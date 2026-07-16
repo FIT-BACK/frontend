@@ -1,6 +1,10 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 
+import {AiWaitingPage} from './pages/AiWaitingPage';
+import {TagEditPage} from './pages/TagEditPage';
+import { ResultReportPage } from './pages/ResultReportPage'; 
+
 function App() {
   return (
     <BrowserRouter>
@@ -13,6 +17,11 @@ function App() {
             </div>
           } />
         </Route>
+
+        {/*  SCR 06, 07, 08 (독립 경로) */}
+        <Route path="/waiting" element={<AiWaitingPage />} />
+        <Route path="/tag-edit" element={<TagEditPage />} />
+        <Route path="/result" element={<ResultReportPage />} />
       </Routes>
     </BrowserRouter>
   );
