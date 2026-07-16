@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { TagChip } from '../components/common/TagChip';
 import { useMatchingReport } from '../hooks/useMatchingQuery';
 import { useAppStore } from '../store/useAppStore';
-import { ResultReportPage } from './ResultReportPage';
 
 export const TagEditPage: React.FC = () => {
+  const navigate = useNavigate();
   const {} = useMatchingReport();
   
   // 1. 태그 상태 (Zustand 스토어 사용)
   const tags = useAppStore((state) => state.tags);
   const setTags = useAppStore((state) => state.setTags);
   const [tagWarning, setTagWarning] = useState(false);
-
-  // 페이지 전환용 상태
-  const [showResultPage, setShowResultPage] = useState(false);
 
   // 2. 바텀시트 상태 및 인풋
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
@@ -22,10 +20,6 @@ export const TagEditPage: React.FC = () => {
 
   // 3. 슬라이더 (매칭 정도) 상태
   const [matchLevel, setMatchLevel] = useState(70);
-
-  // 4. 모의 API 호출 상태
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // 태그 삭제 핸들러
   const handleDelete = (tagToDelete: string) => {
@@ -59,24 +53,6 @@ export const TagEditPage: React.FC = () => {
     setNewTagInput('');
     setIsBottomSheetOpen(false);
   };
-
-  // 결과 보기 모의(Mock) 호출
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    setSubmitError(null);
-    // 20% 확률로 에러 발생
-    if (Math.random() < 0.2) {
-      setSubmitError('결과를 불러오지 못했습니다. 다시 시도해 주세요.');
-      setIsSubmitting(false);
-    } else {
-      setIsSubmitting(false);
-      setShowResultPage(true);
-    }
-  };
-
-  if (showResultPage) {
-    return <ResultReportPage />;
-  }
 
   return (
     <div className="max-w-[375px] min-h-screen mx-auto bg-bg flex flex-col text-text relative overflow-hidden">
@@ -164,19 +140,11 @@ export const TagEditPage: React.FC = () => {
 
         {/* Button & Error Message */}
         <div className="flex flex-col gap-[8px] shrink-0 mb-[14px]">
-          {submitError && (
-            <div className="text-error-400 text-[11px] font-semibold text-center">
-              {submitError}
-            </div>
-          )}
           <button 
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className={`text-bg text-[12px] font-bold border-none rounded-[10px] p-[11px] transition-colors ${
-              isSubmitting ? 'bg-primary-300 cursor-not-allowed' : 'bg-primary-400 hover:bg-primary-500'
-            }`}
+            onClick={() => navigate('/result')}
+            className="text-bg text-[12px] font-bold border-none rounded-[10px] p-[11px] bg-primary-400 hover:bg-primary-500 transition-colors"
           >
-            {isSubmitting ? '분석 중...' : '이대로 결과 보기'}
+            이대로 결과 보기
           </button>
         </div>
       </div>
