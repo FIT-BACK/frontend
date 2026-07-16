@@ -1,10 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 
-// 페이지 컴포넌트 임포트 (각 컴포넌트의 export 방식에 맞게 가져옵니다)
 import {AiWaitingPage} from './pages/AiWaitingPage';
 import {TagEditPage} from './pages/TagEditPage';
-import { ResultReportPage } from './pages/ResultReportPage'; // ◀ 중괄호{} 확인!
+import { ResultReportPage } from './pages/ResultReportPage'; 
 
 function App() {
   return (
