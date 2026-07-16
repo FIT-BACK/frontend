@@ -6,6 +6,10 @@ import MyPagePage from './pages/MyPage/MyPagePage'
 import NotificationSettingsPage from './pages/NotificationSettings/NotificationSettingsPage'
 import ProfileEditPage from './pages/ProfileEdit/ProfileEditPage'
 
+import {AiWaitingPage} from './pages/AiWaitingPage';
+import {TagEditPage} from './pages/TagEditPage';
+import { ResultReportPage } from './pages/ResultReportPage'; 
+
 function App() {
   return (
     <BrowserRouter>
@@ -26,6 +30,11 @@ function App() {
           <Route path="profile-edit" element={<ProfileEditPage />} />
           <Route path="notifications" element={<NotificationSettingsPage />} />
         </Route>
+
+        {/*  SCR 06, 07, 08 (독립 경로) */}
+        <Route path="/waiting" element={<AiWaitingPage />} />
+        <Route path="/tag-edit" element={<TagEditPage />} />
+        <Route path="/result" element={<ResultReportPage />} />
       </Routes>
     </BrowserRouter>
   )
