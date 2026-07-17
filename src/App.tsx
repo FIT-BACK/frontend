@@ -4,6 +4,10 @@ import LoginPage from './pages/LoginPage/LoginPage';
 import SignupBasicPage from './pages/LoginPage/SignupBasicPage';
 import SignupProfilePage from './pages/LoginPage/SignupProfilePage';
 
+import {AiWaitingPage} from './pages/AiWaitingPage';
+import {TagEditPage} from './pages/TagEditPage';
+import { ResultReportPage } from './pages/ResultReportPage'; 
+
 function App() {
   return (
     <BrowserRouter>
@@ -23,6 +27,10 @@ function App() {
         <Route path="/signup" element={<SignupBasicPage />} />
         <Route path="/signup/basic" element={<SignupBasicPage />} />
         <Route path="/signup/profile" element={<SignupProfilePage />} />
+        {/*  SCR 06, 07, 08 (독립 경로) */}
+        <Route path="/waiting" element={<AiWaitingPage />} />
+        <Route path="/tag-edit" element={<TagEditPage />} />
+        <Route path="/result" element={<ResultReportPage />} />
       </Routes>
     </BrowserRouter>
   );
