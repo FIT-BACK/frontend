@@ -1,22 +1,26 @@
 import { useEffect, useRef, useState } from 'react'
-import { Button, TextInput } from '../../components/common'
-import { STYLE_TAG_SUGGESTIONS } from '../../constants/styleTags'
+import { Button, TagSelectBottomSheet, TextInput } from '../../components/common'
+import type { StyleTag } from '../../api/tags'
 import { checkNicknameAvailable } from '../../api/profile'
 import { useImageUpload } from '../../hooks/useImageUpload'
 import { useMyProfile, useUpdateProfile } from '../../hooks/useMyPage'
+import { useTags } from '../../hooks/useTags'
 import { navigate } from '../../utils/navigate'
-import StyleTagInput from '../LookbookUpload/components/StyleTagInput'
 import AvatarEditField from './components/AvatarEditField'
 
 const NICKNAME_DEBOUNCE_MS = 500
+const MAX_TAGS = 5
 
 export default function ProfileEditPage() {
   const { data: profile, isLoading } = useMyProfile()
+  const { data: allTags = [], isLoading: isTagsLoading } = useTags()
   const { mutate: saveProfile, isPending, isError } = useUpdateProfile()
   const avatarUpload = useImageUpload()
 
   const [name, setName] = useState('')
-  const [styleTags, setStyleTags] = useState<string[]>([])
+  const [selectedTags, setSelectedTags] = useState<StyleTag[]>([])
+  const [initialTagIds, setInitialTagIds] = useState<number[]>([])
+  const [isTagSheetOpen, setIsTagSheetOpen] = useState(false)
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null)
   const [avatarImageId, setAvatarImageId] = useState<string | null>(null)
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
@@ -25,11 +29,16 @@ export default function ProfileEditPage() {
   const checkTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(() => {
-    if (profile) {
-      setName(profile.name)
-      setStyleTags(profile.styleTags)
-    }
-  }, [profile])
+    if (!profile || allTags.length === 0) return
+    // TODO: 현재 선택된 관심 태그를 내려주는 GET 엔드포인트가 아직 없어서(api-spec.md 확인 중 항목),
+    // mock profile의 태그 이름(string[])을 태그 목록과 이름 매칭해서 임시로 채움. 노션 문의 후 교체 예정.
+    const matched = profile.styleTags
+      .map((tagName) => allTags.find((tag) => tag.tagName === tagName))
+      .filter((tag): tag is StyleTag => tag !== undefined)
+    setName(profile.name)
+    setSelectedTags(matched)
+    setInitialTagIds(matched.map((tag) => tag.tagId).sort())
+  }, [profile, allTags])
 
   const handleNameChange = (value: string) => {
     setName(value)
@@ -66,10 +75,14 @@ export default function ProfileEditPage() {
     }
   }
 
+  const removeTag = (tagId: number) => {
+    setSelectedTags((prev) => prev.filter((tag) => tag.tagId !== tagId))
+  }
+
   const isDirty =
     !!profile &&
     (name !== profile.name ||
-      JSON.stringify(styleTags) !== JSON.stringify(profile.styleTags) ||
+      JSON.stringify(selectedTags.map((tag) => tag.tagId).sort()) !== JSON.stringify(initialTagIds) ||
       !!avatarPreviewUrl)
 
   const canSave =
@@ -88,7 +101,7 @@ export default function ProfileEditPage() {
   const handleSave = () => {
     if (!canSave) return
     saveProfile(
-      { name, styleTags, avatarImageId: avatarImageId ?? undefined },
+      { name, styleTags: selectedTags, avatarImageId: avatarImageId ?? undefined },
       { onSuccess: () => navigate('/mypage') },
     )
   }
@@ -132,12 +145,29 @@ export default function ProfileEditPage() {
         <span className="text-xs text-text-tertiary">2~16자, 영문·한글·숫자 사용 가능</span>
       </div>
 
-      <StyleTagInput
-        label="관심 스타일"
-        tags={styleTags}
-        onChange={setStyleTags}
-        suggestions={STYLE_TAG_SUGGESTIONS}
-      />
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium text-text">관심 스타일</span>
+        <div className="flex flex-wrap items-center gap-2">
+          {selectedTags.map((tag) => (
+            <button
+              key={tag.tagId}
+              type="button"
+              onClick={() => removeTag(tag.tagId)}
+              className="rounded-full bg-primary-50 px-3 py-1 text-sm text-primary-800"
+            >
+              #{tag.tagName} ✕
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => setIsTagSheetOpen(true)}
+            disabled={selectedTags.length >= MAX_TAGS}
+            className="rounded-full border border-border px-3 py-1 text-sm text-text-secondary disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            + 추가
+          </button>
+        </div>
+      </div>
 
       <TextInput label="이메일 (변경 불가)" value={profile.email} disabled readOnly />
 
@@ -148,6 +178,16 @@ export default function ProfileEditPage() {
       <Button disabled={!canSave} onClick={handleSave}>
         저장하기
       </Button>
+
+      <TagSelectBottomSheet
+        open={isTagSheetOpen}
+        tags={allTags}
+        selectedTagIds={selectedTags.map((tag) => tag.tagId)}
+        maxTags={MAX_TAGS}
+        isLoading={isTagsLoading}
+        onConfirm={setSelectedTags}
+        onClose={() => setIsTagSheetOpen(false)}
+      />
     </div>
   )
 }
