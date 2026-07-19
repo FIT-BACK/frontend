@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TagChip } from '../components/common/TagChip';
-import { useMatchingReport } from '../hooks/useMatchingQuery';
+import { useParams } from 'react-router-dom';
+import { useItemMatching } from '../hooks/useItemMatching';
 import { useAppStore } from '../store/useAppStore';
 
 export const TagEditPage: React.FC = () => {
   const navigate = useNavigate();
-  const {} = useMatchingReport();
+  const { reportId } = useParams<{ reportId: string }>(); // URL에서 받아온다고 가정
+  const { mutate: getRecommendations, isPending } = useItemMatching(reportId || '');
   
   // 1. 태그 상태 (Zustand 스토어 사용)
   const tags = useAppStore((state) => state.tags);
@@ -141,10 +143,18 @@ export const TagEditPage: React.FC = () => {
         {/* Button & Error Message */}
         <div className="flex flex-col gap-[8px] shrink-0 mb-[14px]">
           <button 
-            onClick={() => navigate('/result')}
-            className="text-bg text-[12px] font-bold border-none rounded-[10px] p-[11px] bg-primary-400 hover:bg-primary-500 transition-colors"
+            onClick={() => {
+              getRecommendations(
+                { tags, matchIntensity: matchLevel },
+                {
+                  onSuccess: () => navigate('/result'), // 다음 화면으로 이동
+                }
+              );
+            }}
+            disabled={isPending}
+            className="text-bg text-[12px] font-bold border-none rounded-[10px] p-[11px] bg-primary-400 hover:bg-primary-500 transition-colors disabled:opacity-50"
           >
-            이대로 결과 보기
+            {isPending ? '매칭 중...' : '이대로 결과 보기'}
           </button>
         </div>
       </div>

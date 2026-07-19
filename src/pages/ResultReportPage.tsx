@@ -1,13 +1,22 @@
 import React from 'react';
 import { TagChip } from '../components/common/TagChip';
-import { useMatchingReport } from '../hooks/useMatchingQuery';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useSaveReport } from '../hooks/useSaveReport';
 import { useAppStore } from '../store/useAppStore';
 import TabBar from '../components/layout/TabBar';
-import { useNavigate } from 'react-router-dom'; 
 
 export const ResultReportPage: React.FC = () => {
-  const {} = useMatchingReport();
   const navigate = useNavigate();
+  const { reportId } = useParams<{ reportId: string }>(); // URL에서 받아온다고 가정
+  const { mutate: saveReport, isPending } = useSaveReport();
+
+  const handleSave = () => {
+    if (reportId) {
+      saveReport({ reportId });
+    } else {
+      alert('저장할 리포트 식별자가 없습니다.');
+    }
+  };
 
   const tags = useAppStore((state) => state.tags);
 
@@ -28,11 +37,17 @@ export const ResultReportPage: React.FC = () => {
 
         {/* Header (자체 구현한 분석 결과 헤더) */}
         <div className="px-[14px] pt-[10px] pb-0 shrink-0">
-          <div className="relative flex items-center ">
+          <div className="relative flex items-center justify-between">
             <span 
               onClick={() => navigate(-1)}
               className="text-text-secondary text-[14px] cursor-pointer">←</span>
             <span className="absolute left-1/2 -translate-x-1/2 text-[14px] font-extrabold text-text">분석 결과</span>
+            <span 
+              onClick={handleSave} 
+              className={`text-[12px] font-bold text-primary-400 cursor-pointer ${isPending ? 'opacity-50' : ''}`}
+            >
+              {isPending ? '저장 중...' : '저장'}
+            </span>
           </div>
           <div className="text-[9px] text-text-secondary mt-[3px]">
             상의·하의 각 3개 대안 · 최저가순
@@ -47,7 +62,7 @@ export const ResultReportPage: React.FC = () => {
         </div>
 
         {/* Result Scroll (하단 바에 가려지지 않도록 패딩 확보) */}
-        <div className="flex-1 overflow-y-auto px-[14px] flex flex-col gap-[6px] pb-20">
+        <div className="flex-1 overflow-y-auto px-[14px] flex flex-col gap-[6px] pb-32">
           {/* Tops Section */}
           <div className="text-[10px] font-bold text-text pt-[6px] pb-[4px] flex items-center gap-[4px]">
             상의{' '}
@@ -115,6 +130,16 @@ export const ResultReportPage: React.FC = () => {
           <div className="text-[9px] text-primary-400 text-center p-[8px] font-semibold mt-2 cursor-pointer">
             더보기 +
           </div>
+        </div>
+
+        {/* CTA 버튼 (하단 고정) */}
+        <div className="absolute bottom-[70px] left-0 right-0 px-[14px] z-10">
+          <button
+            onClick={() => navigate('/upload-lookbook')}
+            className="w-full text-bg text-[14px] font-bold border-none rounded-[10px] p-[14px] bg-primary-800 hover:bg-primary-900 transition-colors shadow-lg"
+          >
+            이 조합으로 내 룩북 올리기 🚀
+          </button>
         </div>
 
         {/* 하단 네비게이션 바 */}
