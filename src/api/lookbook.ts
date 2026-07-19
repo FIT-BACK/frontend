@@ -10,8 +10,8 @@ import { api } from './axiosInstance'
  */
 
 export interface LookbookUploadPayload {
-  originalLookImageId: string
-  valueMatchImageId: string
+  originalLookImageId: number
+  valueMatchImageId: number
   styleTags: string[]
   purchaseLink?: string
   comment?: string

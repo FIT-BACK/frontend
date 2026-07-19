@@ -9,22 +9,20 @@ import StyleTagInput from './components/StyleTagInput'
 const URL_PATTERN = /^https?:\/\/[^\s]+$/
 
 export default function LookbookUploadPage() {
-  const [originalLookImageId, setOriginalLookImageId] = useState<string | null>(null)
-  const [valueMatchImageId, setValueMatchImageId] = useState<string | null>(null)
-  const [originalLookFile, setOriginalLookFile] = useState<File | null>(null)
-  const [valueMatchFile, setValueMatchFile] = useState<File | null>(null)
   const [styleTags, setStyleTags] = useState<string[]>([])
   const [purchaseLink, setPurchaseLink] = useState('')
   const [linkError, setLinkError] = useState<string | null>(null)
   const [comment, setComment] = useState('')
 
+  // useImageUpload가 uploadImage()의 결과를 반환하지 않고 내부 상태(imageId/lastFile)로 들고 있는 방식이라
+  // 여기서도 로컬 state로 별도 관리하지 않고 훅의 상태를 그대로 사용
   const originalLookUpload = useImageUpload()
   const valueMatchUpload = useImageUpload()
   const { mutate, isPending, isSuccess, isError } = useLookbookUpload()
 
   const canSubmit =
-    !!originalLookImageId &&
-    !!valueMatchImageId &&
+    !!originalLookUpload.imageId &&
+    !!valueMatchUpload.imageId &&
     styleTags.length > 0 &&
     !isPending &&
     !originalLookUpload.isUploading &&
@@ -35,38 +33,16 @@ export default function LookbookUploadPage() {
     setLinkError(value && !URL_PATTERN.test(value) ? '올바른 링크 형식을 입력해주세요' : null)
   }
 
-  const handleOriginalLookSelect = async (file: File) => {
-    setOriginalLookFile(file)
-    setOriginalLookImageId(null)
-    try {
-      const { imageId } = await originalLookUpload.uploadImage(file)
-      setOriginalLookImageId(imageId)
-    } catch {
-      // 에러 상태는 originalLookUpload.error로 노출됨
-    }
-  }
-
-  const handleValueMatchSelect = async (file: File) => {
-    setValueMatchFile(file)
-    setValueMatchImageId(null)
-    try {
-      const { imageId } = await valueMatchUpload.uploadImage(file)
-      setValueMatchImageId(imageId)
-    } catch {
-      // 에러 상태는 valueMatchUpload.error로 노출됨
-    }
-  }
-
   const handleSubmit = () => {
-    if (!canSubmit || !originalLookImageId || !valueMatchImageId) return
+    if (!canSubmit || !originalLookUpload.imageId || !valueMatchUpload.imageId) return
     if (purchaseLink && !URL_PATTERN.test(purchaseLink)) {
       setLinkError('올바른 링크 형식을 입력해주세요')
       return
     }
 
     mutate({
-      originalLookImageId,
-      valueMatchImageId,
+      originalLookImageId: originalLookUpload.imageId,
+      valueMatchImageId: valueMatchUpload.imageId,
       styleTags,
       purchaseLink: purchaseLink || undefined,
       comment: comment || undefined,
@@ -80,17 +56,17 @@ export default function LookbookUploadPage() {
       <div className="grid grid-cols-2 gap-3">
         <ImageUploadField
           label="원본 룩 사진"
-          onChange={handleOriginalLookSelect}
+          onChange={originalLookUpload.uploadImage}
           isUploading={originalLookUpload.isUploading}
-          uploadError={originalLookUpload.error ? '이미지 업로드에 실패했습니다' : null}
-          onRetry={() => originalLookFile && handleOriginalLookSelect(originalLookFile)}
+          uploadError={originalLookUpload.error}
+          onRetry={originalLookUpload.retryUpload}
         />
         <ImageUploadField
           label="가성비 매칭 사진"
-          onChange={handleValueMatchSelect}
+          onChange={valueMatchUpload.uploadImage}
           isUploading={valueMatchUpload.isUploading}
-          uploadError={valueMatchUpload.error ? '이미지 업로드에 실패했습니다' : null}
-          onRetry={() => valueMatchFile && handleValueMatchSelect(valueMatchFile)}
+          uploadError={valueMatchUpload.error}
+          onRetry={valueMatchUpload.retryUpload}
         />
       </div>
 

@@ -22,8 +22,6 @@ export default function ProfileEditPage() {
   const [initialTagIds, setInitialTagIds] = useState<number[]>([])
   const [isTagSheetOpen, setIsTagSheetOpen] = useState(false)
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null)
-  const [avatarImageId, setAvatarImageId] = useState<string | null>(null)
-  const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [nicknameError, setNicknameError] = useState<string | null>(null)
   const [isCheckingNickname, setIsCheckingNickname] = useState(false)
   const checkTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -63,16 +61,9 @@ export default function ProfileEditPage() {
     }, NICKNAME_DEBOUNCE_MS)
   }
 
-  const handleAvatarSelect = async (file: File) => {
-    setAvatarFile(file)
+  const handleAvatarSelect = (file: File) => {
     setAvatarPreviewUrl(URL.createObjectURL(file))
-    setAvatarImageId(null)
-    try {
-      const { imageId } = await avatarUpload.uploadImage(file)
-      setAvatarImageId(imageId)
-    } catch {
-      // 에러 상태는 avatarUpload.error로 노출됨
-    }
+    avatarUpload.uploadImage(file)
   }
 
   const removeTag = (tagId: number) => {
@@ -101,7 +92,7 @@ export default function ProfileEditPage() {
   const handleSave = () => {
     if (!canSave) return
     saveProfile(
-      { name, styleTags: selectedTags, avatarImageId: avatarImageId ?? undefined },
+      { name, styleTags: selectedTags, avatarImageId: avatarUpload.imageId ?? undefined },
       { onSuccess: () => navigate('/mypage') },
     )
   }
@@ -130,9 +121,9 @@ export default function ProfileEditPage() {
       <AvatarEditField
         avatarUrl={avatarPreviewUrl ?? profile.avatarUrl}
         isUploading={avatarUpload.isUploading}
-        uploadError={avatarUpload.error ? '이미지 업로드에 실패했습니다' : null}
+        uploadError={avatarUpload.error}
         onSelect={handleAvatarSelect}
-        onRetry={() => avatarFile && handleAvatarSelect(avatarFile)}
+        onRetry={avatarUpload.retryUpload}
       />
 
       <div className="flex flex-col gap-1">

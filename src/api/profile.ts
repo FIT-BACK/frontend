@@ -83,7 +83,8 @@ export interface UpdateProfilePayload {
   // PUT /members/me/tags가 tagIds(숫자)를 받기 때문에 이름 문자열이 아닌 태그 객체(tagId 포함)로 들고 있음
   // (관련 배경: [[scr12_tag_input_spec_gap]] 참고 — SCR-12는 자유 입력이 아니라 목록 선택 방식이어야 함)
   styleTags: StyleTag[]
-  avatarImageId?: string
+  // useImageUpload 훅(팀원 구현, PR #16)이 imageId를 number로 관리해서 여기도 number로 맞춤
+  avatarImageId?: number
 }
 
 interface MembersMePatchApiResponse {
