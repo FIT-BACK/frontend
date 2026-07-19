@@ -31,3 +31,10 @@ export interface TextInputProps
   error?: string
   size?: Size
 }
+
+export interface ToggleProps {
+  checked: boolean
+  onChange: (checked: boolean) => void
+  disabled?: boolean
+  'aria-label': string
+}
