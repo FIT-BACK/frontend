@@ -8,6 +8,7 @@ import KakaoCallback from './pages/LoginPage/KakaoCallback';
 import {AiWaitingPage} from './pages/AiWaitingPage';
 import {TagEditPage} from './pages/TagEditPage';
 import { ResultReportPage } from './pages/ResultReportPage'; 
+import ChangePasswordPage from './pages/ChangePasswordPage'; 
 
 function App() {
   return (
@@ -28,7 +29,10 @@ function App() {
         <Route path="/signup/profile" element={<SignupProfilePage />} />
         
         <Route path="/oauth/kakao" element={<KakaoCallback />} />
-        {/*  SCR 06, 07, 08 (독립 경로) */}
+        
+        {/* 추가된 비밀번호 변경 페이지 라우터 */}
+        <Route path="/change-password" element={<ChangePasswordPage />} />
+
         <Route path="/waiting" element={<AiWaitingPage />} />
         <Route path="/tag-edit" element={<TagEditPage />} />
         <Route path="/result" element={<ResultReportPage />} />

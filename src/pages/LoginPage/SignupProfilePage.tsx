@@ -65,7 +65,7 @@ export default function SignupProfilePage() {
 
         <div className="flex flex-col items-center mb-8">
           <div className="relative w-[100px] h-[100px] rounded-full bg-bg border-2 border-border flex items-center justify-center cursor-pointer">
-            <span className="text-3xl">📷</span>
+            <span className="text-3xl"></span>
             <div className="absolute bottom-0 right-0 w-8 h-8 bg-primary-400 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white shadow-sm">
               +
             </div>
