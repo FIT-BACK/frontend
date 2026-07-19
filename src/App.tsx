@@ -3,12 +3,12 @@ import Layout from './components/layout/Layout';
 import LoginPage from './pages/LoginPage/LoginPage';
 import SignupBasicPage from './pages/LoginPage/SignupBasicPage';
 import SignupProfilePage from './pages/LoginPage/SignupProfilePage';
+import KakaoCallback from './pages/LoginPage/KakaoCallback'; 
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* 네비게이션 바가 필요한 페이지들 */}
         <Route element={<Layout />}>
           <Route path="/" element={
             <div className="p-4 text-center">
@@ -18,11 +18,12 @@ function App() {
           } />
         </Route>
 
-        {/* 네비게이션 바가 필요 없는 페이지들 */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupBasicPage />} />
         <Route path="/signup/basic" element={<SignupBasicPage />} />
         <Route path="/signup/profile" element={<SignupProfilePage />} />
+        
+        <Route path="/oauth/kakao" element={<KakaoCallback />} />
       </Routes>
     </BrowserRouter>
   );
