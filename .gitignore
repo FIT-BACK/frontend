@@ -141,3 +141,7 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Local-only files (personal, not shared with team)
+CLAUDE.md
+.claude/
