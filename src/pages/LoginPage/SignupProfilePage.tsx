@@ -1,13 +1,19 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../../api/axiosInstance';
 
 const STYLE_OPTIONS = ['캐주얼', '미니멀', '스트릿', '빈티지', '페미닌', '스포티', '포멀', '고프코어'];
 
 export default function SignupProfilePage() {
   const navigate = useNavigate();
+  
+  const location = useLocation();
+  const { kakaoNickname, kakaoProfileImage } = location.state || {}; 
 
-  const [nickname, setNickname] = useState('');
+  const [nickname, setNickname] = useState(kakaoNickname || '');
+  
+  const [profileImage, setProfileImage] = useState<string | null>(kakaoProfileImage || null); 
+  
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
 
   const toggleStyle = (style: string) => {
@@ -33,7 +39,6 @@ export default function SignupProfilePage() {
     }
 
     try {
-      // 백엔드에서 태그 아이디 확인 필요
       const response = await api.put('/api/v1/members/me/onboarding', {
         nickname: nickname,
         preferredStyles: selectedStyles,
@@ -42,7 +47,7 @@ export default function SignupProfilePage() {
       console.log('2단계(온보딩) 가입 성공:', response.data);
       alert('환영합니다! 가입이 완료되었습니다.');
       navigate('/'); 
-
+ 
     } catch (error) {
       console.error('온보딩 실패:', error);
       alert('프로필 설정에 실패했습니다. 다시 시도해주세요.');
@@ -65,8 +70,13 @@ export default function SignupProfilePage() {
         </div>
 
         <div className="flex flex-col items-center mb-8">
-          <div className="relative w-[100px] h-[100px] rounded-full bg-bg border-2 border-border flex items-center justify-center cursor-pointer">
-            <span className="text-3xl">📷</span>
+          <div className="relative w-[100px] h-[100px] rounded-full bg-bg border-2 border-border flex items-center justify-center cursor-pointer overflow-hidden">
+            {/*  프로필 이미지가 있으면 이미지 표시, 없으면 📷 표시 */}
+            {profileImage ? (
+              <img src={profileImage} alt="프로필" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-3xl">📷</span>
+            )}
             <div className="absolute bottom-0 right-0 w-8 h-8 bg-primary-400 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white shadow-sm">
               +
             </div>

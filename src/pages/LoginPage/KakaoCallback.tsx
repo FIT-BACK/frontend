@@ -13,15 +13,21 @@ export default function KakaoCallback() {
         authorizationCode: code 
       })
       .then((res) => {
-        const { accessToken, isNewMember } = res.data.data;
+        const { accessToken, refreshToken, isNewMember, nickname, profileImageUrl } = res.data.data;
         
-        // 토큰 저장
         localStorage.setItem('accessToken', accessToken);
+        if (refreshToken) {
+          localStorage.setItem('refreshToken', refreshToken);
+        }
         
-        // 신규 회원 여부에 따라 다른 화면으로 이동
         if (isNewMember) {
           alert('환영합니다! 프로필 설정을 진행해주세요.');
-          navigate('/signup/profile'); 
+          navigate('/signup/profile', {
+            state: {
+              kakaoNickname: nickname,
+              kakaoProfileImage: profileImageUrl
+            }
+          }); 
         } else {
           alert('로그인 성공!');
           navigate('/'); 
@@ -37,7 +43,7 @@ export default function KakaoCallback() {
 
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center">
-      <p className="text-primary-900 font-bold text-lg">카카오 로그인 처리 중입니다... 🔄</p>
+      <p className="text-primary-900 font-bold text-lg">카카오 로그인 처리 중입니다... </p>
     </div>
   );
 }
