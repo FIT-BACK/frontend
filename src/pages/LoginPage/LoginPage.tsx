@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../../api/auth';
+import BottomSheet from '../../components/common/BottomSheet';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -8,6 +9,46 @@ export default function LoginPage() {
   const [view, setView] = useState<'main' | 'email'>('main');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [activeSheet, setActiveSheet] = useState<'terms' | 'privacy' | null>(null);
+
+  // 약관 및 개인정보처리방침 데이터
+  const termsText = (
+    <>
+      <strong>제1조 (목적)</strong>
+      <br />
+      본 약관은 FIT BACK(이하 "서비스")이 제공하는 AI 듀프 매칭 서비스의 이용 조건 및 절차에 관한 사항을 규정합니다.
+      <br /><br />
+      
+      <strong>제2조 (서비스 이용)</strong>
+      <br />
+      서비스는 만 14세 이상의 회원에게 제공됩니다. 회원은 서비스를 이용하여 워너비 패션 이미지를 업로드하고 가성비 매칭 결과를 제공받을 수 있습니다.
+      <br /><br />
+      
+      <strong>제3조 (금지 행위)</strong>
+      <br />
+      타인의 사진 무단 도용, 허위 정보 기재, 자동화 스크립트를 통한 대량 요청 등을 금지합니다.
+      <br /><br />
+      
+      <strong>제4조 (서비스 변경·중단)</strong>
+      <br />
+      회사는 서비스 내용을 변경하거나 중단할 수 있으며, 이 경우 사전에 공지합니다.
+      <br /><br />
+      
+      <strong>제5조 (면책)</strong>
+      <br />
+      AI 분석 결과는 참고용이며, 실제 상품 품질·적합성을 보증하지 않습니다.
+    </>
+  );
+
+  const privacyText = (
+    <>
+      <strong>개인정보 수집 항목:</strong> 카카오톡 프로필 정보(닉네임, 프로필 사진)
+      <br />
+      <strong>수집 목적:</strong> 서비스 이용 및 본인 식별
+      <br />
+      <strong>보유 기간:</strong> 회원 탈퇴 시까지
+    </>
+  );
 
   // 이메일 로그인 처리 함수
   const handleLogin = async () => {
@@ -92,8 +133,24 @@ export default function LoginPage() {
                 </span>
               </div>
 
-              <p className="mt-4 text-[12px] text-text-tertiary">
-                로그인 시 이용약관에 동의합니다
+              {/* 하단 약관 동의 텍스트  */}
+              <p className="mt-4 text-[12px] text-text-tertiary text-center leading-relaxed">
+                로그인 시{' '}
+                <span 
+                  onClick={() => setActiveSheet('terms')} 
+                  className="text-primary-600 underline cursor-pointer hover:opacity-80"
+                >
+                  이용약관
+                </span>
+                {' '}및{' '}
+                <br />
+                <span 
+                  onClick={() => setActiveSheet('privacy')} 
+                  className="text-primary-600 underline cursor-pointer hover:opacity-80"
+                >
+                  개인정보처리방침
+                </span>
+                에 동의합니다
               </p>
             </div>
           )}
@@ -129,6 +186,21 @@ export default function LoginPage() {
 
         </div>
       </div>
+
+      {/* 바텀시트 컴포넌트 렌더링 */}
+      <BottomSheet 
+        isOpen={activeSheet === 'terms'} 
+        onClose={() => setActiveSheet(null)} 
+        title="이용약관"
+        content={termsText}
+      />
+
+      <BottomSheet 
+        isOpen={activeSheet === 'privacy'} 
+        onClose={() => setActiveSheet(null)} 
+        title="개인정보처리방침"
+        content={privacyText}
+      />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import Layout from './components/layout/Layout';
 import LoginPage from './pages/LoginPage/LoginPage';
 import SignupBasicPage from './pages/LoginPage/SignupBasicPage';
 import SignupProfilePage from './pages/LoginPage/SignupProfilePage';
+import SignupCompletePage from './pages/LoginPage/SignupCompletePage';
 import KakaoCallback from './pages/LoginPage/KakaoCallback'; 
 import LookbookUploadPage from './pages/LookbookUpload/LookbookUploadPage'
 import MyClosetPage from './pages/MyCloset/MyClosetPage'
@@ -42,6 +43,7 @@ function App() {
         <Route path="/signup" element={<SignupBasicPage />} />
         <Route path="/signup/basic" element={<SignupBasicPage />} />
         <Route path="/signup/profile" element={<SignupProfilePage />} />
+        <Route path="/signup/complete" element={<SignupCompletePage />} /> 
         
         <Route path="/oauth/kakao" element={<KakaoCallback />} />
         
