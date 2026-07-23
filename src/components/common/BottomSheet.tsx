@@ -1,7 +1,7 @@
-import React from 'react';
+import type { BottomSheetProps } from '../../types/component';
 import '../../styles/BottomSheet.css';
 
-const BottomSheet = ({ isOpen, onClose, title, content }) => {
+const BottomSheet = ({ isOpen, onClose, title, content }: BottomSheetProps) => {
   // 열려있지 않으면 아무것도 렌더링하지 않음
   if (!isOpen) return null;
 
