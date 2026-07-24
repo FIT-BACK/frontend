@@ -1,18 +1,20 @@
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
+
 import LoginPage from './pages/LoginPage/LoginPage';
 import SignupBasicPage from './pages/LoginPage/SignupBasicPage';
 import SignupProfilePage from './pages/LoginPage/SignupProfilePage';
 import SignupCompletePage from './pages/LoginPage/SignupCompletePage';
 import KakaoCallback from './pages/LoginPage/KakaoCallback'; 
-import LookbookUploadPage from './pages/LookbookUpload/LookbookUploadPage'
-import MyClosetPage from './pages/MyCloset/MyClosetPage'
-import MyPagePage from './pages/MyPage/MyPagePage'
-import NotificationSettingsPage from './pages/NotificationSettings/NotificationSettingsPage'
-import ProfileEditPage from './pages/ProfileEdit/ProfileEditPage'
 
-import {AiWaitingPage} from './pages/AiWaitingPage';
-import {TagEditPage} from './pages/TagEditPage';
+import LookbookUploadPage from './pages/LookbookUpload/LookbookUploadPage';
+import MyClosetPage from './pages/MyCloset/MyClosetPage';
+import MyPagePage from './pages/MyPage/MyPagePage';
+import NotificationSettingsPage from './pages/NotificationSettings/NotificationSettingsPage';
+import ProfileEditPage from './pages/ProfileEdit/ProfileEditPage';
+
+import { AiWaitingPage } from './pages/AiWaitingPage';
+import { TagEditPage } from './pages/TagEditPage';
 import { ResultReportPage } from './pages/ResultReportPage'; 
 import ChangePasswordPage from './pages/ChangePasswordPage'; 
 
@@ -48,7 +50,7 @@ function App() {
         <Route path="/oauth/kakao" element={<KakaoCallback />} />
         
         <Route path="/change-password" element={<ChangePasswordPage />} />
-
+        
         <Route path="/waiting" element={<AiWaitingPage />} />
         <Route path="/tag-edit" element={<TagEditPage />} />
         <Route path="/result" element={<ResultReportPage />} />

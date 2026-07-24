@@ -1,18 +1,22 @@
+import { useState } from 'react'
 import { navigate } from '../../utils/navigate'
 import { useMyProfile, useLogout } from '../../hooks/useMyPage'
 import ProfileHeader from './components/ProfileHeader'
 import SettingsListItem from './components/SettingsListItem'
 import StatSummary from './components/StatSummary'
+import LogoutModal from '../../components/common/LogoutModal'
 
 export default function MyPagePage() {
   const { data: profile, isLoading, isError } = useMyProfile()
   const { mutate: logout } = useLogout()
+  
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
 
-  const handleLogout = () => {
-    if (!window.confirm('로그아웃 하시겠어요?')) return
+  const executeLogout = () => {
     logout(undefined, {
       onSuccess: () => {
         localStorage.removeItem('accessToken')
+        setIsLogoutModalOpen(false) 
         window.location.href = '/login'
       },
     })
@@ -42,11 +46,17 @@ export default function MyPagePage() {
         <SettingsListItem label="알림 설정" onClick={() => navigate('/notifications')} />
         <SettingsListItem
           label="비밀번호 변경"
-          onClick={() => console.log('비밀번호 변경 이동')}
+          onClick={() => navigate('/change-password')}
           disabled={profile.isSocialLogin}
         />
-        <SettingsListItem label="로그아웃" onClick={handleLogout} />
+        <SettingsListItem label="로그아웃" onClick={() => setIsLogoutModalOpen(true)} />
       </div>
+
+      <LogoutModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onLogout={executeLogout}
+      />
     </div>
   )
 }

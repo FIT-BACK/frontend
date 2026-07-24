@@ -42,8 +42,12 @@ interface MyProfileApiResponse {
 // 기능별로 USE_MOCK 분리 — 확정 스펙이 다르게 진행되므로 따로 관리
 const USE_MOCK_GET = true
 const USE_MOCK_SAVE = true
-const USE_MOCK_NICKNAME_CHECK = true // 전용 중복확인 GET 엔드포인트 자체가 노션에 아직 없음 (api-spec.md 확인 중 항목)
+const USE_MOCK_NICKNAME_CHECK = true 
 const USE_MOCK_LOGOUT = true
+
+const USE_MOCK_CHANGE_PASSWORD = true
+const USE_MOCK_WITHDRAW = true
+
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export const getMyProfile = async (): Promise<UserProfile> => {
@@ -65,10 +69,7 @@ export const getMyProfile = async (): Promise<UserProfile> => {
     name: data.nickname,
     email: data.email,
     avatarUrl: data.profileImageUrl,
-    // TODO: 실제 GET /members/me 응답에 isSocialLogin 필드가 없음 — 비밀번호 변경 버튼 비활성화 조건에 쓰이는데
-    // 백엔드 스펙에 아직 없어서 임시로 false 고정. 소셜 로그인 판별 필드가 추가되면 교체할 것.
     isSocialLogin: false,
-    // TODO: 실제 GET /members/me 응답에 styleTags(관심 태그) 필드가 없음 — 임시 빈 배열, 태그 조회 방법 확인 필요
     styleTags: [],
     stats: {
       saved: data.savedCount,
@@ -80,8 +81,6 @@ export const getMyProfile = async (): Promise<UserProfile> => {
 
 export interface UpdateProfilePayload {
   name: string
-  // PUT /members/me/tags가 tagIds(숫자)를 받기 때문에 이름 문자열이 아닌 태그 객체(tagId 포함)로 들고 있음
-  // (관련 배경: [[scr12_tag_input_spec_gap]] 참고 — SCR-12는 자유 입력이 아니라 목록 선택 방식이어야 함)
   styleTags: StyleTag[]
   // useImageUpload 훅이 imageId를 string(UUID)으로 관리하므로 이에 맞춤
   avatarImageId?: string
@@ -107,7 +106,6 @@ interface MembersMeTagsApiResponse {
   }
 }
 
-// 아바타는 presigned URL로 S3에 먼저 업로드된 상태(useImageUpload) — 여기서는 imageId만 닉네임/태그와 함께 한 번에 저장
 export const updateProfile = async (payload: UpdateProfilePayload): Promise<UserProfile> => {
   if (USE_MOCK_SAVE) {
     await delay(800)
@@ -123,9 +121,6 @@ export const updateProfile = async (payload: UpdateProfilePayload): Promise<User
     }
   }
 
-  // TODO: profileImageUrl 필드가 presigned 업로드 후 URL 문자열을 받는지 imageId를 받는지 노션 문서에
-  // 미반영 (SCR-09 룩북 업로드 때와 같은 패턴 — 문서가 옛날 스펙일 가능성 있음, api-spec.md 참고).
-  // 일단 avatarImageId를 그대로 profileImageUrl 필드에 실어 보내는 것으로 최선 추정, 노션 갱신되면 교체 필요.
   const patchResponse = await api.patch<MembersMePatchApiResponse>('/api/v1/members/me', {
     nickname: payload.name,
     ...(payload.avatarImageId ? { profileImageUrl: payload.avatarImageId } : {}),
@@ -135,9 +130,6 @@ export const updateProfile = async (payload: UpdateProfilePayload): Promise<User
     tagIds: payload.styleTags.map((tag) => tag.tagId),
   })
 
-  // PATCH/PUT 응답 둘 다 email과 stats(savedCount 등)를 안 내려주므로, 최신 전체 프로필은 GET으로 다시
-  // 받아와 병합. GET /members/me엔 태그 필드가 없어서(api-spec.md 확인 중 항목) styleTags는 방금 PUT
-  // 응답으로 온 값으로 덮어씀.
   const freshProfile = await getMyProfile()
   return {
     ...freshProfile,
@@ -153,8 +145,6 @@ export const checkNicknameAvailable = async (nickname: string): Promise<{ availa
     return { available: nickname !== '이미사용중' }
   }
 
-  // TODO: 전용 중복확인 GET 엔드포인트가 노션에 아직 없음(api-spec.md 확인 중 항목) — PATCH /members/me
-  // 시도 후 에러 코드로 판별하는 방식이 될 가능성이 있어 경로/방식 자체가 바뀔 수 있음
   const response = await api.get<{ available: boolean }>('/api/users/nickname-check', {
     params: { nickname },
   })
@@ -168,4 +158,26 @@ export const logout = async (): Promise<void> => {
   }
 
   await api.post('/api/v1/auth/logout')
+}
+
+export const changePassword = async (data: { currentPassword: string; newPassword: string }) => {
+  if (USE_MOCK_CHANGE_PASSWORD) {
+    await delay(500)
+    // 가짜 성공 응답 반환
+    return { success: true, code: "COMMON200_1", message: "성공적으로 요청을 처리했습니다.", data: null }
+  }
+
+  const response = await api.patch('/api/v1/members/me/password', data) 
+  return response.data
+}
+
+export const withdraw = async () => {
+  if (USE_MOCK_WITHDRAW) {
+    await delay(500)
+    // 가짜 성공 응답 반환
+    return { success: true, code: "COMMON200_1", message: "성공적으로 요청을 처리했습니다.", data: null }
+  }
+
+  const response = await api.delete('/api/v1/members/me') 
+  return response.data
 }
