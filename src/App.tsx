@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import LoginPage from './pages/LoginPage/LoginPage';
 import SignupBasicPage from './pages/LoginPage/SignupBasicPage';
@@ -57,4 +57,4 @@ function App() {
   )
 }
 
-export default App
+export default App;
