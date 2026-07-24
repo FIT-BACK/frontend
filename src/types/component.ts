@@ -31,3 +31,17 @@ export interface TextInputProps
   error?: string
   size?: Size
 }
+
+export interface ToggleProps {
+  checked: boolean
+  onChange: (checked: boolean) => void
+  disabled?: boolean
+  'aria-label': string
+}
+
+export interface BottomSheetProps {
+  isOpen: boolean
+  onClose: () => void
+  title: string
+  content: ReactNode
+}

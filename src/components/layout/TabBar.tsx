@@ -1,7 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Home, ClipboardList, Plus, Search, User } from 'lucide-react';
 
-const TabBar = () => {
+interface TabBarProps {
+  onUploadClick?: () => void;
+}
+
+const TabBar = ({ onUploadClick }: TabBarProps) => {
   const location = useLocation();
 
   // 현재 경로와 링크 경로가 같은지 확인하는 함수
@@ -26,13 +30,22 @@ const TabBar = () => {
         <span className="text-[10px] mt-1 font-medium">클로젯</span>
       </Link>
       
-      {/* 업로드 버튼 (이건 보라색 고정) */}
-      <Link to="/upload" className="flex flex-col items-center">
-        <div className="bg-primary-600 text-white w-12 h-12 rounded-full flex items-center justify-center -mt-8 shadow-lg hover:bg-primary-800 transition-colors border-4 border-white">
+      {/* 업로드 버튼 (onUploadClick 기능 지원) */}
+      {onUploadClick ? (
+        <button
+          type="button"
+          onClick={onUploadClick}
+          className="bg-primary-600 text-white w-12 h-12 rounded-full flex items-center justify-center -mt-8 shadow-lg hover:bg-primary-800 transition-colors border-4 border-white"
+        >
           <Plus size={28} strokeWidth={3} />
-        </div>
-        <span className={`text-[10px] mt-1 font-medium ${isActive('/upload') ? 'text-primary-600' : 'text-text-secondary'}`}>업로드</span>
-      </Link>
+        </button>
+      ) : (
+        <Link to="/upload" className="flex flex-col items-center">
+          <div className="bg-primary-600 text-white w-12 h-12 rounded-full flex items-center justify-center -mt-8 shadow-lg hover:bg-primary-800 transition-colors border-4 border-white">
+            <Plus size={28} strokeWidth={3} />
+          </div>
+        </Link>
+      )}
       
       {/* 검색 */}
       <Link to="/search" className={getLinkClass('/search')}>
