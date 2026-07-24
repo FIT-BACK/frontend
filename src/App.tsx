@@ -17,6 +17,8 @@ import { AiWaitingPage } from './pages/AiWaitingPage';
 import { TagEditPage } from './pages/TagEditPage';
 import { ResultReportPage } from './pages/ResultReportPage'; 
 import ChangePasswordPage from './pages/ChangePasswordPage'; 
+import TrendDetailPage from './pages/TrendDetailPage';
+import MoreTrendsPage from './pages/MoreTrendsPage';
 
 function App() {
   return (
@@ -54,6 +56,9 @@ function App() {
         <Route path="/waiting" element={<AiWaitingPage />} />
         <Route path="/tag-edit" element={<TagEditPage />} />
         <Route path="/result" element={<ResultReportPage />} />
+        
+        <Route path="/trend/:id" element={<TrendDetailPage />} />
+        <Route path="/trends" element={<MoreTrendsPage />} />
       </Routes>
     </BrowserRouter>
   )
