@@ -5,16 +5,17 @@ import SignupBasicPage from './pages/LoginPage/SignupBasicPage';
 import SignupProfilePage from './pages/LoginPage/SignupProfilePage';
 import SignupCompletePage from './pages/LoginPage/SignupCompletePage';
 import KakaoCallback from './pages/LoginPage/KakaoCallback'; 
-import LookbookUploadPage from './pages/LookbookUpload/LookbookUploadPage'
-import MyClosetPage from './pages/MyCloset/MyClosetPage'
-import MyPagePage from './pages/MyPage/MyPagePage'
-import NotificationSettingsPage from './pages/NotificationSettings/NotificationSettingsPage'
-import ProfileEditPage from './pages/ProfileEdit/ProfileEditPage'
+import LookbookUploadPage from './pages/LookbookUpload/LookbookUploadPage';
+import MyClosetPage from './pages/MyCloset/MyClosetPage';
+import MyPagePage from './pages/MyPage/MyPagePage';
+import NotificationSettingsPage from './pages/NotificationSettings/NotificationSettingsPage';
+import ProfileEditPage from './pages/ProfileEdit/ProfileEditPage';
 
-import {AiWaitingPage} from './pages/AiWaitingPage';
-import {TagEditPage} from './pages/TagEditPage';
+import { AiWaitingPage } from './pages/AiWaitingPage';
+import { TagEditPage } from './pages/TagEditPage';
 import { ResultReportPage } from './pages/ResultReportPage'; 
 import ChangePasswordPage from './pages/ChangePasswordPage'; 
+import FindPasswordPage from './pages/LoginPage/FindPasswordPage';
 
 function App() {
   return (
@@ -48,6 +49,8 @@ function App() {
         <Route path="/oauth/kakao" element={<KakaoCallback />} />
         
         <Route path="/change-password" element={<ChangePasswordPage />} />
+        
+        <Route path="/find-password" element={<FindPasswordPage />} />
 
         <Route path="/waiting" element={<AiWaitingPage />} />
         <Route path="/tag-edit" element={<TagEditPage />} />

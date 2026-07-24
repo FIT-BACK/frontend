@@ -6,10 +6,10 @@ import BottomSheet from '../../components/common/BottomSheet';
 export default function LoginPage() {
   const navigate = useNavigate();
   
-  const [view, setView] = useState<'main' | 'email'>('main');
+  const [activeSheet, setActiveSheet] = useState<'email' | 'terms' | 'privacy' | null>(null);
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [activeSheet, setActiveSheet] = useState<'terms' | 'privacy' | null>(null);
 
   // 약관 및 개인정보처리방침 데이터
   const termsText = (
@@ -62,12 +62,11 @@ export default function LoginPage() {
     }
   };
 
-  // 카카오 로그인 처리 함수 (클릭 시 카카오 페이지로 이동)
+  // 카카오 로그인 처리 함수
   const handleKakaoLogin = () => {
     const REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY;
     const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
     
-    // 환경변수가 제대로 설정되지 않았을 때를 대비한 안전 장치
     if (!REST_API_KEY || !REDIRECT_URI) {
       alert('카카오 로그인 키가 설정되지 않았습니다. .env 파일을 확인해주세요.');
       return;
@@ -82,15 +81,6 @@ export default function LoginPage() {
     <div className="min-h-screen bg-bg flex justify-center">
       <div className="w-full max-w-[480px] bg-white min-h-screen flex flex-col items-center justify-center px-8 font-sans shadow-lg relative overflow-y-auto">
         
-        {view === 'email' && (
-          <button 
-            onClick={() => setView('main')}
-            className="absolute top-8 left-8 text-text-tertiary text-xl"
-          >
-            ←
-          </button>
-        )}
-
         {/* 로고 영역 */}
         <div className="w-[100px] h-[100px] bg-primary-50 rounded-[24px] flex justify-center items-center mb-6 shadow-sm overflow-hidden">
           <img src="/logo.png" alt="FIT BACK 로고" className="w-full h-full object-cover" />
@@ -103,91 +93,110 @@ export default function LoginPage() {
           원하는 무드 그대로, 지갑에 딱 맞게
         </p>
 
-        <div className="w-full h-[300px] flex flex-col items-center">
-          
-          {/* 메인 화면 */}
-          {view === 'main' && (
-            <div className="w-full flex flex-col items-center">
-              <div className="w-full max-w-[340px] flex flex-col gap-4">
-                <button 
-                  onClick={handleKakaoLogin}
-                  className="w-full bg-[#FEE500] text-[#371D1E] py-[18px] rounded-[14px] text-[16px] font-bold border-none transition active:scale-95 shadow-sm"
-                >
-                  카카오로 시작하기
-                </button>
-                <button 
-                  onClick={() => setView('email')}
-                  className="w-full bg-bg-secondary text-text border-none py-[18px] rounded-[14px] text-[16px] font-semibold transition active:scale-95"
-                >
-                  이메일로 로그인
-                </button>
-              </div>
+        <div className="w-full flex flex-col items-center">
+          <div className="w-full max-w-[340px] flex flex-col gap-4">
+            <button 
+              onClick={handleKakaoLogin}
+              className="w-full bg-[#FEE500] text-[#371D1E] py-[18px] rounded-[14px] text-[16px] font-bold border-none transition active:scale-95 shadow-sm"
+            >
+              카카오로 시작하기
+            </button>
+            <button 
+              onClick={() => setActiveSheet('email')}
+              className="w-full bg-bg-secondary text-text border-none py-[18px] rounded-[14px] text-[16px] font-semibold transition active:scale-95"
+            >
+              이메일로 로그인
+            </button>
+          </div>
 
-              <div className="mt-8 text-[14px] text-text-secondary">
-                아직 계정이 없으신가요?{' '}
-                <span 
-                  onClick={() => navigate('/signup')}
-                  className="text-primary-600 font-bold cursor-pointer hover:underline"
-                >
-                  회원가입
-                </span>
-              </div>
+          <div className="mt-8 text-[14px] text-text-secondary">
+            아직 계정이 없으신가요?{' '}
+            <span 
+              onClick={() => navigate('/signup')}
+              className="text-primary-600 font-bold cursor-pointer hover:underline"
+            >
+              회원가입
+            </span>
+          </div>
 
-              {/* 하단 약관 동의 텍스트  */}
-              <p className="mt-4 text-[12px] text-text-tertiary text-center leading-relaxed">
-                로그인 시{' '}
-                <span 
-                  onClick={() => setActiveSheet('terms')} 
-                  className="text-primary-600 underline cursor-pointer hover:opacity-80"
-                >
-                  이용약관
-                </span>
-                {' '}및{' '}
-                <br />
-                <span 
-                  onClick={() => setActiveSheet('privacy')} 
-                  className="text-primary-600 underline cursor-pointer hover:opacity-80"
-                >
-                  개인정보처리방침
-                </span>
-                에 동의합니다
-              </p>
-            </div>
-          )}
-
-          {/* 이메일 로그인 입력 화면 */}
-          {view === 'email' && (
-            <div className="w-full flex flex-col items-center">
-              <div className="w-full max-w-[340px] flex flex-col gap-4 mb-8">
-                <input 
-                  type="email" 
-                  placeholder="이메일" 
-                  className="w-full p-4 border border-border rounded-[14px] outline-none focus:border-primary-400"
-                  onChange={(e) => setEmail(e.target.value)} 
-                />
-                <input 
-                  type="password" 
-                  placeholder="비밀번호" 
-                  className="w-full p-4 border border-border rounded-[14px] outline-none focus:border-primary-400"
-                  onChange={(e) => setPassword(e.target.value)} 
-                />
-              </div>
-
-              <div className="w-full max-w-[340px] flex flex-col gap-4">
-                <button 
-                  onClick={handleLogin}
-                  className="w-full bg-primary-400 text-white py-[18px] rounded-[14px] text-[16px] font-bold transition active:scale-95"
-                >
-                  로그인하기
-                </button>
-              </div>
-            </div>
-          )}
-
+          <p className="mt-4 text-[12px] text-text-tertiary text-center leading-relaxed">
+            로그인 시{' '}
+            <span 
+              onClick={() => setActiveSheet('terms')} 
+              className="text-primary-600 underline cursor-pointer hover:opacity-80"
+            >
+              이용약관
+            </span>
+            {' '}및{' '}
+            <br />
+            <span 
+              onClick={() => setActiveSheet('privacy')} 
+              className="text-primary-600 underline cursor-pointer hover:opacity-80"
+            >
+              개인정보처리방침
+            </span>
+            에 동의합니다
+          </p>
         </div>
       </div>
 
-      {/* 바텀시트 컴포넌트 렌더링 */}
+      {/* 이메일 로그인 바텀시트 */}
+      {activeSheet === 'email' && (
+        <div 
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 transition-opacity"
+          onClick={() => setActiveSheet(null)}
+        >
+          <div 
+            className="w-full max-w-[480px] bg-white rounded-t-2xl p-8 pb-12 shadow-2xl animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 헤더 및 닫기 버튼 */}
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-xl font-bold text-primary-900">이메일 로그인</h2>
+              <button 
+                onClick={() => setActiveSheet(null)}
+                className="text-text-tertiary text-2xl p-2 hover:text-text-secondary transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* 입력 폼 */}
+            <div className="flex flex-col gap-4">
+              <input 
+                type="email" 
+                placeholder="이메일을 입력해주세요" 
+                className="w-full p-4 border border-border rounded-[14px] outline-none focus:border-primary-400 focus:ring-1 focus:ring-primary-400"
+                onChange={(e) => setEmail(e.target.value)} 
+              />
+              <input 
+                type="password" 
+                placeholder="비밀번호를 입력해주세요" 
+                className="w-full p-4 border border-border rounded-[14px] outline-none focus:border-primary-400 focus:ring-1 focus:ring-primary-400"
+                onChange={(e) => setPassword(e.target.value)} 
+              />
+              
+              <button 
+                onClick={handleLogin}
+                className="w-full mt-4 bg-primary-400 text-white py-[18px] rounded-[14px] text-[16px] font-bold transition active:scale-95"
+              >
+                로그인하기
+              </button>
+            </div>
+            
+            {/* 부가 기능 링크 */}
+            <div className="flex justify-center gap-6 mt-6 text-[14px] text-text-tertiary">
+              <button onClick={() => navigate('/find-password')} className="hover:text-primary-900 transition">
+                비밀번호 찾기
+              </button>
+              <span className="text-border">|</span>
+              <button onClick={() => navigate('/signup')} className="hover:text-primary-900 transition">이메일 가입</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 기존 약관/개인정보 바텀시트 */}
       <BottomSheet 
         isOpen={activeSheet === 'terms'} 
         onClose={() => setActiveSheet(null)} 

@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../../api/axiosInstance';
+import { useImageUpload } from '../../hooks/useImageUpload'; 
 
 const STYLE_OPTIONS = ['캐주얼', '미니멀', '스트릿', '빈티지', '페미닌', '스포티', '포멀', '고프코어'];
 
@@ -15,6 +16,8 @@ export default function SignupProfilePage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const { uploadImage, isUploading, uploadProgress, imageId, error } = useImageUpload('PROFILE');
+
   const toggleStyle = (style: string) => {
     if (selectedStyles.includes(style)) {
       setSelectedStyles(selectedStyles.filter((s) => s !== style));
@@ -27,17 +30,19 @@ export default function SignupProfilePage() {
     }
   };
 
-  // 프로필 동그라미를 클릭하면 숨겨진 파일 선택 창을 대신 클릭
   const handleImageClick = () => {
     fileInputRef.current?.click();
   };
 
-  // 유저가 이미지를 선택하면 화면에 미리보기를 띄워주기
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // 화면에 미리보기 띄우기
       const imageUrl = URL.createObjectURL(file);
       setProfileImage(imageUrl);
+
+      // S3로 업로드 실행
+      await uploadImage(file);
     }
   };
 
@@ -50,11 +55,20 @@ export default function SignupProfilePage() {
       alert('관심 스타일을 1개 이상 선택해주세요.');
       return;
     }
+    if (isUploading) {
+      alert('프로필 이미지를 업로드 중입니다. 잠시만 기다려주세요.');
+      return;
+    }
+    if (error) {
+      alert(`이미지 업로드 에러: ${error}`);
+      return;
+    }
 
     try {
       const response = await api.put('/api/v1/members/me/onboarding', {
         nickname: nickname,
         preferredStyles: selectedStyles,
+        imageId: imageId 
       });
 
       console.log('2단계(온보딩) 가입 성공:', response.data);
@@ -64,8 +78,8 @@ export default function SignupProfilePage() {
         replace: true 
       });
  
-    } catch (error) {
-      console.error('온보딩 실패:', error);
+    } catch (err) {
+      console.error('온보딩 실패:', err);
       alert('프로필 설정에 실패했습니다. 다시 시도해주세요.');
     }
   };
@@ -88,11 +102,10 @@ export default function SignupProfilePage() {
         {/* 프로필 이미지 영역 */}
         <div className="flex flex-col items-center mb-8">
           <div 
-            className="relative w-[100px] h-[100px] cursor-pointer group"
+            className={`relative w-[100px] h-[100px] cursor-pointer group ${isUploading ? 'opacity-50' : ''}`}
             onClick={handleImageClick} 
             title="" 
           >
-            {/* 실제 이미지가 들어가는 곳 (동그랗게 자르기) */}
             <div className="w-full h-full rounded-full bg-bg border-2 border-border flex items-center justify-center overflow-hidden">
               {profileImage ? (
                 <img src={profileImage} alt="프로필" className="w-full h-full object-cover" />
@@ -101,20 +114,29 @@ export default function SignupProfilePage() {
               )}
             </div>
             
-            {/* + 버튼 */}
             <div className="absolute bottom-0 right-0 z-10 w-8 h-8 bg-primary-400 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white shadow-sm transition group-hover:scale-110">
               +
             </div>
+            
+            {/* 이미지 위 검은 반투명 레이어에 퍼센트 띄우기 */}
+            {isUploading && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 rounded-full text-white text-xs font-bold">
+                <span>업로드 중..</span>
+                <span className="mt-1">{uploadProgress}%</span>
+              </div>
+            )}
           </div>
           <p className="mt-3 text-xs text-text-tertiary">프로필 사진을 등록해주세요</p>
+          
+          {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
 
-          {/* 실제 사진 업로드 인풋 (화면에서는 숨김) */}
           <input 
             type="file" 
             ref={fileInputRef}
             onChange={handleImageChange}
             className="hidden"
             accept="image/*"
+            disabled={isUploading}
           />
         </div>
 
@@ -154,16 +176,17 @@ export default function SignupProfilePage() {
         </div>
 
         <div className="mt-auto pt-6">
+          {/* 하단 가입 버튼 텍스트에도 퍼센트 표시 */}
           <button 
             onClick={handleComplete}
             className={`w-full py-4 rounded-xl text-base font-bold transition shadow-md ${
-              nickname.trim() && selectedStyles.length > 0 
+              nickname.trim() && selectedStyles.length > 0 && !isUploading
                 ? 'bg-primary-400 text-white active:scale-95' 
                 : 'bg-border text-text-tertiary cursor-not-allowed'
             }`}
-            disabled={!nickname.trim() || selectedStyles.length === 0}
+            disabled={!nickname.trim() || selectedStyles.length === 0 || isUploading}
           >
-            가입 완료하고 시작하기
+            {isUploading ? `이미지 처리 중... (${uploadProgress}%)` : '가입 완료하고 시작하기'}
           </button>
         </div>
 
