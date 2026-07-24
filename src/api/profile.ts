@@ -82,7 +82,8 @@ export const getMyProfile = async (): Promise<UserProfile> => {
 export interface UpdateProfilePayload {
   name: string
   styleTags: StyleTag[]
-  avatarImageId?: number
+  // useImageUpload 훅이 imageId를 string(UUID)으로 관리하므로 이에 맞춤
+  avatarImageId?: string
 }
 
 interface MembersMePatchApiResponse {
