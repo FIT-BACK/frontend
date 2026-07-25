@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 // TODO: API 연동 시 교체할 더미 데이터 (트렌드 상세 정보)
 const TREND_DETAIL_DATA = {
@@ -21,7 +21,6 @@ const RELATED_LOOKBOOKS = [
 
 const TrendDetailPage: React.FC = () => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
   
   // 추후 API 조회 후 상태 업데이트
   const [detailData, setDetailData] = useState(TREND_DETAIL_DATA);
@@ -31,11 +30,11 @@ const TrendDetailPage: React.FC = () => {
     // TODO: Toast 알림 추가 (ex: '트렌드가 클로젯에 저장되었습니다')
   };
 
-  const handleTagClick = (tag: string) => {
+  const handleTagClick = () => {
     // TODO: Toast 알림 및 검색 페이지 이동 (ex: '#미니멀 검색')
   };
 
-  const handleLookbookClick = (lookbookId: number) => {
+  const handleLookbookClick = () => {
     // 룩북 상세 페이지(SCR-04B)로 이동
     // navigate(`/lookbook/${lookbookId}`);
   };
@@ -90,7 +89,7 @@ const TrendDetailPage: React.FC = () => {
           {detailData.relatedTags.map((tag) => (
             <span
               key={tag}
-              onClick={() => handleTagClick(tag)}
+              onClick={() => handleTagClick()}
               className="text-xs text-primary-600 bg-primary-50 px-3 py-1.5 rounded-full font-medium cursor-pointer"
             >
               {tag}
@@ -104,7 +103,7 @@ const TrendDetailPage: React.FC = () => {
           {RELATED_LOOKBOOKS.map((lb) => (
             <div
               key={lb.id}
-              onClick={() => handleLookbookClick(lb.id)}
+              onClick={() => handleLookbookClick()}
               className="w-[110px] shrink-0 aspect-[0.8] rounded-xl cursor-pointer transition-transform active:scale-95"
               style={{ background: lb.bgGradient }}
             />
