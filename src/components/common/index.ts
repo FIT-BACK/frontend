@@ -1,5 +1,6 @@
 export { default as Button } from './Button'
 export { default as IconButton } from './IconButton'
+export { default as PageLoader } from './PageLoader'
 export { default as TagSelectBottomSheet } from './TagSelectBottomSheet'
 export { default as TextInput } from './TextInput'
 export { default as Toggle } from './Toggle'
