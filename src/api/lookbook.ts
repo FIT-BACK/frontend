@@ -9,11 +9,13 @@ import { api } from './axiosInstance'
  * 컴포넌트에서 직접 호출하지 말고 src/hooks/useLookbookUpload.ts 훅을 사용할 것.
  */
 
+// 백엔드 develop 브랜치 LookbookRequest.LookbookCreate 기준 (2026-07-23 확인) — 필드명은
+// originalImageId/matchedImageId(둘 다 string UUID), tagIds(number[], 1~5개), purchaseUrl, comment
 export interface LookbookUploadPayload {
-  originalLookImageId: number
-  valueMatchImageId: number
-  styleTags: string[]
-  purchaseLink?: string
+  originalImageId: string
+  matchedImageId: string
+  tagIds: number[]
+  purchaseUrl?: string
   comment?: string
 }
 
@@ -21,7 +23,15 @@ export interface LookbookUploadResult {
   id: number
 }
 
-const USE_MOCK = true
+// 실제 POST /api/v1/lookbooks 응답은 ApiResponse 봉투 안에 lookbookId로 내려옴 (LookbookResponse.LookbookCreate 기준)
+interface LookbookCreateApiResponse {
+  success: boolean
+  code: string
+  message: string
+  data: { lookbookId: number }
+}
+
+const USE_MOCK = false
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // 이미지는 presigned URL로 S3에 먼저 업로드된 상태 (useImageUpload) — 여기서는 imageId만 전달
@@ -33,6 +43,6 @@ export const uploadLookbook = async (
     return { id: Date.now() }
   }
 
-  const response = await api.post<LookbookUploadResult>('/api/lookbooks', payload)
-  return response.data
+  const response = await api.post<LookbookCreateApiResponse>('/api/v1/lookbooks', payload)
+  return { id: response.data.data.lookbookId }
 }

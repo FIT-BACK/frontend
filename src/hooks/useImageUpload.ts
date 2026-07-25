@@ -1,12 +1,33 @@
 import { useState, useCallback } from 'react';
+import axios from 'axios';
+import { api } from '../api/axiosInstance';
 
-//  업로드 용도(목적)를 명확한 타입으로 정의
-export type UploadPurpose = 'analysis' | 'lookbook' | 'profile';
+// 백엔드 develop 브랜치 ImageUploadRequest.purpose 기준 (2026-07-25 재확인).
+// 엔티티 저장용 ImagePurpose는 6개 값(LOOKBOOK_ORIGINAL/LOOKBOOK_MATCHED 포함)이지만,
+// 업로드 요청 API가 실제로 받는 타입(ImageUploadPurpose)은 3개뿐이고 LOOKBOOK은 서버에서
+// 무조건 LOOKBOOK_ORIGINAL로 저장된다(ImageUploadService.toStoredPurpose) — 원본/매칭 이미지를
+// 요청 시점에 구분할 방법이 현재 API에 없다. SCR-09 두 슬롯 모두 'LOOKBOOK'으로 보낼 것.
+export type UploadPurpose = 'ANALYSIS' | 'LOOKBOOK' | 'PROFILE';
+
+interface ImageUploadResponseData {
+  imageId: string;
+  uploadUrl: string;
+  uploadMethod: string;
+  uploadFields: Record<string, string>;
+  expiresAt: string;
+}
+
+interface ApiEnvelope<T> {
+  success: boolean;
+  code: string;
+  message: string;
+  data: T;
+}
 
 export const useImageUpload = (purpose: UploadPurpose) => {
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0); // 진행률(%) 상태
-  const [imageId, setImageId] = useState<number | null>(null);
+  const [imageId, setImageId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lastFile, setLastFile] = useState<File | null>(null);
 
@@ -29,7 +50,7 @@ export const useImageUpload = (purpose: UploadPurpose) => {
     return true;
   };
 
-  // 2. 로컬 시뮬레이션용 업로드 프로세스
+  // 2. 실제 업로드: Presigned POST 발급 → S3 직접 업로드 → 완료 확인
   const uploadImage = useCallback(async (file: File) => {
     if (!validateFile(file)) return;
 
@@ -39,27 +60,26 @@ export const useImageUpload = (purpose: UploadPurpose) => {
     setError(null);
     setImageId(null);
 
-    console.log(`[Mock Upload] 용도: "${purpose}" | 파일명: ${file.name}`);
-
-    /*
-      백엔드 실제 배포 완료 시 활성화할 로직
     try {
-      const PRESIGNED_URL_ENDPOINTS: Record<UploadPurpose, string> = {
-        analysis: '/api/v1/analyses/presigned',
-        lookbook: '/api/v1/lookbooks/presigned',
-        profile: '/api/v1/members/me/profile-image/presigned',
-      };
+      const presignedResponse = await api.post<ApiEnvelope<ImageUploadResponseData>>(
+        '/api/v1/images/upload-requests',
+        {
+          purpose,
+          contentType: file.type,
+          fileSize: file.size,
+        },
+      );
 
-      const endpoint = PRESIGNED_URL_ENDPOINTS[purpose];
-      const presignedResponse = await axios.post(endpoint, {
-        fileName: file.name,
-        fileType: file.type,
+      const { imageId: newImageId, uploadUrl, uploadFields } = presignedResponse.data.data;
+
+      // S3 Presigned POST 정책 — uploadFields를 먼저 채우고 file 필드는 반드시 마지막에 추가
+      const formData = new FormData();
+      Object.entries(uploadFields).forEach(([key, value]) => {
+        formData.append(key, value);
       });
+      formData.append('file', file);
 
-      const { uploadUrl, generatedImageId } = presignedResponse.data;
-
-      await axios.put(uploadUrl, file, {
-        headers: { 'Content-Type': file.type },
+      await axios.post(uploadUrl, formData, {
         onUploadProgress: (progressEvent) => {
           if (progressEvent.total) {
             const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
@@ -67,34 +87,14 @@ export const useImageUpload = (purpose: UploadPurpose) => {
           }
         },
       });
-      setImageId(generatedImageId);
+
+      await api.post(`/api/v1/images/${newImageId}/complete`);
+      setImageId(newImageId);
     } catch (err: any) {
       setError(err.response?.data?.message || '이미지 업로드 중 오류가 발생했습니다.');
     } finally {
       setIsUploading(false);
     }
-    */
-
-    //  백엔드가 없어도 UI가 멈추지 않도록 프로그레스 바 수치를 0.2초 간격으로 올리는 시뮬레이션
-    let currentProgress = 0;
-    const interval = setInterval(() => {
-      currentProgress += 20; // 20%씩 상승
-      if (currentProgress <= 100) {
-        setUploadProgress(currentProgress);
-      }
-
-      if (currentProgress >= 100) {
-        clearInterval(interval);
-
-        // 지환님 원래 명세(number | null)에 맞춰 가짜 정수형 ID 발급
-        const mockImageId = Math.floor(Math.random() * 900000) + 100000;
-        setImageId(mockImageId);
-        setIsUploading(false);
-
-        console.log(`[Mock Success] ${purpose} 업로드 완료. 생성된 임시 ID:`, mockImageId);
-      }
-    }, 200);
-
   }, [purpose]);
 
   // 3. 에러 발생 시 호출할 재시도 함수
@@ -111,7 +111,7 @@ export const useImageUpload = (purpose: UploadPurpose) => {
     retryUpload,    // 업로드 실패 시 마지막 파일 객체로 업로드를 재시도하는 함수
     isUploading,    // 현재 이미지 업로드가 진행 중인지 여부 (boolean)
     uploadProgress, // 이미지 업로드 진행률 (0 ~ 100 사이의 숫자 %)
-    imageId,        // 업로드 완료 후 발급받은 이미지 고유 ID (number | null)
+    imageId,        // 업로드 완료 후 발급받은 이미지 고유 ID (string UUID | null)
     error,          // 파일 검증 실패 또는 업로드 중 발생한 에러 메시지 (string | null)
     lastFile,       // 에러 발생 시 재시도를 위해 기억해 둔 직전 파일 객체 (File | null)
   };
