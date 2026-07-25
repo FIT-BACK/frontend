@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [activeSheet, setActiveSheet] = useState<'terms' | 'privacy' | null>(null);
 
-  // 약관 및 개인정보처리방침 데이터
+  // 약관 및 개인정보처리방침 데이터 
   const termsText = (
     <>
       <strong>제1조 (목적)</strong>
@@ -62,12 +62,11 @@ export default function LoginPage() {
     }
   };
 
-  // 카카오 로그인 처리 함수 (클릭 시 카카오 페이지로 이동)
+  // 카카오 로그인 처리 함수
   const handleKakaoLogin = () => {
     const REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY;
     const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
     
-    // 환경변수가 제대로 설정되지 않았을 때를 대비한 안전 장치
     if (!REST_API_KEY || !REDIRECT_URI) {
       alert('카카오 로그인 키가 설정되지 않았습니다. .env 파일을 확인해주세요.');
       return;
@@ -133,7 +132,7 @@ export default function LoginPage() {
                 </span>
               </div>
 
-              {/* 하단 약관 동의 텍스트  */}
+              {/* 하단 약관 동의 텍스트 */}
               <p className="mt-4 text-[12px] text-text-tertiary text-center leading-relaxed">
                 로그인 시{' '}
                 <span 
@@ -183,7 +182,6 @@ export default function LoginPage() {
               </div>
             </div>
           )}
-
         </div>
       </div>
 

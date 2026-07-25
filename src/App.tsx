@@ -47,6 +47,7 @@ function App() {
         <Route path="/signup/profile" element={<SignupProfilePage />} />
         <Route path="/signup/complete" element={<SignupCompletePage />} /> 
         
+        {/* 카카오 로그인 콜백 경로 - 카카오 디벨로퍼스 설정과 일치해야 합니다 */}
         <Route path="/oauth/kakao" element={<KakaoCallback />} />
         
         <Route path="/change-password" element={<ChangePasswordPage />} />
