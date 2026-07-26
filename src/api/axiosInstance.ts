@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-//임시 베이스 URL (추후 실제 API 서버 URL로 변경 필요)
-const BASE_URL = 'https://api.fit-back.com'; 
+// 환경별 API 베이스 URL — .env.local(로컬), .env.production(배포 빌드)에서 주입
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const api = axios.create({
   baseURL: BASE_URL,
