@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { Home, ClipboardList, Plus, Search, User } from 'lucide-react';
 
 interface TabBarProps {
   onUploadClick?: () => void;
@@ -6,48 +7,64 @@ interface TabBarProps {
 
 const TabBar = ({ onUploadClick }: TabBarProps) => {
   const location = useLocation();
-  const isActive = (path: string) =>
-    path === '/'
-      ? location.pathname === '/'
-      : location.pathname.startsWith(path);
 
-  const tabClass = (path: string) =>
-    `text-sm font-medium ${
-      isActive(path) ? 'text-primary-600 font-bold' : 'text-text-secondary'
-    }`;
+  // 현재 경로와 링크 경로가 같은지 확인하는 함수
+  const isActive = (path: string) => location.pathname === path;
+
+  // 스타일을 결정하는 공통 함수
+  const getLinkClass = (path: string) => 
+    `flex flex-col items-center transition-colors ${isActive(path) ? 'text-primary-600' : 'text-text-secondary'}`;
 
   return (
-    <nav className='h-16 w-full flex items-center justify-around border-t border-primary-200 bg-white'>
-      <Link to='/' className={tabClass('/')}>
-        홈
-      </Link>
-      <Link to='/closet' className={tabClass('/closet')}>
-        클로젯
+    <nav className="h-16 w-full flex items-center justify-around border-t border-primary-200 bg-white z-50">
+      
+      {/* 홈 */}
+      <Link to="/" className={getLinkClass('/')}>
+        <Home size={22} />
+        <span className="text-[10px] mt-1 font-medium">홈</span>
       </Link>
 
+      {/* 클로젯 */}
+      <Link to="/closet" className={getLinkClass('/closet')}>
+        <ClipboardList size={22} />
+        <span className="text-[10px] mt-1 font-medium">클로젯</span>
+      </Link>
+      
+      {/* 업로드 버튼 */}
       {onUploadClick ? (
         <button
-          type='button'
+          type="button"
           onClick={onUploadClick}
-          aria-label='이미지 업로드'
-          className='bg-primary-600 text-white w-12 h-12 rounded-full flex items-center justify-center -mt-8 shadow-lg hover:bg-primary-800 transition-colors'
+          className="flex flex-col items-center focus:outline-none"
         >
-          +
+          <div className="bg-primary-600 text-white w-12 h-12 rounded-full flex items-center justify-center -mt-8 shadow-lg hover:bg-primary-800 transition-colors border-4 border-white">
+            <Plus size={28} strokeWidth={3} />
+          </div>
+          <span className={`text-[10px] mt-1 font-medium ${isActive('/upload') ? 'text-primary-600' : 'text-text-secondary'}`}>
+            업로드
+          </span>
         </button>
       ) : (
-        <Link
-          to='/upload'
-          className='bg-primary-600 text-white w-12 h-12 rounded-full flex items-center justify-center -mt-8 shadow-lg hover:bg-primary-800 transition-colors'
-        >
-          +
+        <Link to="/upload" className="flex flex-col items-center">
+          <div className="bg-primary-600 text-white w-12 h-12 rounded-full flex items-center justify-center -mt-8 shadow-lg hover:bg-primary-800 transition-colors border-4 border-white">
+            <Plus size={28} strokeWidth={3} />
+          </div>
+          <span className={`text-[10px] mt-1 font-medium ${isActive('/upload') ? 'text-primary-600' : 'text-text-secondary'}`}>
+            업로드
+          </span>
         </Link>
       )}
-
-      <Link to='/saved' className={tabClass('/saved')}>
-        저장
+      
+      {/* 검색 */}
+      <Link to="/search" className={getLinkClass('/search')}>
+        <Search size={22} />
+        <span className="text-[10px] mt-1 font-medium">검색</span>
       </Link>
-      <Link to='/mypage' className={tabClass('/mypage')}>
-        마이
+
+      {/* 마이 */}
+      <Link to="/mypage" className={getLinkClass('/mypage')}>
+        <User size={22} />
+        <span className="text-[10px] mt-1 font-medium">마이</span>
       </Link>
     </nav>
   );

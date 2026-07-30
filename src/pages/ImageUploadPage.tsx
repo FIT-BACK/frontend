@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useUploadStore } from '../store/useUploadStore';
 import { DUMMY_UPLOAD_IMAGE_URL } from '../constants/dummyData.ts';
 
@@ -10,15 +11,8 @@ const RECENT_GALLERY_DUMMY: string[] = [
   DUMMY_UPLOAD_IMAGE_URL,
 ];
 
-interface ImageUploadPageProps {
-  onBack: () => void;
-  onStartAnalysis: () => void;
-}
-
-export default function ImageUploadPage({
-  onBack,
-  onStartAnalysis,
-}: ImageUploadPageProps) {
+export default function ImageUploadPage() {
+  const navigate = useNavigate();
   const imageUri = useUploadStore((state) => state.imageUri);
   const setImage = useUploadStore((state) => state.setImage);
   const setStatus = useUploadStore((state) => state.setStatus);
@@ -39,9 +33,12 @@ export default function ImageUploadPage({
       return;
     }
     setError(null);
-    // TODO: 실제 업로드 훅 연동 시 여기서 Presigned URL 요청 → S3 업로드로 대체
     const previewUrl = URL.createObjectURL(file);
     setImage(previewUrl);
+  };
+
+  const handleBack = () => {
+    navigate(-1);
   };
 
   const handleDropZoneClick = () => fileInputRef.current?.click();
@@ -58,8 +55,8 @@ export default function ImageUploadPage({
   };
 
   const handleStartAnalysis = () => {
-    setStatus('analyzing');
-    onStartAnalysis();
+    setStatus('analyzing'); // 👈 AI 상태 업데이트!
+    navigate('/waiting'); // 👈 AI 대기 화면으로 이동!
   };
 
   const handleRetake = () => {
@@ -73,7 +70,7 @@ export default function ImageUploadPage({
       <header className='flex items-center gap-3'>
         <button
           type='button'
-          onClick={onBack}
+          onClick={handleBack}
           aria-label='뒤로가기'
           className='grid h-9 w-9 place-items-center rounded-full border border-border bg-white'
         >

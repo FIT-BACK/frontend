@@ -3,20 +3,27 @@ import { CLOSET_DUMMY_ITEMS } from '../../constants/dummyData';
 interface TrendSectionProps {
   onOpenTrendDetail?: (id: string) => void;
   onSaveTrend?: (id: string) => void;
+  /** "더보기" 클릭 시 호출. 트렌드 전체 목록 화면이 아직 없다면 콜백을 안 넘겨도 됩니다. */
+  onSeeMoreTrends?: () => void;
 }
 
 export default function TrendSection({
   onOpenTrendDetail,
   onSaveTrend,
+  onSeeMoreTrends,
 }: TrendSectionProps) {
   return (
     <section className='mt-6 px-5'>
       <div className='flex items-center justify-between'>
         <h2 className='text-sm font-bold text-text'>🔥 요즘 트렌드</h2>
 
-        <span className='text-xs text-text-secondary cursor-pointer'>
+        <button
+          type='button'
+          onClick={onSeeMoreTrends}
+          className='text-xs text-text-secondary cursor-pointer'
+        >
           더보기 &gt;
-        </span>
+        </button>
       </div>
 
       <div className='mt-3 flex gap-3 overflow-x-auto pb-2'>
