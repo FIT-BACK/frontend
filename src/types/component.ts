@@ -38,3 +38,10 @@ export interface ToggleProps {
   disabled?: boolean
   'aria-label': string
 }
+
+export interface BottomSheetProps {
+  isOpen: boolean
+  onClose: () => void
+  title: string
+  content: ReactNode
+}

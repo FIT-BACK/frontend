@@ -15,7 +15,7 @@ export default function ProfileEditPage() {
   const { data: profile, isLoading } = useMyProfile()
   const { data: allTags = [], isLoading: isTagsLoading } = useTags()
   const { mutate: saveProfile, isPending, isError } = useUpdateProfile()
-  const avatarUpload = useImageUpload()
+  const avatarUpload = useImageUpload('PROFILE')
 
   const [name, setName] = useState('')
   const [selectedTags, setSelectedTags] = useState<StyleTag[]>([])

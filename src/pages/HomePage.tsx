@@ -28,6 +28,7 @@ interface HomePageProps {
   onOpenImageSearch?: () => void;
   onOpenTrendDetail?: (id: string) => void;
   onSaveTrend?: (id: string) => void;
+  onSeeMoreTrends?: () => void;
   onOpenLookbookDetail?: (id: string) => void;
 }
 
@@ -36,6 +37,7 @@ export default function HomePage({
   onOpenImageSearch,
   onOpenTrendDetail,
   onSaveTrend,
+  onSeeMoreTrends,
   onOpenLookbookDetail,
 }: HomePageProps) {
   const [feedItems, setFeedItems] = useState<LookbookFeedItem[]>([]);
@@ -107,6 +109,7 @@ export default function HomePage({
       <TrendSection
         onOpenTrendDetail={onOpenTrendDetail}
         onSaveTrend={onSaveTrend}
+        onSeeMoreTrends={onSeeMoreTrends}
       />
 
       <section className='mt-8 px-5'>
