@@ -19,6 +19,8 @@ import { TagEditPage } from './pages/TagEditPage';
 import { ResultReportPage } from './pages/ResultReportPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import ImageUploadPage from './pages/ImageUploadPage';
+import LookbookDetailPage from './pages/LookbookDetail/LookbookDetailPage';
+import NotificationListPage from './pages/NotificationListPage';
 
 function App() {
   return (
@@ -33,6 +35,11 @@ function App() {
           <Route path='profile-edit' element={<ProfileEditPage />} />
           <Route path='notifications' element={<NotificationSettingsPage />} />
           <Route path='image-upload' element={<ImageUploadPage />} />
+          <Route
+            path='lookbooks/:lookbookId'
+            element={<LookbookDetailPage />}
+          />
+          <Route path='alerts' element={<NotificationListPage />} />
         </Route>
 
         {/* Layout이 적용되지 않는 단독 페이지들 */}
