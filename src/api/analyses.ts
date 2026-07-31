@@ -5,30 +5,41 @@ import { api } from './axiosInstance';
  *  AI 태그 분석 API 통신 정의
  * ==========================================
  * 컴포넌트에서 직접 부르지 말고 src/hooks/useCreateAnalysisMutation.ts를 사용하세요.
- *
- * ⚠️ imageId 타입 - 일단 number로 정의함
  */
 
-export interface AnalysisCreateResponse {
-  reportId: string;
+export interface SuggestedTag {
+  tagId: number;
+  tagName: string;
 }
 
-// 이 값을 false로 바꾸면 실제 서버와 연동됩니다.
-const USE_MOCK = true;
+export interface AnalysisCreateResponse {
+  reportId: number; // string → number로 수정 (실제 API 기준)
+  imageUrl: string;
+  matchPercentage: number;
+  suggestedTags: SuggestedTag[];
+}
 
+const USE_MOCK = true;
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** POST /api/v1/analyses - 업로드된 이미지(imageId)로 AI 태그 분석 시작 */
 export const createAnalysis = async (
-  imageId: number,
+  imageId: string, // ⚠️ 아래 참고 - number가 아니라 string(UUID)일 가능성 높음
 ): Promise<AnalysisCreateResponse> => {
   if (USE_MOCK) {
     await delay(1000);
-    return { reportId: 'mock-report-1' };
+    return {
+      reportId: 501,
+      imageUrl: 'https://picsum.photos/seed/analysis-mock/800/1000',
+      matchPercentage: 70,
+      suggestedTags: [
+        { tagId: 12, tagName: '미니멀' },
+        { tagId: 21, tagName: '와이드핏' },
+        { tagId: 33, tagName: '베이지톤' },
+      ],
+    };
   }
 
-  const response = await api.post<AnalysisCreateResponse>('/api/v1/analyses', {
-    imageId,
-  });
-  return response.data;
+  const response = await api.post('/api/v1/analyses', { imageId });
+  return response.data.data;
 };
