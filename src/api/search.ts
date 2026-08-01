@@ -25,8 +25,8 @@ const USE_MOCK = true
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const MOCK_TRENDS: TrendItem[] = [
-  { id: 1, imageUrl: 'https://picsum.photos/seed/trend1/300/300', label: '베이지 트렌치코트' },
-  { id: 2, imageUrl: 'https://picsum.photos/seed/trend2/300/300', label: '화이트 셔츠' },
+  { id: 1, imageUrl: 'https://picsum.photos/seed/trend1/300/300', label: '베이지 트렌치코트', styleTags: ['미니멀', '포멀'] },
+  { id: 2, imageUrl: 'https://picsum.photos/seed/trend2/300/300', label: '화이트 셔츠', styleTags: ['미니멀', '캐주얼'] },
 ]
 
 const MOCK_LOOKBOOKS: LookbookSearchItem[] = [
