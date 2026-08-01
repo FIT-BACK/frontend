@@ -1,11 +1,31 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useContentSearch } from '../hooks/useContentSearch';
+import { useTags } from '../hooks/useTags';
+
+const RECENT_SEARCH_KEY = 'fitback:recentSearches';
+const MAX_RECENT = 8;
+
+function loadRecentSearches(): string[] {
+  try {
+    const raw = localStorage.getItem(RECENT_SEARCH_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecentSearches(list: string[]) {
+  localStorage.setItem(RECENT_SEARCH_KEY, JSON.stringify(list));
+}
 
 export default function SearchPage() {
   const navigate = useNavigate();
   const [input, setInput] = useState('');
   const [keyword, setKeyword] = useState('');
+  const [recentSearches, setRecentSearches] = useState<string[]>(() => loadRecentSearches());
+
+  const { data: tags = [] } = useTags();
 
   // 입력 300ms 후에만 검색 실행 (매 타이핑마다 요청 나가는 것 방지)
   useEffect(() => {
@@ -17,6 +37,30 @@ export default function SearchPage() {
 
   const hasQuery = keyword.trim().length > 0;
   const hasResults = !!data && (data.trends.length > 0 || data.lookbooks.length > 0);
+
+  // 실제 검색 결과가 나온 키워드만 최근 검색어에 남긴다 (빈 결과·오타는 제외)
+  useEffect(() => {
+    if (!hasQuery || isLoading || !hasResults) return;
+    const trimmed = keyword.trim();
+    setRecentSearches((prev) => {
+      const next = [trimmed, ...prev.filter((term) => term !== trimmed)].slice(0, MAX_RECENT);
+      saveRecentSearches(next);
+      return next;
+    });
+  }, [hasQuery, isLoading, hasResults, keyword]);
+
+  const runSearch = (term: string) => {
+    setInput(term);
+    setKeyword(term);
+  };
+
+  const removeRecentSearch = (term: string) => {
+    setRecentSearches((prev) => {
+      const next = prev.filter((t) => t !== term);
+      saveRecentSearches(next);
+      return next;
+    });
+  };
 
   return (
     <div className='max-w-[375px] min-h-screen mx-auto bg-bg flex flex-col text-text'>
@@ -44,9 +88,57 @@ export default function SearchPage() {
 
       <div className='flex-1 overflow-y-auto px-5 pb-8'>
         {!hasQuery && (
-          <p className='pt-16 text-center text-xs text-text-secondary'>
-            찾고 싶은 스타일이나 태그를 검색해보세요
-          </p>
+          <div className='pt-2'>
+            {recentSearches.length > 0 && (
+              <section className='mb-6'>
+                <h2 className='text-xs font-bold text-text-secondary mb-2'>최근 검색어</h2>
+                <div className='flex flex-wrap gap-2'>
+                  {recentSearches.map((term) => (
+                    <span
+                      key={term}
+                      className='inline-flex items-center gap-1.5 rounded-full bg-bg-secondary px-3 py-1.5 text-xs text-text'
+                    >
+                      <button type='button' onClick={() => runSearch(term)}>
+                        {term}
+                      </button>
+                      <button
+                        type='button'
+                        onClick={() => removeRecentSearch(term)}
+                        aria-label={`${term} 삭제`}
+                        className='text-text-tertiary'
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {tags.length > 0 && (
+              <section>
+                <h2 className='text-xs font-bold text-text-secondary mb-2'>추천 태그</h2>
+                <div className='flex flex-wrap gap-2'>
+                  {tags.slice(0, 8).map((tag) => (
+                    <button
+                      key={tag.tagId}
+                      type='button'
+                      onClick={() => runSearch(tag.tagName)}
+                      className='rounded-full bg-primary-50 px-3 py-1.5 text-xs font-semibold text-primary-700'
+                    >
+                      #{tag.tagName}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {recentSearches.length === 0 && tags.length === 0 && (
+              <p className='pt-16 text-center text-xs text-text-secondary'>
+                찾고 싶은 스타일이나 태그를 검색해보세요
+              </p>
+            )}
+          </div>
         )}
 
         {hasQuery && isLoading && (
