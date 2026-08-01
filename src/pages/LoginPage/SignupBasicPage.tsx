@@ -8,20 +8,22 @@ export default function SignupBasicPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleNextStep = async () => {
     if (!email || !password) {
-      alert('이메일과 비밀번호를 모두 입력해주세요.');
+      setErrorMessage('이메일과 비밀번호를 모두 입력해주세요.');
       return;
     }
     if (!/^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(password)) {
-      alert('비밀번호는 영문, 숫자를 포함해 8자 이상이어야 합니다.');
+      setErrorMessage('비밀번호는 영문, 숫자를 포함해 8자 이상이어야 합니다.');
       return;
     }
     if (password !== passwordConfirm) {
-      alert('비밀번호가 일치하지 않습니다.');
+      setErrorMessage('비밀번호가 일치하지 않습니다.');
       return;
     }
+    setErrorMessage('');
 
     try {
       const response = await api.post('/api/v1/auth/sign', {
@@ -29,10 +31,10 @@ export default function SignupBasicPage() {
         password: password,
       });
       console.log('1단계 가입 성공:', response.data);
-      navigate('/signup/profile'); 
+      navigate('/signup/profile');
     } catch (error) {
       console.error('가입 실패:', error);
-      alert('회원가입에 실패했습니다. 다시 시도해주세요.');
+      setErrorMessage('회원가입에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -56,9 +58,9 @@ export default function SignupBasicPage() {
           <div className="flex flex-col gap-2">
             <label className="text-sm font-bold text-primary-900">이메일</label>
             <input 
-              type="email" 
+              type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => { setEmail(e.target.value); setErrorMessage(''); }}
               placeholder="example@email.com" 
               className="w-full bg-bg p-4 rounded-xl text-base outline-none focus:ring-2 focus:ring-primary-400"
             />
@@ -67,9 +69,9 @@ export default function SignupBasicPage() {
           <div className="flex flex-col gap-2">
             <label className="text-sm font-bold text-primary-900">비밀번호</label>
             <input 
-              type="password" 
+              type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => { setPassword(e.target.value); setErrorMessage(''); }}
               placeholder="8자 이상 입력해주세요" 
               className="w-full bg-bg p-4 rounded-xl text-base outline-none focus:ring-2 focus:ring-primary-400"
             />
@@ -79,13 +81,17 @@ export default function SignupBasicPage() {
           <div className="flex flex-col gap-2">
             <label className="text-sm font-bold text-primary-900">비밀번호 확인</label>
             <input 
-              type="password" 
+              type="password"
               value={passwordConfirm}
-              onChange={(e) => setPasswordConfirm(e.target.value)}
-              placeholder="비밀번호를 한번 더 입력해주세요" 
+              onChange={(e) => { setPasswordConfirm(e.target.value); setErrorMessage(''); }}
+              placeholder="비밀번호를 한번 더 입력해주세요"
               className="w-full bg-bg p-4 rounded-xl text-base outline-none focus:ring-2 focus:ring-primary-400"
             />
           </div>
+
+          {errorMessage && (
+            <p className="text-[13px] text-red-500 font-medium">{errorMessage}</p>
+          )}
         </div>
 
         <div className="mt-auto pt-6">
