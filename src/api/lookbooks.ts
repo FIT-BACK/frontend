@@ -1,80 +1,121 @@
-import { api } from './axiosInstance';
+import { api } from './axiosInstance'; // ← apiClient → api로 수정
 
 /**
  * ==========================================
- *  룩북 피드 관련 API 통신 정의
+ *  룩북 상세(SCR-04B) / 신고(SCR-04C) 관련 API 통신 정의
  * ==========================================
- * 컴포넌트에서 직접 부르지 말고 src/hooks/useLookbookFeedQuery.ts를 사용하세요.
+ * 컴포넌트에서 직접 부르지 말고 src/hooks/useLookbookDetail.ts를 사용하세요.
  */
 
-export interface LookbookFeedItem {
+// 도메인 타입은 여기서 직접 정의 (types/component.ts는 공용 UI props 전용)
+export type ReportType =
+  | 'INAPPROPRIATE_IMAGE'
+  | 'COPYRIGHT'
+  | 'FALSE_INFO'
+  | 'SPAM'
+  | 'ETC';
+
+export interface LookbookDetail {
   id: number;
-  authorHandle: string;
-  likeCount: number;
-  isLiked: boolean;
+  authorNickname: string;
+  authorAvatarUrl: string | null;
+  createdAt: string;
   originalImageUrl: string;
   matchedImageUrl: string;
+  styleTags: string[];
+  comment: string | null;
+  products: {
+    id: number;
+    name: string;
+    shopName: string;
+    price: number;
+    purchaseUrl: string | null;
+  }[];
+  relatedTrend: { id: number; name: string } | null;
+  likeCount: number;
+  isLiked: boolean;
+  isSaved: boolean;
+  isMine: boolean;
 }
 
-export interface LookbookListResponse {
-  items: LookbookFeedItem[];
-  hasMore: boolean;
-}
-
-// 이 값을 false로 바꾸면 실제 서버와 연동됩니다.
 const USE_MOCK = true;
-
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// 목업 상태에서도 좋아요 토글이 실제로 반영되도록 하는 간단한 인메모리 저장소
-// (새로고침하면 초기화됩니다. 실제 서버 연동 시 이 블록은 필요 없습니다.)
-const mockLikedIds = new Set<number>();
-
-function createMockPage(page: number): LookbookFeedItem[] {
-  return Array.from({ length: page === 0 ? 1 : 20 }).map((_, i) => {
-    const id = page * 1000 + i;
-    return {
-      id,
-      authorHandle: '@minji_style',
-      likeCount: 128 + (mockLikedIds.has(id) ? 1 : 0),
-      isLiked: mockLikedIds.has(id),
-      originalImageUrl: 'https://picsum.photos/seed/fitback-upload/800/1000',
-      matchedImageUrl: 'https://picsum.photos/seed/fitback-upload/800/1000',
-    };
-  });
-}
-
-/** GET /api/v1/lookbooks - 홈 가성비 룩북 피드 목록 (페이지네이션) */
-export const getLookbooks = async (
-  page: number,
-): Promise<LookbookListResponse> => {
-  if (USE_MOCK) {
-    await delay(500);
-    return { items: createMockPage(page), hasMore: page < 1 };
-  }
-  // TODO: 실제 페이지네이션 파라미터 이름(page/cursor 등)은 백엔드 확정되면 맞추기
-  const response = await api.get<LookbookListResponse>('/api/v1/lookbooks', {
-    params: { page },
-  });
-  return response.data;
+const mockDetail: LookbookDetail = {
+  id: 1,
+  authorNickname: '@minji_style',
+  authorAvatarUrl: null,
+  createdAt: '3시간 전',
+  originalImageUrl: 'https://picsum.photos/seed/original/800/1000',
+  matchedImageUrl: 'https://picsum.photos/seed/matched/800/1000',
+  styleTags: ['미니멀', '와이드핏', '베이지톤'],
+  comment:
+    '무신사에서 3만원대에 찾았어요! 핏이 거의 똑같고 소재도 생각보다 좋아서 만족 😊',
+  products: [
+    {
+      id: 1,
+      name: '오버핏 베이지 셔츠',
+      shopName: '무신사 스탠다드',
+      price: 28900,
+      purchaseUrl: 'https://example.com',
+    },
+  ],
+  relatedTrend: { id: 1, name: '미니멀 무드' },
+  likeCount: 128,
+  isLiked: false,
+  isSaved: false,
+  isMine: false,
 };
 
-/** POST /api/v1/lookbooks/{lookbookId}/like - 좋아요 등록 */
-export const likeLookbook = async (lookbookId: number): Promise<void> => {
+/** GET /api/v1/lookbooks/{lookbookId} */
+export const getLookbookDetail = async (
+  lookbookId: number,
+): Promise<LookbookDetail> => {
   if (USE_MOCK) {
-    await delay(200);
-    mockLikedIds.add(lookbookId);
-    return;
+    await delay(400);
+    return { ...mockDetail, id: lookbookId };
   }
-  await api.post(`/api/v1/lookbooks/${lookbookId}/like`);
+  const { data } = await api.get<LookbookDetail>(
+    `/api/v1/lookbooks/${lookbookId}`,
+  );
+  return data;
 };
 
-/** DELETE /api/v1/lookbooks/{lookbookId}/like - 좋아요 취소 */
-export const unlikeLookbook = async (lookbookId: number): Promise<void> => {
+/** POST /api/v1/lookbooks/{lookbookId}/likes */
+export const toggleLookbookLike = async (lookbookId: number): Promise<void> => {
   if (USE_MOCK) {
     await delay(200);
-    mockLikedIds.delete(lookbookId);
     return;
   }
-  await api.delete(`/api/v1/lookbooks/${lookbookId}/like`);
+  await api.post(`/api/v1/lookbooks/${lookbookId}/likes`);
+};
+
+/** POST /api/v1/lookbooks/{lookbookId}/saves */
+export const toggleLookbookSave = async (lookbookId: number): Promise<void> => {
+  if (USE_MOCK) {
+    await delay(200);
+    return;
+  }
+  await api.post(`/api/v1/lookbooks/${lookbookId}/saves`);
+};
+
+/** POST /api/v1/lookbooks/{lookbookId}/reports */
+export const reportLookbook = async (
+  lookbookId: number,
+  reportType: ReportType,
+): Promise<void> => {
+  if (USE_MOCK) {
+    await delay(300);
+    return;
+  }
+  await api.post(`/api/v1/lookbooks/${lookbookId}/reports`, { reportType });
+};
+
+/** DELETE /api/v1/lookbooks/{lookbookId} */
+export const deleteLookbook = async (lookbookId: number): Promise<void> => {
+  if (USE_MOCK) {
+    await delay(300);
+    return;
+  }
+  await api.delete(`/api/v1/lookbooks/${lookbookId}`);
 };

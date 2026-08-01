@@ -20,12 +20,13 @@ import SearchPage from './pages/SearchPage';
 import ImageUploadPage from './pages/ImageUploadPage';
 import { AiWaitingPage } from './pages/AiWaitingPage';
 import { TagEditPage } from './pages/TagEditPage';
-import { ResultReportPage } from './pages/ResultReportPage'; 
-import ChangePasswordPage from './pages/ChangePasswordPage'; 
+import { ResultReportPage } from './pages/ResultReportPage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
 import TrendDetailPage from './pages/TrendDetailPage';
 import MoreTrendsPage from './pages/MoreTrendsPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
-
+import LookbookDetailPage from './pages/LookbookDetail/LookbookDetailPage';
+import NotificationListPage from './pages/NotificationListPage';
 
 // 검색바의 텍스트 검색은 /search로, 카메라(이미지로 검색) 아이콘은 AI 매칭 업로드로 연결
 function HomeRoute() {
@@ -52,6 +53,8 @@ function App() {
           <Route path='notifications' element={<NotificationSettingsPage />} />
           <Route path='image-upload' element={<ImageUploadPage />} />
           <Route path='search' element={<SearchPage />} />
+          <Route path='lookbooks/:lookbookId' element={<LookbookDetailPage />} />
+          <Route path='alerts' element={<NotificationListPage />} />
         </Route>
 
         {/* Layout이 적용되지 않는 단독 페이지들 */}
