@@ -17,9 +17,12 @@ import ProfileEditPage from './pages/ProfileEdit/ProfileEditPage';
 import ImageUploadPage from './pages/ImageUploadPage';
 import { AiWaitingPage } from './pages/AiWaitingPage';
 import { TagEditPage } from './pages/TagEditPage';
-import { ResultReportPage } from './pages/ResultReportPage';
+import { ResultReportPage } from './pages/ResultReportPage'; 
+import ChangePasswordPage from './pages/ChangePasswordPage'; 
+import TrendDetailPage from './pages/TrendDetailPage';
+import MoreTrendsPage from './pages/MoreTrendsPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
-import ChangePasswordPage from './pages/ChangePasswordPage';
+
 
 function App() {
   return (
@@ -51,6 +54,8 @@ function App() {
         <Route path='/tag-edit' element={<TagEditPage />} />
         <Route path='/result' element={<ResultReportPage />} />
         <Route path='/product/:productId' element={<ProductDetailPage />} />
+        <Route path='/trend/:id' element={<TrendDetailPage />} />
+        <Route path='/trends' element={<MoreTrendsPage />} />
       </Routes>
     </BrowserRouter>
   );
