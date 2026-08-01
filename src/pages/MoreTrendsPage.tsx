@@ -6,7 +6,7 @@ const FILTER_TABS = [
   { id: 'all', label: '전체' },
   { id: 'minimal', label: '#미니멀', tag: '#미니멀' },
   { id: 'street', label: '#스트릿', tag: '#스트릿' },
-  { id: 'vintage', label: '#빈티지', tag: '#빈티지' },
+  { id: 'lovely', label: '#러블리', tag: '#러블리' },
   { id: 'casual', label: '#캐주얼', tag: '#캐주얼' },
   { id: 'formal', label: '#포멀', tag: '#포멀' },
 ];
