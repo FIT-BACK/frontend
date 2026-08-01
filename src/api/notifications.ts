@@ -10,10 +10,17 @@ import { api } from './axiosInstance'
  */
 
 export interface NotificationSettings {
-  aiAnalysisComplete: boolean
-  lookbookLike: boolean
-  trendUpdate: boolean
-  marketing: boolean
+  analysisCompleteEnabled: boolean
+  lookbookLikedEnabled: boolean
+  trendUpdateEnabled: boolean
+  marketingEnabled: boolean
+}
+
+interface NotificationSettingsApiResponse {
+  success: boolean
+  code: string
+  message: string
+  data: NotificationSettings
 }
 
 const USE_MOCK = true
@@ -23,15 +30,15 @@ export const getNotificationSettings = async (): Promise<NotificationSettings> =
   if (USE_MOCK) {
     await delay(600)
     return {
-      aiAnalysisComplete: true,
-      lookbookLike: true,
-      trendUpdate: false,
-      marketing: false,
+      analysisCompleteEnabled: true,
+      lookbookLikedEnabled: true,
+      trendUpdateEnabled: false,
+      marketingEnabled: false,
     }
   }
 
-  const response = await api.get<NotificationSettings>('/api/users/me/notification')
-  return response.data
+  const response = await api.get<NotificationSettingsApiResponse>('/api/v1/members/me/notification-settings')
+  return response.data.data
 }
 
 export const updateNotificationSetting = async (
@@ -43,5 +50,7 @@ export const updateNotificationSetting = async (
     return
   }
 
-  await api.patch('/api/users/me/notification', { [key]: value })
+  await api.patch<NotificationSettingsApiResponse>('/api/v1/members/me/notification-settings', {
+    [key]: value,
+  })
 }
