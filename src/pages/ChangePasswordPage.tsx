@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/axiosInstance';
+import { useMyProfile } from '../hooks/useMyPage';
 
 // 비밀번호 숨김/표시 눈 아이콘 SVG 컴포넌트
 const EyeIcon = ({ show }: { show: boolean }) => (
@@ -20,15 +21,14 @@ export default function ChangePasswordPage() {
   const navigate = useNavigate();
 
   // --- 소셜 로그인 유저 접근 제어 ---
-  useEffect(() => {
-    // FIXME: 실제 프로젝트의 로컬스토리지 키값이나 로그인 상태 관리 훅(예: useAuth)으로 변경하세요.
-    const userType = localStorage.getItem('userType'); // 임시로 로컬스토리지에서 가져온다고 가정
+  const { data: profile } = useMyProfile();
 
-    if (userType === 'KAKAO') {
+  useEffect(() => {
+    if (profile?.isSocialLogin) {
       alert('소셜 로그인 계정은 비밀번호를 변경할 수 없어요.');
       navigate('/mypage', { replace: true });
     }
-  }, [navigate]);
+  }, [profile, navigate]);
 
   // --- 상태 관리 ---
   const [currentPassword, setCurrentPassword] = useState('');
@@ -115,7 +115,7 @@ export default function ChangePasswordPage() {
     if (!isFormValid) return;
 
     try {
-      await api.patch('/api/auth/password', {
+      await api.patch('/api/v1/members/me/password', {
         currentPassword,
         newPassword,
       });
