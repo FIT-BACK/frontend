@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 
 import LoginPage from './pages/LoginPage/LoginPage';
@@ -13,6 +13,7 @@ import MyClosetPage from './pages/MyCloset/MyClosetPage';
 import MyPagePage from './pages/MyPage/MyPagePage';
 import NotificationSettingsPage from './pages/NotificationSettings/NotificationSettingsPage';
 import ProfileEditPage from './pages/ProfileEdit/ProfileEditPage';
+import SearchPage from './pages/SearchPage';
 
 import ImageUploadPage from './pages/ImageUploadPage';
 import { AiWaitingPage } from './pages/AiWaitingPage';
@@ -24,19 +25,31 @@ import MoreTrendsPage from './pages/MoreTrendsPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 
 
+// 검색바의 텍스트 검색은 /search로, 카메라(이미지로 검색) 아이콘은 AI 매칭 업로드로 연결
+function HomeRoute() {
+  const navigate = useNavigate();
+  return (
+    <HomePage
+      onOpenSearch={() => navigate('/search')}
+      onOpenImageSearch={() => navigate('/image-upload')}
+    />
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         {/* Layout이 적용되는 페이지 그룹 */}
         <Route path='/' element={<Layout />}>
-          <Route index element={<HomePage />} />
+          <Route index element={<HomeRoute />} />
           <Route path='mypage' element={<MyPagePage />} />
           <Route path='closet' element={<MyClosetPage />} />
           <Route path='upload' element={<LookbookUploadPage />} />
           <Route path='profile-edit' element={<ProfileEditPage />} />
           <Route path='notifications' element={<NotificationSettingsPage />} />
           <Route path='image-upload' element={<ImageUploadPage />} />
+          <Route path='search' element={<SearchPage />} />
         </Route>
 
         {/* Layout이 적용되지 않는 단독 페이지들 */}
