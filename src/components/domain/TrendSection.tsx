@@ -1,4 +1,5 @@
-import { CLOSET_DUMMY_ITEMS } from '../../constants/dummyData';
+import { useTrendsQuery } from '../../hooks/useTrendsQuery';
+import { useMyProfile } from '../../hooks/useMyPage';
 
 interface TrendSectionProps {
   onOpenTrendDetail?: (id: string) => void;
@@ -12,10 +13,35 @@ export default function TrendSection({
   onSaveTrend,
   onSeeMoreTrends,
 }: TrendSectionProps) {
+  const { data: trends, isLoading } = useTrendsQuery();
+  const { data: profile } = useMyProfile();
+
+  // 회원가입/마이페이지에서 고른 관심 스타일 중 첫 번째를 개인화 기준으로 사용
+  const primaryStyle = profile?.styleTags?.[0];
+
+  const items = trends ?? [];
+  const matchedItems = primaryStyle
+    ? items.filter((item) => item.styleTags.includes(primaryStyle))
+    : [];
+
+  // 선택한 스타일과 맞는 트렌드가 있을 때만 "당신을 위한" 개인화 피드로 전환하고,
+  // 없으면 원래의 전체 트렌드 피드를 그대로 보여준다.
+  const isPersonalized = matchedItems.length > 0;
+  const visibleItems = isPersonalized ? matchedItems : items;
+
   return (
     <section className='mt-6 px-5'>
       <div className='flex items-center justify-between'>
-        <h2 className='text-sm font-bold text-text'>🔥 요즘 트렌드</h2>
+        <h2 className='text-sm font-bold text-text'>
+          {isPersonalized ? (
+            <>
+              ✨ <span className='text-primary-500'>{primaryStyle}</span>을 선택한
+              당신을 위한 트렌드
+            </>
+          ) : (
+            '🔥 요즘 트렌드'
+          )}
+        </h2>
 
         <button
           type='button'
@@ -27,18 +53,18 @@ export default function TrendSection({
       </div>
 
       <div className='mt-3 flex gap-3 overflow-x-auto pb-2'>
-        {CLOSET_DUMMY_ITEMS.length === 0
+        {isLoading
           ? Array.from({ length: 2 }).map((_, i) => (
               <div
                 key={i}
                 className='w-32 h-32 shrink-0 rounded-xl bg-bg-secondary animate-pulse'
               />
             ))
-          : CLOSET_DUMMY_ITEMS.map((item) => (
+          : visibleItems.map((item) => (
               <button
                 key={item.id}
                 type='button'
-                onClick={() => onOpenTrendDetail?.(item.id)}
+                onClick={() => onOpenTrendDetail?.(String(item.id))}
                 className='relative w-32 h-32 shrink-0 rounded-xl bg-bg-secondary border border-border overflow-hidden text-left'
               >
                 <img
@@ -52,7 +78,7 @@ export default function TrendSection({
                   aria-label='마이 클로젯에 저장'
                   onClick={(e) => {
                     e.stopPropagation();
-                    onSaveTrend?.(item.id);
+                    onSaveTrend?.(String(item.id));
                   }}
                   className='absolute top-2 right-2 grid h-6 w-6 place-items-center rounded-full bg-white/80 text-text-secondary'
                 >

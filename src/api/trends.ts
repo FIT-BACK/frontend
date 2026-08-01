@@ -11,6 +11,7 @@ export interface TrendItem {
   id: number;
   imageUrl: string;
   label: string;
+  styleTags: string[];
 }
 
 export interface TrendDetail extends TrendItem {
@@ -27,16 +28,49 @@ const MOCK_TRENDS: TrendItem[] = [
     id: 1,
     imageUrl: 'https://picsum.photos/seed/trend1/300/300',
     label: '베이지 트렌치코트',
+    styleTags: ['미니멀', '포멀'],
   },
   {
     id: 2,
     imageUrl: 'https://picsum.photos/seed/trend2/300/300',
     label: '화이트 셔츠',
+    styleTags: ['미니멀', '캐주얼'],
   },
   {
     id: 3,
     imageUrl: 'https://picsum.photos/seed/trend3/300/300',
     label: '블랙 슬랙스',
+    styleTags: ['미니멀', '포멀'],
+  },
+  {
+    id: 4,
+    imageUrl: 'https://picsum.photos/seed/trend4/300/300',
+    label: '오버사이즈 후드',
+    styleTags: ['스트릿', '캐주얼'],
+  },
+  {
+    id: 5,
+    imageUrl: 'https://picsum.photos/seed/trend5/300/300',
+    label: '카고 팬츠',
+    styleTags: ['스트릿', '고프코어'],
+  },
+  {
+    id: 6,
+    imageUrl: 'https://picsum.photos/seed/trend6/300/300',
+    label: '레이스 블라우스',
+    styleTags: ['페미닌', '빈티지'],
+  },
+  {
+    id: 7,
+    imageUrl: 'https://picsum.photos/seed/trend7/300/300',
+    label: '트랙 자켓',
+    styleTags: ['스포티', '캐주얼'],
+  },
+  {
+    id: 8,
+    imageUrl: 'https://picsum.photos/seed/trend8/300/300',
+    label: '와이드 데님',
+    styleTags: ['빈티지', '캐주얼'],
   },
 ];
 
@@ -59,6 +93,7 @@ export const getTrendDetail = async (trendId: number): Promise<TrendDetail> => {
       id: trendId,
       imageUrl: found?.imageUrl ?? MOCK_TRENDS[0].imageUrl,
       label: found?.label ?? '트렌드',
+      styleTags: found?.styleTags ?? [],
       description: '이 시즌 인기 있는 스타일이에요.',
     };
   }
