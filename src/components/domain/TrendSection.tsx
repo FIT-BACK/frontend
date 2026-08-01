@@ -1,4 +1,4 @@
-import { useTrendsQuery } from '../../hooks/useTrendsQuery';
+import { TREND_ARTICLES, type TrendArticle } from '../../constants/trendArticles';
 import { useMyProfile } from '../../hooks/useMyPage';
 
 interface TrendSectionProps {
@@ -8,26 +8,31 @@ interface TrendSectionProps {
   onSeeMoreTrends?: () => void;
 }
 
+function getTrendThumbnail(trend: TrendArticle): string | null {
+  if (trend.contentType === 'photo') return trend.imageUrl;
+  if (trend.contentType === 'magazine') return trend.photos[0] ?? null;
+  return null;
+}
+
 export default function TrendSection({
   onOpenTrendDetail,
   onSaveTrend,
   onSeeMoreTrends,
 }: TrendSectionProps) {
-  const { data: trends, isLoading } = useTrendsQuery();
   const { data: profile } = useMyProfile();
 
   // 회원가입/마이페이지에서 고른 관심 스타일 중 첫 번째를 개인화 기준으로 사용
   const primaryStyle = profile?.styleTags?.[0];
+  const primaryTag = primaryStyle ? `#${primaryStyle}` : undefined;
 
-  const items = trends ?? [];
-  const matchedItems = primaryStyle
-    ? items.filter((item) => item.styleTags.includes(primaryStyle))
+  const matchedItems = primaryTag
+    ? TREND_ARTICLES.filter((item) => item.relatedTags.includes(primaryTag))
     : [];
 
   // 선택한 스타일과 맞는 트렌드가 있을 때만 "당신을 위한" 개인화 피드로 전환하고,
   // 없으면 원래의 전체 트렌드 피드를 그대로 보여준다.
   const isPersonalized = matchedItems.length > 0;
-  const visibleItems = isPersonalized ? matchedItems : items;
+  const visibleItems = isPersonalized ? matchedItems : TREND_ARTICLES;
 
   return (
     <section className='mt-6 px-5'>
@@ -52,26 +57,27 @@ export default function TrendSection({
         </button>
       </div>
 
-      <div className='mt-3 flex gap-3 overflow-x-auto pb-2'>
-        {isLoading
-          ? Array.from({ length: 2 }).map((_, i) => (
+      <div className='mt-3 flex gap-3 overflow-x-auto pb-2 snap-x'>
+        {visibleItems.map((item) => {
+          const thumbnail = getTrendThumbnail(item);
+          return (
+            <button
+              key={item.id}
+              type='button'
+              onClick={() => onOpenTrendDetail?.(String(item.id))}
+              className='relative w-[260px] shrink-0 snap-start rounded-2xl border border-border bg-white overflow-hidden text-left'
+            >
               <div
-                key={i}
-                className='w-32 h-32 shrink-0 rounded-xl bg-bg-secondary animate-pulse'
-              />
-            ))
-          : visibleItems.map((item) => (
-              <button
-                key={item.id}
-                type='button'
-                onClick={() => onOpenTrendDetail?.(String(item.id))}
-                className='relative w-32 h-32 shrink-0 rounded-xl bg-bg-secondary border border-border overflow-hidden text-left'
+                className='h-[150px] w-full bg-cover bg-center relative'
+                style={
+                  thumbnail
+                    ? { backgroundImage: `url(${thumbnail})` }
+                    : { background: item.bgGradient }
+                }
               >
-                <img
-                  src={item.imageUrl}
-                  alt={item.label}
-                  className='h-full w-full object-cover'
-                />
+                <span className='absolute top-2.5 left-2.5 rounded-full bg-primary-400 px-2.5 py-1 text-[10px] font-bold text-white'>
+                  {item.tag}
+                </span>
 
                 <span
                   role='button'
@@ -80,16 +86,18 @@ export default function TrendSection({
                     e.stopPropagation();
                     onSaveTrend?.(String(item.id));
                   }}
-                  className='absolute top-2 right-2 grid h-6 w-6 place-items-center rounded-full bg-white/80 text-text-secondary'
+                  className='absolute top-2.5 right-2.5 grid h-7 w-7 place-items-center rounded-full bg-white/85 text-text-secondary'
                 >
                   <BookmarkIcon />
                 </span>
+              </div>
 
-                <span className='absolute bottom-2 left-2 rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold text-text'>
-                  #{item.label}
-                </span>
-              </button>
-            ))}
+              <div className='px-3 py-2.5'>
+                <p className='text-[13px] font-bold text-text leading-snug'>{item.title}</p>
+              </div>
+            </button>
+          );
+        })}
       </div>
     </section>
   );

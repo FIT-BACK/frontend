@@ -4,6 +4,8 @@ interface LookbookFeedItem {
   id: string;
   authorHandle: string;
   likeCount: number;
+  originalImageUrl?: string;
+  matchedImageUrl?: string;
 }
 
 interface LookbookFeedCardProps {
@@ -27,7 +29,7 @@ export default function LookbookFeedCard({
       <div className='relative flex'>
         <div className='flex-1 aspect-square bg-bg-secondary overflow-hidden'>
           <img
-            src={DUMMY_UPLOAD_IMAGE_URL}
+            src={item.originalImageUrl ?? DUMMY_UPLOAD_IMAGE_URL}
             alt='원본 사진'
             className='h-full w-full object-cover'
           />
@@ -38,7 +40,7 @@ export default function LookbookFeedCard({
 
         <div className='flex-1 aspect-square bg-bg-secondary overflow-hidden border-l border-border relative'>
           <img
-            src={DUMMY_UPLOAD_IMAGE_URL}
+            src={item.matchedImageUrl ?? DUMMY_UPLOAD_IMAGE_URL}
             alt='매칭 아이템'
             className='h-full w-full object-cover'
           />
