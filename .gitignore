@@ -145,3 +145,4 @@ vite.config.ts.timestamp-*
 # Local-only files (personal, not shared with team)
 CLAUDE.md
 .claude/
+.vercel

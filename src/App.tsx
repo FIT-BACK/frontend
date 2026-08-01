@@ -14,11 +14,12 @@ import MyPagePage from './pages/MyPage/MyPagePage';
 import NotificationSettingsPage from './pages/NotificationSettings/NotificationSettingsPage';
 import ProfileEditPage from './pages/ProfileEdit/ProfileEditPage';
 
+import ImageUploadPage from './pages/ImageUploadPage';
 import { AiWaitingPage } from './pages/AiWaitingPage';
 import { TagEditPage } from './pages/TagEditPage';
 import { ResultReportPage } from './pages/ResultReportPage';
+import { ProductDetailPage } from './pages/ProductDetailPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
-import ImageUploadPage from './pages/ImageUploadPage';
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
         <Route path='/waiting' element={<AiWaitingPage />} />
         <Route path='/tag-edit' element={<TagEditPage />} />
         <Route path='/result' element={<ResultReportPage />} />
+        <Route path='/product/:productId' element={<ProductDetailPage />} />
       </Routes>
     </BrowserRouter>
   );

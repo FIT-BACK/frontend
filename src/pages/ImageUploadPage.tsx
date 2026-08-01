@@ -1,27 +1,22 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUploadStore } from '../store/useUploadStore';
-import { DUMMY_UPLOAD_IMAGE_URL } from '../constants/dummyData.ts';
+import { useImageUpload } from '../hooks/useImageUpload';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-
-const RECENT_GALLERY_DUMMY: string[] = [
-  DUMMY_UPLOAD_IMAGE_URL,
-  DUMMY_UPLOAD_IMAGE_URL,
-  DUMMY_UPLOAD_IMAGE_URL,
-];
 
 export default function ImageUploadPage() {
   const navigate = useNavigate();
   const imageUri = useUploadStore((state) => state.imageUri);
   const setImage = useUploadStore((state) => state.setImage);
-  const setStatus = useUploadStore((state) => state.setStatus);
+  const setImageId = useUploadStore((state) => state.setImageId);
   const resetUpload = useUploadStore((state) => state.resetUpload);
+
+  const { uploadImage, isUploading, uploadProgress, error: uploadError } = useImageUpload('ANALYSIS');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const hasGalleryPermission = RECENT_GALLERY_DUMMY.length > 0;
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const validateAndSetFile = (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -33,12 +28,8 @@ export default function ImageUploadPage() {
       return;
     }
     setError(null);
-    const previewUrl = URL.createObjectURL(file);
-    setImage(previewUrl);
-  };
-
-  const handleBack = () => {
-    navigate(-1);
+    setSelectedFile(file);
+    setImage(URL.createObjectURL(file));
   };
 
   const handleDropZoneClick = () => fileInputRef.current?.click();
@@ -49,18 +40,18 @@ export default function ImageUploadPage() {
     e.target.value = ''; // 같은 파일 재선택 가능하도록 초기화
   };
 
-  const handleSelectRecent = (dummyUrl: string) => {
-    setError(null);
-    setImage(dummyUrl);
-  };
-
-  const handleStartAnalysis = () => {
-    setStatus('analyzing'); // 👈 AI 상태 업데이트!
-    navigate('/waiting'); // 👈 AI 대기 화면으로 이동!
+  const handleStartAnalysis = async () => {
+    if (!selectedFile) return;
+    const imageId = await uploadImage(selectedFile);
+    if (imageId) {
+      setImageId(imageId);
+      navigate('/waiting');
+    }
   };
 
   const handleRetake = () => {
     resetUpload();
+    setSelectedFile(null);
     setError(null);
   };
 
@@ -70,7 +61,7 @@ export default function ImageUploadPage() {
       <header className='flex items-center gap-3'>
         <button
           type='button'
-          onClick={handleBack}
+          onClick={() => navigate(-1)}
           aria-label='뒤로가기'
           className='grid h-9 w-9 place-items-center rounded-full border border-border bg-white'
         >
@@ -109,13 +100,20 @@ export default function ImageUploadPage() {
               alt='업로드한 사진 미리보기'
               className='h-[320px] w-full object-cover'
             />
-            <button
-              type='button'
-              onClick={handleRetake}
-              className='absolute top-3 right-3 rounded-full bg-black/50 px-3 py-1 text-[11px] text-white'
-            >
-              다시 선택
-            </button>
+            {!isUploading && (
+              <button
+                type='button'
+                onClick={handleRetake}
+                className='absolute top-3 right-3 rounded-full bg-black/50 px-3 py-1 text-[11px] text-white'
+              >
+                다시 선택
+              </button>
+            )}
+            {isUploading && (
+              <div className='absolute inset-x-0 bottom-0 bg-black/60 px-3 py-2 text-[11px] text-white'>
+                업로드 중... {uploadProgress}%
+              </div>
+            )}
           </div>
         ) : (
           <button
@@ -137,27 +135,10 @@ export default function ImageUploadPage() {
           </button>
         )}
 
-        {error && (
-          <p className='mt-2 text-[11px] text-error-400 text-center'>{error}</p>
+        {(error || uploadError) && (
+          <p className='mt-2 text-[11px] text-error-400 text-center'>{error ?? uploadError}</p>
         )}
       </div>
-
-      {/* C-05-02 최근 사진 미리보기 (갤러리 권한 없으면 미표시) */}
-      {hasGalleryPermission && !imageUri && (
-        <div className='mt-3 flex gap-2 justify-center'>
-          {RECENT_GALLERY_DUMMY.map((url, i) => (
-            <button
-              key={i}
-              type='button'
-              onClick={() => handleSelectRecent(url)}
-              aria-label={`최근 사진 ${i + 1}`}
-              className='h-16 w-16 overflow-hidden rounded-lg bg-bg-secondary border border-border'
-            >
-              <img src={url} alt='' className='h-full w-full object-cover' />
-            </button>
-          ))}
-        </div>
-      )}
 
       <div className='flex-1' />
 
@@ -166,10 +147,10 @@ export default function ImageUploadPage() {
         <button
           type='button'
           onClick={handleStartAnalysis}
-          disabled={!imageUri}
+          disabled={!imageUri || isUploading}
           className='w-full rounded-xl bg-primary-400 py-4 text-sm font-bold text-white transition active:scale-[0.98] disabled:opacity-40'
         >
-          분석 시작하기
+          {isUploading ? '업로드 중...' : '분석 시작하기'}
         </button>
       </div>
     </div>
