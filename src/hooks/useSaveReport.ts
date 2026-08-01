@@ -1,24 +1,17 @@
 import { useMutation } from '@tanstack/react-query';
-import axios from 'axios';
+import { saveReport, type SaveReportSelectedItem, type SaveReportResult } from '../api/analysis';
 
 export interface SaveReportRequest {
-  reportId: string;
-}
-
-export interface SaveReportResponse {
-  success: boolean;
-  savedId?: string;
+  reportId: number;
+  selectedItems: SaveReportSelectedItem[];
 }
 
 /**
- * SCR-08: 최종 리포트를 마이 클로젯에 저장하는 훅
+ * SCR-08: 현재 추천 결과에서 카테고리별로 선택한 상품을 마이 클로젯에 저장하는 훅
  */
 export const useSaveReport = () => {
-  return useMutation<SaveReportResponse, Error, SaveReportRequest>({
-    mutationFn: async (data: SaveReportRequest) => {
-      const response = await axios.post<SaveReportResponse>('/api/v1/closet-saves', data);
-      return response.data;
-    },
+  return useMutation<SaveReportResult, Error, SaveReportRequest>({
+    mutationFn: ({ reportId, selectedItems }) => saveReport(reportId, selectedItems),
     onSuccess: () => {
       alert('리포트가 마이 클로젯에 성공적으로 저장되었습니다!');
     },

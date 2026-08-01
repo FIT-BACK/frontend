@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useParams } from 'react-router-dom';
 import { useItemMatching } from '../hooks/useItemMatching';
-import { useAppStore } from '../store/useAppStore';
+import { useUploadStore } from '../store/useUploadStore';
 
 export const TagEditPage: React.FC = () => {
   const navigate = useNavigate();
-  const { reportId } = useParams<{ reportId: string }>(); 
-  const { mutate: getRecommendations, isPending } = useItemMatching(reportId || '');
-  
-  const tags = useAppStore((state) => state.tags);
-  const setTags = useAppStore((state) => state.setTags);
+  const reportId = useUploadStore((state) => state.reportId);
+  const imageUri = useUploadStore((state) => state.imageUri);
+  const suggestedTags = useUploadStore((state) => state.suggestedTags);
+  const tags = useUploadStore((state) => state.aiTags);
+  const setTags = useUploadStore((state) => state.setAiTags);
+  const setRecommendations = useUploadStore((state) => state.setRecommendations);
+
+  const { mutate: getRecommendations, isPending, isError, error } = useItemMatching(reportId ?? 0);
+
   const [tagWarning, setTagWarning] = useState(false);
 
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
@@ -21,10 +24,16 @@ export const TagEditPage: React.FC = () => {
 
   const [matchLevel, setMatchLevel] = useState(70);
 
+  useEffect(() => {
+    if (!reportId) {
+      navigate('/analyze');
+    }
+  }, [reportId, navigate]);
+
   const handleDelete = (tagToDelete: string) => {
     if (tags.length <= 1) {
       setTagWarning(true);
-      setTimeout(() => setTagWarning(false), 2000); 
+      setTimeout(() => setTagWarning(false), 2000);
       return;
     }
     setTags(tags.filter((tag) => tag !== tagToDelete));
@@ -46,6 +55,32 @@ export const TagEditPage: React.FC = () => {
     setIsBottomSheetOpen(false);
   };
 
+  const handleConfirm = () => {
+    if (!reportId) return;
+
+    // 현재 화면에 남아있는 태그를 원본 추천 태그(tagId 보유)와 대조해
+    // 확정된 기본 태그(confirmedTagIds)와 사용자가 직접 추가한 태그(customTagNames)로 분리한다.
+    const suggestedByName = new Map(suggestedTags.map((tag) => [tag.tagName, tag.tagId]));
+    const confirmedTagIds = tags
+      .map((tag) => suggestedByName.get(tag))
+      .filter((tagId): tagId is number => tagId !== undefined);
+    const customTagNames = tags.filter((tag) => !suggestedByName.has(tag));
+
+    getRecommendations(
+      { confirmedTagIds, customTagNames, matchPercentage: matchLevel },
+      {
+        onSuccess: (data) => {
+          setRecommendations({
+            recommendationGroups: data.recommendationGroups,
+            partial: data.partial,
+            warnings: data.warnings,
+          });
+          navigate('/result');
+        },
+      },
+    );
+  };
+
   return (
     <div className="max-w-[375px] min-h-screen mx-auto bg-bg flex flex-col text-text relative overflow-hidden pb-5">
       <div className="flex items-center justify-between p-[20px_20px_8px] shrink-0">
@@ -60,11 +95,9 @@ export const TagEditPage: React.FC = () => {
           </div>
         </div>
 
-        {/* [Mock Data Flow]: 더미 배경 이미지입니다. */}
-        {/* [Real API Flow]: 이전 화면에서 넘어온 원본 이미지 URL 렌더링 필요 */}
-        <div 
+        <div
           className="h-[70px] rounded-[10px] bg-bg-secondary shrink-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('https://picsum.photos/400/100')" }}
+          style={{ backgroundImage: imageUri ? `url('${imageUri}')` : undefined }}
         ></div>
 
         {/* Tags */}
@@ -84,10 +117,10 @@ export const TagEditPage: React.FC = () => {
                 <span onClick={() => handleDelete(tag)} className="cursor-pointer text-[10px] flex items-center justify-center rounded-full bg-primary-900/15 w-[14px] h-[14px] ml-1">✕</span>
               </div>
             ))}
-            
+
             {tags.length < 8 && (
-              <div 
-                onClick={() => setIsBottomSheetOpen(true)} 
+              <div
+                onClick={() => setIsBottomSheetOpen(true)}
                 className="cursor-pointer text-[12px] border border-dashed border-primary-200 text-primary-400 px-[12px] py-[6px] rounded-full font-semibold"
               >
                 + 추가
@@ -99,28 +132,34 @@ export const TagEditPage: React.FC = () => {
         {/* Spacer */}
         <div className="flex-1"></div>
 
+        {isError && (
+          <p className="text-[11px] text-error-400 text-center">
+            {error?.message ?? '추천 결과를 생성하지 못했습니다. 다시 시도해 주세요.'}
+          </p>
+        )}
+
         {/* Slider Card */}
         <div className="bg-bg-secondary p-[14px] rounded-[12px] shrink-0 mt-4 border border-border">
           <div className="flex justify-between items-center mb-[12px]">
             <span className="text-[12px] font-bold text-text">매칭 정도</span>
             <span className="text-[14px] font-extrabold text-primary-400">{matchLevel}%</span>
           </div>
-          
+
           <div className="relative flex items-center h-[24px]">
-            <input 
-              type="range" 
-              min="0" 
-              max="100" 
+            <input
+              type="range"
+              min="0"
+              max="100"
               value={matchLevel}
               onChange={(e) => setMatchLevel(Number(e.target.value))}
               className="absolute w-full h-full opacity-0 cursor-pointer z-10 m-0"
             />
             <div className="absolute w-full h-[6px] bg-border rounded-[10px] pointer-events-none">
-              <div 
+              <div
                 className="h-full bg-gradient-to-r from-primary-200 to-primary-400 rounded-[10px]"
                 style={{ width: `${matchLevel}%` }}
               ></div>
-              <div 
+              <div
                 className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-[18px] h-[18px] rounded-full bg-bg border-[2.5px] border-primary-400 shadow-[0_2px_5px_rgba(0,0,0,0.12)] transition-none"
                 style={{ left: `${matchLevel}%` }}
               ></div>
@@ -134,22 +173,9 @@ export const TagEditPage: React.FC = () => {
         </div>
 
         {/* Confirm Button */}
-        <button 
-          onClick={() => {
-            // [Real API Flow]: 최종 결정된 태그 배열(tags)과 매칭 강도(matchLevel)를 서버로 전송합니다.
-            getRecommendations(
-              { tags, matchIntensity: matchLevel },
-              { 
-                onSuccess: () => navigate('/result'),
-                onError: () => {
-                  // [Mock Data Flow]: 백엔드 서버가 닫혀있어도 프로토타입 UI 확인을 위해 에러 무시하고 강제 이동
-                  console.warn('API 연결이 되지 않아 더미 UI 흐름으로 강제 이동합니다.');
-                  navigate('/result');
-                }
-              }
-            );
-          }}
-          disabled={isPending}
+        <button
+          onClick={handleConfirm}
+          disabled={isPending || !reportId}
           className="w-full text-bg text-[15px] font-bold border-none rounded-[14px] p-[16px] bg-primary-400 hover:bg-primary-500 transition-colors disabled:opacity-50 shrink-0 mt-2"
         >
           {isPending ? '매칭 중...' : '이대로 매칭하기'}
@@ -159,16 +185,16 @@ export const TagEditPage: React.FC = () => {
       {/* 태그 추가 바텀시트 */}
       {isBottomSheetOpen && (
         <div className="absolute inset-0 z-50 flex flex-col justify-end">
-          <div 
+          <div
             className="absolute inset-0 bg-primary-900/40 transition-opacity"
             onClick={() => setIsBottomSheetOpen(false)}
           ></div>
-          
+
           <div className="relative bg-bg w-full rounded-t-[24px] p-[12px_20px_34px] shadow-xl">
             <div className="w-[40px] h-[4px] bg-border rounded-full mx-auto mb-[18px]"></div>
-            
+
             <div className="text-[15px] font-bold text-text mb-[14px]">태그 추가</div>
-            
+
             <input
               type="text"
               value={newTagInput}
@@ -184,9 +210,9 @@ export const TagEditPage: React.FC = () => {
             <div className="text-[12px] font-bold text-text-secondary mb-[10px]">추천 태그</div>
             <div className="flex flex-wrap gap-[6px]">
               {recommendedTags.map((tag) => (
-                <div 
-                  key={tag} 
-                  onClick={() => handleAddTag(tag)} 
+                <div
+                  key={tag}
+                  onClick={() => handleAddTag(tag)}
                   className="cursor-pointer inline-flex items-center gap-[5px] text-[12px] bg-primary-50 text-primary-800 px-[12px] py-[6px] rounded-full font-semibold"
                 >
                   #{tag}
