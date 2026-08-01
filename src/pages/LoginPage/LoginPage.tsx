@@ -62,20 +62,12 @@ export default function LoginPage() {
     }
   };
 
-  // 카카오 로그인 처리 함수 (클릭 시 카카오 페이지로 이동)
+  // 카카오 로그인 처리 함수 (클릭 시 백엔드의 OAuth 시작 엔드포인트로 이동)
+  // 카카오 client-id/secret과 실제 인가 요청은 전부 백엔드(Spring Security OAuth2)가 처리하므로
+  // 프론트는 카카오 관련 키를 전혀 가지고 있을 필요가 없다.
   const handleKakaoLogin = () => {
-    const REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY;
-    const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
-    
-    // 환경변수가 제대로 설정되지 않았을 때를 대비한 안전 장치
-    if (!REST_API_KEY || !REDIRECT_URI) {
-      alert('카카오 로그인 키가 설정되지 않았습니다. .env 파일을 확인해주세요.');
-      return;
-    }
-
-    const KAKAO_AUTH_URL = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`;
-    
-    window.location.href = KAKAO_AUTH_URL;
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+    window.location.href = `${API_BASE_URL}/api/v1/auth/oauth2/kakao`;
   };
 
   return (
