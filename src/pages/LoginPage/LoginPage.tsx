@@ -9,6 +9,7 @@ export default function LoginPage() {
   const [view, setView] = useState<'main' | 'email'>('main');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [activeSheet, setActiveSheet] = useState<'terms' | 'privacy' | null>(null);
 
   // 약관 및 개인정보처리방침 데이터
@@ -150,19 +151,33 @@ export default function LoginPage() {
           {/* 이메일 로그인 입력 화면 */}
           {view === 'email' && (
             <div className="w-full flex flex-col items-center">
+              <h2 className="w-full max-w-[340px] text-[18px] font-bold text-primary-900 mb-5">
+                이메일로 로그인
+              </h2>
+
               <div className="w-full max-w-[340px] flex flex-col gap-4 mb-8">
-                <input 
-                  type="email" 
-                  placeholder="이메일" 
+                <input
+                  type="email"
+                  placeholder="이메일"
                   className="w-full p-4 border border-border rounded-[14px] outline-none focus:border-primary-400"
-                  onChange={(e) => setEmail(e.target.value)} 
+                  onChange={(e) => setEmail(e.target.value)}
                 />
-                <input 
-                  type="password" 
-                  placeholder="비밀번호" 
-                  className="w-full p-4 border border-border rounded-[14px] outline-none focus:border-primary-400"
-                  onChange={(e) => setPassword(e.target.value)} 
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="비밀번호"
+                    className="w-full p-4 pr-12 border border-border rounded-[14px] outline-none focus:border-primary-400"
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary"
+                  >
+                    {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                  </button>
+                </div>
               </div>
 
               <div className="w-full max-w-[340px] flex flex-col gap-4">
@@ -174,13 +189,15 @@ export default function LoginPage() {
                 </button>
               </div>
 
-              <button
-                type="button"
-                onClick={() => navigate('/find-password')}
-                className="mt-4 text-[13px] text-text-secondary underline"
-              >
-                비밀번호를 잊으셨나요?
-              </button>
+              <div className="mt-4 flex items-center gap-3 text-[13px] text-text-secondary">
+                <button type="button" onClick={() => navigate('/find-password')} className="underline">
+                  비밀번호 찾기
+                </button>
+                <span className="text-border">|</span>
+                <button type="button" onClick={() => navigate('/signup')} className="underline">
+                  이메일로 회원가입
+                </button>
+              </div>
             </div>
           )}
 
@@ -195,12 +212,30 @@ export default function LoginPage() {
         content={termsText}
       />
 
-      <BottomSheet 
-        isOpen={activeSheet === 'privacy'} 
-        onClose={() => setActiveSheet(null)} 
+      <BottomSheet
+        isOpen={activeSheet === 'privacy'}
+        onClose={() => setActiveSheet(null)}
         title="개인정보처리방침"
         content={privacyText}
       />
     </div>
+  );
+}
+
+function EyeIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function EyeOffIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
   );
 }
