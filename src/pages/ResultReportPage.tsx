@@ -1,81 +1,116 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSaveReport } from '../hooks/useSaveReport';
-import { useAppStore } from '../store/useAppStore';
+import { useUploadStore } from '../store/useUploadStore';
+import type { RecommendationItem } from '../api/analysis';
+
+const CATEGORY_LABELS: Record<string, string> = {
+  OUTER: '아우터',
+  TOP: '상의',
+  BOTTOM: '하의',
+  DRESS: '원피스',
+  SHOES: '신발',
+  BAG: '가방',
+  ACCESSORY: '액세서리',
+  OTHER: '기타',
+};
 
 export const ResultReportPage: React.FC = () => {
   const navigate = useNavigate();
-  const { reportId } = useParams<{ reportId: string }>();
-  const { mutate: saveReport, isPending } = useSaveReport();
-  const tags = useAppStore((state) => state.tags);
+  const reportId = useUploadStore((state) => state.reportId);
+  const tags = useUploadStore((state) => state.aiTags);
+  const recommendationGroups = useUploadStore((state) => state.recommendationGroups);
+  const partial = useUploadStore((state) => state.partial);
+  const warnings = useUploadStore((state) => state.warnings);
 
-  const [selectedTop, setSelectedTop] = useState<number | null>(null);
-  const [selectedBottom, setSelectedBottom] = useState<number | null>(null);
+  const { mutate: submitSaveReport, isPending } = useSaveReport();
 
-  // [Real API Flow]: 리포트 저장(찜) API를 호출하는 로직입니다. 
-  // 실제 연동 시 onSuccess 콜백 등을 통해 UI 토스트(저장 완료) 처리가 필요합니다.
+  // 카테고리별로 선택된 상품 productId
+  const [selectedByCategory, setSelectedByCategory] = useState<Record<string, number>>({});
+
+  const nonEmptyGroups = useMemo(
+    () => recommendationGroups.filter((group) => group.items.length > 0),
+    [recommendationGroups],
+  );
+
+  const allSelected =
+    nonEmptyGroups.length > 0 &&
+    nonEmptyGroups.every((group) => selectedByCategory[group.category] !== undefined);
+
   const handleSave = () => {
-    if (reportId) saveReport({ reportId });
-    else alert('저장할 리포트 식별자가 없습니다.');
+    if (!reportId) return;
+    if (!allSelected) {
+      alert('저장하려면 상품이 있는 카테고리마다 하나씩 선택해주세요.');
+      return;
+    }
+    submitSaveReport({
+      reportId,
+      selectedItems: Object.entries(selectedByCategory).map(([category, productId]) => ({
+        category,
+        productId,
+      })),
+    });
   };
 
-  // [Mock Data Flow]: 하드코딩된 대안 상품 데이터입니다.
-  // [Real API Flow]: 명세서에 따르면 GET /api/v1/results 호출 결과를 받아와 렌더링해야 합니다.
-  const tops = [
-    { id: 1, rank: 1, name: '오버핏 셔츠', shop: '무신사 스탠다드', price: '₩28,900', img: 'https://picsum.photos/100' },
-    { id: 2, rank: 2, name: '루즈핏 셔츠', shop: '에이블리', price: '₩32,000', img: 'https://picsum.photos/101' },
-    { id: 3, rank: 3, name: '와이드 셔츠', shop: '지그재그', price: '₩35,500', img: 'https://picsum.photos/102' },
-  ];
+  const handleSelect = (category: string, productId: number) => {
+    setSelectedByCategory((prev) => ({ ...prev, [category]: productId }));
+  };
 
-  const bottoms = [
-    { id: 4, rank: 1, name: '와이드 슬랙스', shop: '지그재그', price: '₩24,900', img: 'https://picsum.photos/103' },
-    { id: 5, rank: 2, name: '스트레이트 핏 데님', shop: '무신사', price: '₩39,900', img: 'https://picsum.photos/104' },
-  ];
-
-  const ItemCard = ({ 
-    item, 
-    isSelected, 
-    onSelect 
-  }: { 
-    item: any, 
-    isSelected: boolean, 
-    onSelect: () => void 
+  const ItemCard = ({
+    item,
+    category,
+    isSelected,
+  }: {
+    item: RecommendationItem;
+    category: string;
+    isSelected: boolean;
   }) => (
     <div
-      onClick={onSelect}
-      className={`flex gap-[10px] rounded-[11px] p-[10px] items-center cursor-pointer transition-colors border-[1px] ${
+      className={`flex gap-[10px] rounded-[11px] p-[10px] items-center transition-colors border-[1px] ${
         isSelected ? 'border-primary-400 bg-primary-50' : 'border-border bg-white'
       }`}
     >
-      {/* Radio Button */}
-      <div className={`w-[18px] h-[18px] rounded-full border-[1.5px] flex items-center justify-center shrink-0 ${
-        isSelected ? 'border-primary-400 bg-primary-400' : 'border-border bg-bg-secondary'
-      }`}>
+      {/* Radio Button — 룩북 조합용 선택 */}
+      <button
+        type="button"
+        onClick={() => handleSelect(category, item.productId)}
+        aria-label="이 상품 선택"
+        className={`w-[18px] h-[18px] rounded-full border-[1.5px] flex items-center justify-center shrink-0 ${
+          isSelected ? 'border-primary-400 bg-primary-400' : 'border-border bg-bg-secondary'
+        }`}
+      >
         {isSelected && (
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round">
             <polyline points="20 6 9 17 4 12" />
           </svg>
         )}
-      </div>
+      </button>
 
-      <div 
-        className="w-[44px] h-[44px] rounded-[8px] bg-bg-secondary shrink-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${item.img})` }}
-      ></div>
-      
-      <div className="flex-1 min-w-0 flex flex-col justify-center">
-        <div className="text-[12px] text-text font-bold truncate">{item.name}</div>
-        <div className="text-[10px] text-text-secondary mt-[2px]">{item.shop}</div>
-      </div>
-      
-      <div className="flex flex-col items-end">
-        <div className="text-[10px] px-[6px] py-[2px] rounded-[6px] font-extrabold bg-[#FAEEDA] text-[#633806] mb-[4px]">
-          {item.rank}위 매칭
+      {/* 이미지/이름 — 상품 상세로 이동 */}
+      <button
+        type="button"
+        onClick={() => navigate(`/product/${item.productId}`)}
+        className="flex flex-1 min-w-0 gap-[10px] items-center text-left"
+      >
+        <div
+          className="w-[44px] h-[44px] rounded-[8px] bg-bg-secondary shrink-0 bg-cover bg-center"
+          style={{ backgroundImage: item.imageUrl ? `url(${item.imageUrl})` : undefined }}
+        ></div>
+
+        <div className="flex-1 min-w-0 flex flex-col justify-center">
+          <div className="text-[12px] text-text font-bold truncate">{item.name}</div>
+          <div className="text-[10px] text-text-secondary mt-[2px]">{item.sellerName}</div>
         </div>
-        <div className="text-[14px] font-extrabold text-primary-800">
-          {item.price}
+
+        <div className="flex flex-col items-end">
+          <div className="text-[10px] px-[6px] py-[2px] rounded-[6px] font-extrabold bg-[#FAEEDA] text-[#633806] mb-[4px]">
+            {item.rank}위 매칭
+          </div>
+          <div className="text-[14px] font-extrabold text-primary-800">
+            {item.price.amount.toLocaleString()}{item.price.currency === 'KRW' ? '원' : ` ${item.price.currency}`}
+          </div>
         </div>
-      </div>
+      </button>
     </div>
   );
 
@@ -87,9 +122,9 @@ export const ResultReportPage: React.FC = () => {
         <div className="flex flex-col items-center">
           <span className="text-[16px] font-bold text-text">분석 결과</span>
         </div>
-        <span 
-          onClick={handleSave} 
-          className={`text-[14px] font-bold text-primary-400 cursor-pointer p-1 ${isPending ? 'opacity-50' : ''}`}
+        <span
+          onClick={handleSave}
+          className={`text-[14px] font-bold text-primary-400 cursor-pointer p-1 ${isPending ? 'opacity-50 pointer-events-none' : !allSelected ? 'opacity-50' : ''}`}
         >
           {isPending ? '저장 중...' : '저장'}
         </span>
@@ -104,63 +139,50 @@ export const ResultReportPage: React.FC = () => {
         ))}
       </div>
 
+      {partial && warnings.length > 0 && (
+        <div className="mx-[20px] mt-[10px] rounded-[10px] bg-[#FFF6E5] border border-[#F3D9A0] px-[12px] py-[8px] text-[11px] text-[#7A5B00]">
+          {warnings.join(' ')}
+        </div>
+      )}
+
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto px-[20px] flex flex-col gap-[12px] pb-[100px] pt-[14px]">
-        
-        {/* Tops Section */}
-        <div className="text-[12px] font-bold text-text pb-[4px] flex items-center gap-[6px]">
-          상의 <span className="text-[10px] bg-bg-secondary text-text-secondary px-[6px] py-[2px] rounded-[6px] font-semibold">{tops.length}개 대안</span>
-        </div>
-        <div className="flex flex-col gap-[8px]">
-          {tops.map((item) => (
-            <ItemCard 
-              key={item.id} 
-              item={item} 
-              isSelected={selectedTop === item.id}
-              onSelect={() => setSelectedTop(item.id)}
-            />
-          ))}
-        </div>
-        <div className="text-[11px] text-primary-400 text-center p-[8px] font-bold cursor-pointer hover:bg-primary-50 rounded-[8px] transition-colors mb-[10px]">
-          더보기 +
-        </div>
+        {nonEmptyGroups.length === 0 && (
+          <p className="py-10 text-center text-xs text-text-secondary">추천 결과가 없습니다</p>
+        )}
 
-        {/* Bottoms Section */}
-        <div className="text-[12px] font-bold text-text pb-[4px] flex items-center gap-[6px]">
-          하의 <span className="text-[10px] bg-bg-secondary text-text-secondary px-[6px] py-[2px] rounded-[6px] font-semibold">{bottoms.length}개 대안</span>
-        </div>
-        <div className="flex flex-col gap-[8px]">
-          {bottoms.map((item) => (
-            <ItemCard 
-              key={item.id} 
-              item={item} 
-              isSelected={selectedBottom === item.id}
-              onSelect={() => setSelectedBottom(item.id)}
-            />
-          ))}
-        </div>
-        <div className="text-[11px] text-primary-400 text-center p-[8px] font-bold cursor-pointer hover:bg-primary-50 rounded-[8px] transition-colors">
-          더보기 +
-        </div>
-
+        {nonEmptyGroups.map((group) => (
+          <div key={group.category}>
+            <div className="text-[12px] font-bold text-text pb-[4px] flex items-center gap-[6px]">
+              {CATEGORY_LABELS[group.category] ?? group.category}{' '}
+              <span className="text-[10px] bg-bg-secondary text-text-secondary px-[6px] py-[2px] rounded-[6px] font-semibold">
+                {group.items.length}개 대안
+              </span>
+            </div>
+            <div className="flex flex-col gap-[8px] mb-[10px]">
+              {group.items.map((item) => (
+                <ItemCard
+                  key={item.productId}
+                  item={item}
+                  category={group.category}
+                  isSelected={selectedByCategory[group.category] === item.productId}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Fixed Bottom Button */}
       <div className="absolute bottom-[20px] left-[20px] right-[20px] z-20">
-        {/* 
-          [Real API Flow]: 명세서에 따르면 '룩북으로 올리기' 진입 시 
-          원본 imageId와 여기서 선택한 상품의 imageUrl을 다음 페이지(SCR-09)로 전달해야 합니다. 
-          상태 관리자나 라우터 state로 넘기는 로직 연동이 필요합니다. 
-        */}
         <button
-          onClick={() => navigate('/upload-lookbook')}
-          disabled={!selectedTop && !selectedBottom}
+          onClick={() => navigate('/upload')}
+          disabled={!allSelected}
           className="w-full text-bg text-[15px] font-bold border-none rounded-[14px] p-[16px] bg-primary-400 hover:bg-primary-500 transition-colors shadow-[0_5px_12px_rgba(127,119,221,0.3)] disabled:bg-border disabled:text-text-secondary disabled:shadow-none"
         >
-          이 조합으로 내 룩북 올리기 
+          이 조합으로 내 룩북 올리기
         </button>
       </div>
-
     </div>
   );
 };
