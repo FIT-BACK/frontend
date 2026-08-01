@@ -6,6 +6,9 @@ import { useTags } from '../hooks/useTags';
 const RECENT_SEARCH_KEY = 'fitback:recentSearches';
 const MAX_RECENT = 8;
 
+// 트렌드 아티클과 동일하게 5개 태그로만 추천 (constants/trendArticles.ts 참고)
+const RECOMMENDED_TAG_NAMES = ['미니멀', '스트릿', '러블리', '캐주얼', '포멀'];
+
 function loadRecentSearches(): string[] {
   try {
     const raw = localStorage.getItem(RECENT_SEARCH_KEY);
@@ -25,7 +28,10 @@ export default function SearchPage() {
   const [keyword, setKeyword] = useState('');
   const [recentSearches, setRecentSearches] = useState<string[]>(() => loadRecentSearches());
 
-  const { data: tags = [] } = useTags();
+  const { data: allTags = [] } = useTags();
+  const tags = RECOMMENDED_TAG_NAMES.map((name) =>
+    allTags.find((tag) => tag.tagName === name),
+  ).filter((tag): tag is NonNullable<typeof tag> => !!tag);
 
   // 입력 300ms 후에만 검색 실행 (매 타이핑마다 요청 나가는 것 방지)
   useEffect(() => {
@@ -119,7 +125,7 @@ export default function SearchPage() {
               <section>
                 <h2 className='text-xs font-bold text-text-secondary mb-2'>추천 태그</h2>
                 <div className='flex flex-wrap gap-2'>
-                  {tags.slice(0, 8).map((tag) => (
+                  {tags.map((tag) => (
                     <button
                       key={tag.tagId}
                       type='button'
