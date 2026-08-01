@@ -38,7 +38,11 @@ export const ResultReportPage: React.FC = () => {
     nonEmptyGroups.every((group) => selectedByCategory[group.category] !== undefined);
 
   const handleSave = () => {
-    if (!reportId || !allSelected) return;
+    if (!reportId) return;
+    if (!allSelected) {
+      alert('저장하려면 상품이 있는 카테고리마다 하나씩 선택해주세요.');
+      return;
+    }
     submitSaveReport({
       reportId,
       selectedItems: Object.entries(selectedByCategory).map(([category, productId]) => ({
@@ -120,7 +124,7 @@ export const ResultReportPage: React.FC = () => {
         </div>
         <span
           onClick={handleSave}
-          className={`text-[14px] font-bold text-primary-400 cursor-pointer p-1 ${isPending || !allSelected ? 'opacity-50 pointer-events-none' : ''}`}
+          className={`text-[14px] font-bold text-primary-400 cursor-pointer p-1 ${isPending ? 'opacity-50 pointer-events-none' : !allSelected ? 'opacity-50' : ''}`}
         >
           {isPending ? '저장 중...' : '저장'}
         </span>
@@ -172,7 +176,7 @@ export const ResultReportPage: React.FC = () => {
       {/* Fixed Bottom Button */}
       <div className="absolute bottom-[20px] left-[20px] right-[20px] z-20">
         <button
-          onClick={() => navigate('/upload-lookbook')}
+          onClick={() => navigate('/upload')}
           disabled={!allSelected}
           className="w-full text-bg text-[15px] font-bold border-none rounded-[14px] p-[16px] bg-primary-400 hover:bg-primary-500 transition-colors shadow-[0_5px_12px_rgba(127,119,221,0.3)] disabled:bg-border disabled:text-text-secondary disabled:shadow-none"
         >
