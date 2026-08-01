@@ -68,11 +68,15 @@ const TrendDetailPage: React.FC = () => {
         </div>
       ) : (
         <div
-          className="h-[150px] shrink-0 flex items-center justify-center relative bg-cover bg-center"
+          className={`shrink-0 flex items-center justify-center relative bg-cover bg-center ${
+            trend.contentType === 'magazine' ? 'h-[320px]' : 'h-[150px]'
+          }`}
           style={
             trend.contentType === 'photo'
               ? { backgroundImage: `url(${trend.imageUrl})` }
-              : { background: trend.bgGradient }
+              : trend.contentType === 'magazine'
+                ? { backgroundImage: `url(${trend.photos[0]})` }
+                : { background: trend.bgGradient }
           }
         >
           <div className="absolute top-3 left-3 text-[11px] bg-primary-400 text-white px-2.5 py-1 rounded-full font-bold">
@@ -87,9 +91,46 @@ const TrendDetailPage: React.FC = () => {
       {/* Scrollable Body */}
       <div className="flex-1 overflow-y-auto px-5 pt-4 pb-20">
         <h2 className="text-[20px] font-extrabold text-text mb-2.5">{trend.title}</h2>
-        <p className="text-[13px] text-text-secondary leading-[1.7] mb-3.5">
-          {trend.description}
-        </p>
+
+        {trend.contentType === 'magazine' ? (
+          <p className="text-[14px] text-text font-semibold leading-[1.7] mb-4">
+            {trend.intro}
+          </p>
+        ) : (
+          <p className="text-[13px] text-text-secondary leading-[1.7] mb-3.5">
+            {trend.description}
+          </p>
+        )}
+
+        {trend.contentType === 'magazine' && (
+          <div className="mb-5">
+            <h3 className="text-[12px] font-bold text-text-secondary mb-2.5">컬러 팔레트</h3>
+            <div className="flex gap-4">
+              {trend.colorPalette.map((color) => (
+                <div key={color.name} className="flex flex-col items-center gap-1.5">
+                  <span
+                    className="h-9 w-9 rounded-full border border-border shadow-sm"
+                    style={{ backgroundColor: color.hex }}
+                    aria-hidden="true"
+                  />
+                  <span className="text-[10px] text-text-secondary">{color.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {trend.contentType === 'magazine' && trend.photos.length > 1 && (
+          <div className="mb-5 grid grid-cols-2 gap-2">
+            {trend.photos.slice(1).map((photo, i) => (
+              <div
+                key={i}
+                className="aspect-[0.8] rounded-xl bg-bg-secondary bg-cover bg-center"
+                style={{ backgroundImage: `url(${photo})` }}
+              />
+            ))}
+          </div>
+        )}
 
         {trend.contentType === 'article' && (
           <a

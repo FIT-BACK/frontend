@@ -15,6 +15,7 @@ const CONTENT_TYPE_ICON: Record<string, string> = {
   photo: '📷',
   article: '📰',
   youtube: '▶',
+  magazine: '✨',
 };
 
 const MoreTrendsPage: React.FC = () => {
@@ -87,7 +88,9 @@ const MoreTrendsPage: React.FC = () => {
                 style={
                   trend.contentType === 'photo'
                     ? { backgroundImage: `url(${trend.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-                    : { background: trend.bgGradient }
+                    : trend.contentType === 'magazine' && trend.photos[0]
+                      ? { backgroundImage: `url(${trend.photos[0]})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                      : { background: trend.bgGradient }
                 }
               >
                 {/* Content type badge */}
@@ -121,8 +124,16 @@ const MoreTrendsPage: React.FC = () => {
                 </span>
                 {/* Title */}
                 <span
-                  className={`text-[13px] font-bold ${trend.contentType === 'photo' ? 'text-white drop-shadow' : ''}`}
-                  style={trend.contentType === 'photo' ? undefined : { color: trend.tagColor }}
+                  className={`text-[13px] font-bold ${
+                    trend.contentType === 'photo' || (trend.contentType === 'magazine' && trend.photos[0])
+                      ? 'text-white drop-shadow'
+                      : ''
+                  }`}
+                  style={
+                    trend.contentType === 'photo' || (trend.contentType === 'magazine' && trend.photos[0])
+                      ? undefined
+                      : { color: trend.tagColor }
+                  }
                 >
                   {trend.title}
                 </span>

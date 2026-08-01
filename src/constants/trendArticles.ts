@@ -5,10 +5,12 @@
  *
  * 트렌드 아티클은 별도 업로드 화면 없이, 이 파일을 레포에 push할 권한이 있는
  * 사람(=사실상 관리자)만 수정해서 올리는 방식으로 관리한다.
- * 사진(photo) / 외부 기사(article) / 유튜브 영상(youtube) 세 가지 타입을 지원한다.
+ * 사진(photo) / 외부 기사(article) / 유튜브 영상(youtube) / 자체 매거진(magazine) 네 가지
+ * 타입을 지원한다. magazine은 컬러 팔레트와 화보 사진을 곁들인 자체 제작 스타일 가이드다
+ * (외부 기사 링크가 없는 에디토리얼 콘텐츠라는 점에서 article과 구분됨).
  */
 
-export type TrendContentType = 'photo' | 'article' | 'youtube';
+export type TrendContentType = 'photo' | 'article' | 'youtube' | 'magazine';
 
 interface TrendArticleBase {
   id: number;
@@ -36,7 +38,23 @@ export interface YoutubeTrendArticle extends TrendArticleBase {
   youtubeVideoId: string;
 }
 
-export type TrendArticle = PhotoTrendArticle | ArticleTrendArticle | YoutubeTrendArticle;
+export interface ColorSwatch {
+  name: string;
+  hex: string;
+}
+
+export interface MagazineTrendArticle extends TrendArticleBase {
+  contentType: 'magazine';
+  intro: string;
+  colorPalette: ColorSwatch[];
+  photos: string[];
+}
+
+export type TrendArticle =
+  | PhotoTrendArticle
+  | ArticleTrendArticle
+  | YoutubeTrendArticle
+  | MagazineTrendArticle;
 
 export const TREND_ARTICLES: TrendArticle[] = [
   {
@@ -48,8 +66,14 @@ export const TREND_ARTICLES: TrendArticle[] = [
     description:
       '군더더기 없는 깔끔한 실루엣과 뉴트럴 컬러로 완성하는 미니멀 스타일. 이번 시즌 가장 핫한 트렌드예요.',
     relatedTags: ['#미니멀', '#뉴트럴', '#와이드핏'],
-    contentType: 'photo',
-    imageUrl: 'https://picsum.photos/seed/trend-minimal/600/400',
+    contentType: 'magazine',
+    intro: '미니멀은 작은 악세서리와 함께 매치하면 더 아름답게 연출할 수 있어요',
+    colorPalette: [
+      { name: '화이트', hex: '#FFFFFF' },
+      { name: '블랙', hex: '#1C1C1C' },
+      { name: '아이보리', hex: '#F0E4D0' },
+    ],
+    photos: ['https://i.pinimg.com/1200x/6f/fe/1e/6ffe1ea673bc95190a513535c00678b9.jpg'],
   },
   {
     id: 2,
