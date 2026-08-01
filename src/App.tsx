@@ -21,7 +21,8 @@ import ImageUploadPage from './pages/ImageUploadPage';
 import { AiWaitingPage } from './pages/AiWaitingPage';
 import { TagEditPage } from './pages/TagEditPage';
 import { ResultReportPage } from './pages/ResultReportPage'; 
-import ChangePasswordPage from './pages/ChangePasswordPage'; 
+import ChangePasswordPage from './pages/ChangePasswordPage';
+import WithdrawPage from './pages/WithdrawPage';
 import TrendDetailPage from './pages/TrendDetailPage';
 import MoreTrendsPage from './pages/MoreTrendsPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
@@ -67,6 +68,7 @@ function App() {
         <Route path='/oauth/kakao' element={<KakaoCallback />} />
 
         <Route path='/change-password' element={<ChangePasswordPage />} />
+        <Route path='/withdraw' element={<WithdrawPage />} />
 
         <Route path='/waiting' element={<AiWaitingPage />} />
         <Route path='/tag-edit' element={<TagEditPage />} />
