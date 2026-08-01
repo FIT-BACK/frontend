@@ -5,7 +5,8 @@ import LoginPage from './pages/LoginPage/LoginPage';
 import SignupBasicPage from './pages/LoginPage/SignupBasicPage';
 import SignupProfilePage from './pages/LoginPage/SignupProfilePage';
 import SignupCompletePage from './pages/LoginPage/SignupCompletePage';
-import KakaoCallback from './pages/LoginPage/KakaoCallback'; 
+import KakaoCallback from './pages/LoginPage/KakaoCallback';
+import HomePage from './pages/HomePage';
 
 import LookbookUploadPage from './pages/LookbookUpload/LookbookUploadPage';
 import MyClosetPage from './pages/MyCloset/MyClosetPage';
@@ -13,55 +14,51 @@ import MyPagePage from './pages/MyPage/MyPagePage';
 import NotificationSettingsPage from './pages/NotificationSettings/NotificationSettingsPage';
 import ProfileEditPage from './pages/ProfileEdit/ProfileEditPage';
 
+import ImageUploadPage from './pages/ImageUploadPage';
 import { AiWaitingPage } from './pages/AiWaitingPage';
 import { TagEditPage } from './pages/TagEditPage';
 import { ResultReportPage } from './pages/ResultReportPage'; 
 import ChangePasswordPage from './pages/ChangePasswordPage'; 
 import TrendDetailPage from './pages/TrendDetailPage';
 import MoreTrendsPage from './pages/MoreTrendsPage';
+import { ProductDetailPage } from './pages/ProductDetailPage';
+
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         {/* Layout이 적용되는 페이지 그룹 */}
-        <Route path="/" element={<Layout />}>
-          <Route
-            index
-            element={
-              <div className="p-4 text-center">
-                <h1 className="text-2xl font-bold mt-10">홈 화면</h1>
-                <p>실제 컨텐츠 표시</p>
-              </div>
-            }
-          />
-          <Route path="mypage" element={<MyPagePage />} />
-          <Route path="closet" element={<MyClosetPage />} />
-          <Route path="upload" element={<LookbookUploadPage />} />
-          <Route path="profile-edit" element={<ProfileEditPage />} />
-          <Route path="notifications" element={<NotificationSettingsPage />} />
+        <Route path='/' element={<Layout />}>
+          <Route index element={<HomePage />} />
+          <Route path='mypage' element={<MyPagePage />} />
+          <Route path='closet' element={<MyClosetPage />} />
+          <Route path='upload' element={<LookbookUploadPage />} />
+          <Route path='profile-edit' element={<ProfileEditPage />} />
+          <Route path='notifications' element={<NotificationSettingsPage />} />
+          <Route path='image-upload' element={<ImageUploadPage />} />
         </Route>
 
         {/* Layout이 적용되지 않는 단독 페이지들 */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupBasicPage />} />
-        <Route path="/signup/basic" element={<SignupBasicPage />} />
-        <Route path="/signup/profile" element={<SignupProfilePage />} />
-        <Route path="/signup/complete" element={<SignupCompletePage />} /> 
-        
-        <Route path="/oauth/kakao" element={<KakaoCallback />} />
-        
-        <Route path="/change-password" element={<ChangePasswordPage />} />
-        
-        <Route path="/waiting" element={<AiWaitingPage />} />
-        <Route path="/tag-edit" element={<TagEditPage />} />
-        <Route path="/result" element={<ResultReportPage />} />
-        
-        <Route path="/trend/:id" element={<TrendDetailPage />} />
-        <Route path="/trends" element={<MoreTrendsPage />} />
+        <Route path='/login' element={<LoginPage />} />
+        <Route path='/signup' element={<SignupBasicPage />} />
+        <Route path='/signup/basic' element={<SignupBasicPage />} />
+        <Route path='/signup/profile' element={<SignupProfilePage />} />
+        <Route path='/signup/complete' element={<SignupCompletePage />} />
+
+        <Route path='/oauth/kakao' element={<KakaoCallback />} />
+
+        <Route path='/change-password' element={<ChangePasswordPage />} />
+
+        <Route path='/waiting' element={<AiWaitingPage />} />
+        <Route path='/tag-edit' element={<TagEditPage />} />
+        <Route path='/result' element={<ResultReportPage />} />
+        <Route path='/product/:productId' element={<ProductDetailPage />} />
+        <Route path='/trend/:id' element={<TrendDetailPage />} />
+        <Route path='/trends' element={<MoreTrendsPage />} />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
 export default App;
