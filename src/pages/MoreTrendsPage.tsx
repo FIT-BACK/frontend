@@ -1,67 +1,41 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { TREND_ARTICLES } from '../constants/trendArticles';
 
-// TODO: API 연동 시 교체할 더미 데이터 (트렌드 카테고리 필터)
 const FILTER_TABS = [
   { id: 'all', label: '전체' },
-  { id: 'my-style', label: '내 스타일' },
-  { id: 'minimal', label: '#미니멀' },
-  { id: 'street', label: '#스트릿' },
-  { id: 'vintage', label: '#빈티지' },
+  { id: 'minimal', label: '#미니멀', tag: '#미니멀' },
+  { id: 'street', label: '#스트릿', tag: '#스트릿' },
+  { id: 'vintage', label: '#빈티지', tag: '#빈티지' },
+  { id: 'casual', label: '#캐주얼', tag: '#캐주얼' },
+  { id: 'formal', label: '#포멀', tag: '#포멀' },
 ];
 
-// TODO: API 연동 시 교체할 더미 데이터 (트렌드 목록)
-const TREND_LIST = [
-  {
-    id: 1,
-    tag: '#미니멀',
-    title: '미니멀 무드',
-    bgGradient: 'linear-gradient(160deg, #EEE9FF, #D5CCF5)',
-    tagColor: '#3c3489', // primary-800
-    isSaved: true,
-  },
-  {
-    id: 2,
-    tag: '#스트릿',
-    title: '스트릿 무드',
-    bgGradient: 'linear-gradient(160deg, #F0EDF9, #DDD5F5)',
-    tagColor: '#3c3489',
-    isSaved: false,
-  },
-  {
-    id: 3,
-    tag: '#빈티지',
-    title: '빈티지 무드',
-    bgGradient: 'linear-gradient(160deg, #EDF5E8, #C8E4C0)',
-    tagColor: '#27500A',
-    isSaved: false,
-  },
-  {
-    id: 4,
-    tag: '#캐주얼',
-    title: '캐주얼 무드',
-    bgGradient: 'linear-gradient(160deg, #FEF5E8, #FAD9A0)',
-    tagColor: '#9C620B', // arbitrary color for a900
-    isSaved: false,
-  },
-];
+const CONTENT_TYPE_ICON: Record<string, string> = {
+  photo: '📷',
+  article: '📰',
+  youtube: '▶',
+};
 
 const MoreTrendsPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState('all');
-  const [trends, setTrends] = useState(TREND_LIST);
+  const [savedIds, setSavedIds] = useState<Set<number>>(new Set());
+
+  const activeTag = FILTER_TABS.find((tab) => tab.id === activeFilter)?.tag;
+
+  const trends = useMemo(
+    () => (activeTag ? TREND_ARTICLES.filter((t) => t.relatedTags.includes(activeTag)) : TREND_ARTICLES),
+    [activeTag],
+  );
 
   const toggleSave = (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
-    setTrends(trends.map(t => t.id === id ? { ...t, isSaved: !t.isSaved } : t));
-    // TODO: Toast 알림 추가 (ex: '저장되었습니다', '저장 해제되었습니다')
-  };
-
-  const handleFilterClick = (filterId: string) => {
-    setActiveFilter(filterId);
-    if (filterId === 'my-style') {
-      // TODO: Toast 알림 추가 (ex: '내 스타일 기반 필터 적용됨')
-    }
+    setSavedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
   };
 
   const handleTrendClick = (id: number) => {
@@ -86,7 +60,7 @@ const MoreTrendsPage: React.FC = () => {
           return (
             <button
               key={tab.id}
-              onClick={() => handleFilterClick(tab.id)}
+              onClick={() => setActiveFilter(tab.id)}
               className={`text-xs px-3.5 py-1.5 rounded-full shrink-0 cursor-pointer transition-colors ${
                 isActive
                   ? 'bg-primary-400 text-white font-bold'
@@ -101,48 +75,61 @@ const MoreTrendsPage: React.FC = () => {
 
       {/* Scrollable Body - Grid */}
       <div className="flex-1 overflow-y-auto px-5 pb-10">
-        <div className="grid grid-cols-2 gap-3 content-start">
-          {trends.map((trend) => (
-            <div
-              key={trend.id}
-              onClick={() => handleTrendClick(trend.id)}
-              className="rounded-[18px] aspect-[0.85] flex flex-col justify-end p-3 relative cursor-pointer"
-              style={{ background: trend.bgGradient }}
-            >
-              {/* Bookmark Icon */}
-              <button
-                className="absolute top-2.5 right-2.5 cursor-pointer z-10"
-                onClick={(e) => toggleSave(e, trend.id)}
+        {trends.length === 0 ? (
+          <p className="pt-16 text-center text-xs text-text-secondary">해당하는 트렌드가 없어요</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 content-start">
+            {trends.map((trend) => (
+              <div
+                key={trend.id}
+                onClick={() => handleTrendClick(trend.id)}
+                className="rounded-[18px] aspect-[0.85] flex flex-col justify-end p-3 relative cursor-pointer overflow-hidden"
+                style={
+                  trend.contentType === 'photo'
+                    ? { backgroundImage: `url(${trend.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                    : { background: trend.bgGradient }
+                }
               >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill={trend.isSaved ? '#3c3489' : 'none'}
-                  stroke={trend.isSaved ? '#3c3489' : '#3c3489'}
-                  strokeWidth={trend.isSaved ? "1" : "2"}
-                >
-                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-                </svg>
-              </button>
+                {/* Content type badge */}
+                <span className="absolute top-2.5 left-2.5 grid h-6 w-6 place-items-center rounded-full bg-white/90 text-[11px]">
+                  {CONTENT_TYPE_ICON[trend.contentType]}
+                </span>
 
-              {/* Tag Badge */}
-              <span
-                className="text-[10px] bg-white/90 px-2 py-0.5 rounded-full font-semibold self-start mb-1.5"
-                style={{ color: trend.tagColor }}
-              >
-                {trend.tag}
-              </span>
-              {/* Title */}
-              <span
-                className="text-[13px] font-bold"
-                style={{ color: trend.tagColor }}
-              >
-                {trend.title}
-              </span>
-            </div>
-          ))}
-        </div>
+                {/* Bookmark Icon */}
+                <button
+                  className="absolute top-2.5 right-2.5 cursor-pointer z-10"
+                  onClick={(e) => toggleSave(e, trend.id)}
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill={savedIds.has(trend.id) ? '#3c3489' : 'none'}
+                    stroke={savedIds.has(trend.id) ? '#3c3489' : '#3c3489'}
+                    strokeWidth={savedIds.has(trend.id) ? '1' : '2'}
+                  >
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                  </svg>
+                </button>
+
+                {/* Tag Badge */}
+                <span
+                  className="text-[10px] bg-white/90 px-2 py-0.5 rounded-full font-semibold self-start mb-1.5"
+                  style={{ color: trend.tagColor }}
+                >
+                  {trend.tag}
+                </span>
+                {/* Title */}
+                <span
+                  className={`text-[13px] font-bold ${trend.contentType === 'photo' ? 'text-white drop-shadow' : ''}`}
+                  style={trend.contentType === 'photo' ? undefined : { color: trend.tagColor }}
+                >
+                  {trend.title}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
