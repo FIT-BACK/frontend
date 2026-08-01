@@ -37,16 +37,7 @@ export default function TrendSection({
   return (
     <section className='mt-6 px-5'>
       <div className='flex items-center justify-between'>
-        <h2 className='text-sm font-bold text-text'>
-          {isPersonalized ? (
-            <>
-              ✨ <span className='text-primary-500'>{primaryStyle}</span>을 선택한
-              당신을 위한 트렌드
-            </>
-          ) : (
-            '🔥 요즘 트렌드'
-          )}
-        </h2>
+        <h2 className='text-sm font-bold text-text'>나를 위한 트렌드</h2>
 
         <button
           type='button'
