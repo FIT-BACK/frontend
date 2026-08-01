@@ -166,13 +166,21 @@ export default function LoginPage() {
               </div>
 
               <div className="w-full max-w-[340px] flex flex-col gap-4">
-                <button 
+                <button
                   onClick={handleLogin}
                   className="w-full bg-primary-400 text-white py-[18px] rounded-[14px] text-[16px] font-bold transition active:scale-95"
                 >
                   로그인하기
                 </button>
               </div>
+
+              <button
+                type="button"
+                onClick={() => navigate('/find-password')}
+                className="mt-4 text-[13px] text-text-secondary underline"
+              >
+                비밀번호를 잊으셨나요?
+              </button>
             </div>
           )}
 

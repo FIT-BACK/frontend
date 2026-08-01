@@ -6,6 +6,8 @@ import SignupBasicPage from './pages/LoginPage/SignupBasicPage';
 import SignupProfilePage from './pages/LoginPage/SignupProfilePage';
 import SignupCompletePage from './pages/LoginPage/SignupCompletePage';
 import KakaoCallback from './pages/LoginPage/KakaoCallback';
+import FindPasswordPage from './pages/LoginPage/FindPasswordPage';
+import ResetPasswordPage from './pages/LoginPage/ResetPasswordPage';
 import HomePage from './pages/HomePage';
 
 import LookbookUploadPage from './pages/LookbookUpload/LookbookUploadPage';
@@ -58,6 +60,9 @@ function App() {
         <Route path='/signup/basic' element={<SignupBasicPage />} />
         <Route path='/signup/profile' element={<SignupProfilePage />} />
         <Route path='/signup/complete' element={<SignupCompletePage />} />
+
+        <Route path='/find-password' element={<FindPasswordPage />} />
+        <Route path='/reset-password' element={<ResetPasswordPage />} />
 
         <Route path='/oauth/kakao' element={<KakaoCallback />} />
 
