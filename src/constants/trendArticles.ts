@@ -78,13 +78,23 @@ export const TREND_ARTICLES: TrendArticle[] = [
   {
     id: 2,
     tag: '#스트릿',
-    title: '스트릿 무드',
+    title: '스트릿패션을 표현하는 방법',
     tagColor: '#3c3489',
     bgGradient: 'linear-gradient(160deg, #F0EDF9, #DDD5F5)',
     description: '오버사이즈 실루엣과 레이어드 룩으로 완성하는 스트릿 스타일링.',
     relatedTags: ['#스트릿', '#오버사이즈', '#캐주얼'],
-    contentType: 'youtube',
-    youtubeVideoId: 'dQw4w9WgXcQ',
+    contentType: 'magazine',
+    intro: '스트릿은 오버사이즈 아이템에 포인트 액세서리를 더하면 개성있게 연출할 수 있어요',
+    colorPalette: [
+      { name: '화이트', hex: '#FFFFFF' },
+      { name: '블랙', hex: '#1C1C1C' },
+      { name: '데님블루', hex: '#5B7B9A' },
+    ],
+    photos: [
+      'https://i.pinimg.com/736x/58/89/bd/5889bdca4cc29df44f87ab87f0b6dfe6.jpg',
+      'https://i.pinimg.com/736x/a6/29/95/a62995db8ff64d83d733861ea7fb5fd3.jpg',
+      'https://i.pinimg.com/736x/3e/b0/49/3eb04975a5fbf8fc44269d4ad8648470.jpg',
+    ],
   },
   {
     id: 3,
