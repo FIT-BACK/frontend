@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { navigate } from '../../utils/navigate';
+import { getProductDetail } from '../../api/products';
 import {
   useLookbookDetail,
   useToggleLike,
-  useToggleSave,
+  useSaveLookbook,
   useDeleteLookbook,
 } from '../../hooks/useLookbookDetail';
 import ReportBottomSheet from './components/ReportBottomSheet';
@@ -15,8 +17,15 @@ export default function LookbookDetailPage() {
 
   const { data: lookbook, isLoading, isError } = useLookbookDetail(id);
   const toggleLike = useToggleLike(id);
-  const toggleSave = useToggleSave(id);
+  const saveLookbook = useSaveLookbook(id);
   const deleteLookbookMutation = useDeleteLookbook(id);
+
+  // 매칭 상품이 실제 카탈로그 상품일 때만 상세(이름/가격/판매처)를 조회한다.
+  const { data: product } = useQuery({
+    queryKey: ['productDetail', lookbook?.matchedProductId],
+    queryFn: () => getProductDetail(lookbook!.matchedProductId!),
+    enabled: !!lookbook?.matchedProductId,
+  });
 
   const [showMoreSheet, setShowMoreSheet] = useState(false);
   const [showReportSheet, setShowReportSheet] = useState(false);
@@ -30,6 +39,8 @@ export default function LookbookDetailPage() {
   if (isLoading) return <div className='p-4 text-center'>불러오는 중...</div>;
   if (isError || !lookbook)
     return <div className='p-4 text-center'>삭제된 콘텐츠입니다</div>;
+
+  const purchaseUrl = product ? (product.affiliateUrl ?? product.purchaseUrl) : lookbook.purchaseUrl;
 
   return (
     <div className='flex flex-col h-full'>
@@ -45,28 +56,36 @@ export default function LookbookDetailPage() {
           alt='원본 룩'
           className='flex-1 rounded-xl'
         />
-        <img
-          src={lookbook.matchedImageUrl}
-          alt='가성비 매칭'
-          className='flex-1 rounded-xl'
-        />
+        {lookbook.matchedImageUrl && (
+          <img
+            src={lookbook.matchedImageUrl}
+            alt='가성비 매칭'
+            className='flex-1 rounded-xl'
+          />
+        )}
       </div>
 
       <div className='px-4 pt-3 flex items-center gap-2'>
-        <div className='w-7 h-7 rounded-full bg-gray-200' />
+        <div className='w-7 h-7 rounded-full bg-gray-200 overflow-hidden'>
+          {lookbook.authorProfileImageUrl && (
+            <img src={lookbook.authorProfileImageUrl} alt='' className='h-full w-full object-cover' />
+          )}
+        </div>
         <div>
           <div className='text-xs font-bold'>{lookbook.authorNickname}</div>
-          <div className='text-[9px] text-gray-400'>{lookbook.createdAt}</div>
+          <div className='text-[9px] text-gray-400'>
+            {new Date(lookbook.createdAt).toLocaleDateString()}
+          </div>
         </div>
       </div>
 
       <div className='flex gap-1 flex-wrap px-4 pt-2'>
-        {lookbook.styleTags.slice(0, 5).map((tag) => (
+        {lookbook.tags.slice(0, 5).map((tag) => (
           <span
-            key={tag}
+            key={tag.tagId}
             className='text-xs bg-purple-50 text-purple-800 px-2 py-1 rounded-full'
           >
-            #{tag}
+            #{tag.tagName}
           </span>
         ))}
       </div>
@@ -75,52 +94,40 @@ export default function LookbookDetailPage() {
         <p className='px-4 pt-2 text-xs leading-relaxed'>{lookbook.comment}</p>
       )}
 
-      {lookbook.products.length > 0 && (
+      {purchaseUrl && (
         <div className='mx-4 mt-2 bg-gray-50 rounded-xl p-3'>
           <div className='text-xs font-bold mb-2'>🛍️ 구매한 상품</div>
-          {lookbook.products.map((p) => (
-            <div key={p.id} className='flex items-center gap-2 mb-1'>
+          {product && (
+            <div className='flex items-center gap-2 mb-1'>
               <div className='flex-1'>
-                <div className='text-xs font-semibold'>{p.name}</div>
-                <div className='text-[9px] text-gray-400'>{p.shopName}</div>
+                <div className='text-xs font-semibold'>{product.name}</div>
+                <div className='text-[9px] text-gray-400'>{product.sellerName}</div>
               </div>
               <div className='text-sm font-bold text-purple-800'>
-                ₩{p.price.toLocaleString()}
+                {product.price.amount.toLocaleString()}
+                {product.price.currency === 'KRW' ? '원' : ` ${product.price.currency}`}
               </div>
             </div>
-          ))}
-          {lookbook.products[0].purchaseUrl && (
-            <button
-              className='w-full bg-purple-400 text-white rounded-lg py-2 text-xs font-bold mt-1'
-              onClick={() =>
-                window.open(lookbook.products[0].purchaseUrl!, '_blank')
-              }
-            >
-              구매하러 가기 →
-            </button>
           )}
+          <button
+            className='w-full bg-purple-400 text-white rounded-lg py-2 text-xs font-bold mt-1'
+            onClick={() => window.open(purchaseUrl, '_blank', 'noopener,noreferrer')}
+          >
+            구매하러 가기 →
+          </button>
         </div>
-      )}
-
-      {lookbook.relatedTrend && (
-        <button
-          className='flex items-center gap-1.5 px-4 py-2 text-xs text-teal-700'
-          onClick={() => navigate(`/trends/${lookbook.relatedTrend!.id}`)}
-        >
-          관련 트렌드: {lookbook.relatedTrend.name} →
-        </button>
       )}
 
       <div className='mt-auto flex items-center justify-between px-4 py-3 border-t'>
         <button
-          onClick={() => toggleLike.mutate()}
+          onClick={() => toggleLike.mutate(lookbook.isLiked)}
           className='flex items-center gap-1.5'
         >
           <span>{lookbook.isLiked ? '❤️' : '🤍'}</span>
           <span className='text-xs font-bold'>{lookbook.likeCount}</span>
         </button>
-        <button onClick={() => toggleSave.mutate()}>
-          {lookbook.isSaved ? '🔖' : '📑'}
+        <button onClick={() => saveLookbook.mutate()} aria-label='마이 클로젯에 저장'>
+          📑
         </button>
       </div>
 
@@ -133,7 +140,7 @@ export default function LookbookDetailPage() {
             className='w-full bg-white rounded-t-2xl p-4'
             onClick={(e) => e.stopPropagation()}
           >
-            {lookbook.isMine ? (
+            {lookbook.isOwner ? (
               <>
                 <button
                   className='w-full text-left py-3'

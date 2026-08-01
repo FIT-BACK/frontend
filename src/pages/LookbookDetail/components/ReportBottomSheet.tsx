@@ -4,10 +4,10 @@ import type { ReportType } from '../../../api/lookbooks';
 
 const REPORT_OPTIONS: { value: ReportType; label: string }[] = [
   { value: 'INAPPROPRIATE_IMAGE', label: '부적절한 이미지 (성인/폭력)' },
-  { value: 'COPYRIGHT', label: '저작권 침해 / 무단 도용' },
-  { value: 'FALSE_INFO', label: '허위 정보 / 사기' },
-  { value: 'SPAM', label: '스팸 / 광고성 콘텐츠' },
-  { value: 'ETC', label: '기타' },
+  { value: 'COPYRIGHT_INFRINGEMENT', label: '저작권 침해 / 무단 도용' },
+  { value: 'FRAUD_OR_FALSE_INFORMATION', label: '허위 정보 / 사기' },
+  { value: 'SPAM_OR_ADVERTISEMENT', label: '스팸 / 광고성 콘텐츠' },
+  { value: 'OTHER', label: '기타' },
 ];
 
 export default function ReportBottomSheet({
