@@ -47,8 +47,8 @@ export default function SignupProfilePage() {
   };
 
   const handleComplete = async () => {
-    if (!nickname.trim()) {
-      alert('닉네임을 입력해주세요.');
+    if (nickname.trim().length < 2) {
+      alert('닉네임은 2자 이상 입력해주세요.');
       return;
     }
     if (selectedTagIds.length === 0) {
@@ -154,11 +154,11 @@ export default function SignupProfilePage() {
               type="text"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
-              placeholder="사용하실 닉네임을 입력해주세요"
+              placeholder="다른 유저에게 보일 이름"
               className="w-full bg-bg p-4 rounded-xl text-base outline-none focus:ring-2 focus:ring-primary-400"
-              maxLength={10}
+              maxLength={16}
             />
-            <p className="text-xs text-text-tertiary">최대 10자 이내로 입력해주세요.</p>
+            <p className="text-xs text-text-tertiary">2~16자, 영문·한글·숫자 사용 가능</p>
           </div>
 
           <div className="flex flex-col gap-3">
@@ -191,7 +191,7 @@ export default function SignupProfilePage() {
             }`}
             disabled={!canSubmit}
           >
-            {isUploading ? '사진 업로드 중...' : isSubmitting ? '가입 처리 중...' : '가입 완료하고 시작하기'}
+            {isUploading ? '사진 업로드 중...' : isSubmitting ? '가입 처리 중...' : '가입 완료'}
           </button>
         </div>
 
