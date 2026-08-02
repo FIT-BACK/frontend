@@ -52,44 +52,46 @@ const TrendDetailPage: React.FC = () => {
         </button>
       </header>
 
-      {/* Main Visual — 콘텐츠 타입별로 다르게 렌더링 */}
-      {trend.contentType === 'youtube' ? (
-        <div className="shrink-0 relative bg-black">
-          <iframe
-            className="w-full aspect-video"
-            src={`https://www.youtube.com/embed/${trend.youtubeVideoId}`}
-            title={trend.title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-          <div className="absolute top-3 left-3 text-[11px] bg-primary-400 text-white px-2.5 py-1 rounded-full font-bold">
-            {trend.tag}
+      {/* Scrollable Body — 히어로 이미지도 본문과 함께 스크롤되도록 같은 컨테이너에 둔다.
+          (예전엔 이미지가 shrink-0로 헤더 아래 고정돼 있어서 화면이 작을 때 본문을 볼 공간이 부족했음) */}
+      <div className="flex-1 overflow-y-auto pb-20">
+        {/* Main Visual — 콘텐츠 타입별로 다르게 렌더링 */}
+        {trend.contentType === 'youtube' ? (
+          <div className="relative bg-black">
+            <iframe
+              className="w-full aspect-video"
+              src={`https://www.youtube.com/embed/${trend.youtubeVideoId}`}
+              title={trend.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+            <div className="absolute top-3 left-3 text-[11px] bg-primary-400 text-white px-2.5 py-1 rounded-full font-bold">
+              {trend.tag}
+            </div>
           </div>
-        </div>
-      ) : (
-        <div
-          className={`shrink-0 flex items-center justify-center relative bg-cover bg-center ${
-            trend.contentType === 'magazine' ? 'h-[320px]' : 'h-[150px]'
-          }`}
-          style={
-            trend.contentType === 'photo'
-              ? { backgroundImage: `url(${trend.imageUrl})` }
-              : trend.contentType === 'magazine'
-                ? { backgroundImage: `url(${trend.photos[0]})` }
-                : { background: trend.bgGradient }
-          }
-        >
-          <div className="absolute top-3 left-3 text-[11px] bg-primary-400 text-white px-2.5 py-1 rounded-full font-bold">
-            {trend.tag}
+        ) : (
+          <div
+            className={`flex items-center justify-center relative bg-cover bg-center ${
+              trend.contentType === 'magazine' ? 'h-[320px]' : 'h-[150px]'
+            }`}
+            style={
+              trend.contentType === 'photo'
+                ? { backgroundImage: `url(${trend.imageUrl})` }
+                : trend.contentType === 'magazine'
+                  ? { backgroundImage: `url(${trend.photos[0]})` }
+                  : { background: trend.bgGradient }
+            }
+          >
+            <div className="absolute top-3 left-3 text-[11px] bg-primary-400 text-white px-2.5 py-1 rounded-full font-bold">
+              {trend.tag}
+            </div>
+            {trend.contentType === 'article' && (
+              <span className="text-sm text-primary-800">📰 {trend.sourceName}</span>
+            )}
           </div>
-          {trend.contentType === 'article' && (
-            <span className="text-sm text-primary-800">📰 {trend.sourceName}</span>
-          )}
-        </div>
-      )}
+        )}
 
-      {/* Scrollable Body */}
-      <div className="flex-1 overflow-y-auto px-5 pt-4 pb-20">
+        <div className="px-5 pt-4">
         <h2 className="text-[20px] font-extrabold text-text mb-2.5">{trend.title}</h2>
 
         {trend.contentType === 'magazine' ? (
@@ -176,6 +178,7 @@ const TrendDetailPage: React.FC = () => {
         >
           이 트렌드로 매칭 시작하기
         </button>
+        </div>
       </div>
     </div>
   );
