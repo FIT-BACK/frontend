@@ -119,4 +119,23 @@ export const TREND_ARTICLES: TrendArticle[] = [
     contentType: 'youtube',
     youtubeVideoId: 'dQw4w9WgXcQ',
   },
+  {
+    id: 6,
+    tag: '#캐주얼 #포멀',
+    title: '어떤 자리에서도 손색없는 캐주얼+포멀조합',
+    tagColor: '#7A5C2E',
+    bgGradient: 'linear-gradient(160deg, #F5EFE6, #E4D3B8)',
+    description: '캐주얼함은 유지하면서 포멀한 자리에서도 손색없는 밸런스를 잡은 조합.',
+    // 캐주얼/포멀 태그를 둘 다 선택한 사람 모두에게 노출되도록 두 태그를 함께 등록
+    relatedTags: ['#캐주얼', '#포멀'],
+    contentType: 'magazine',
+    intro:
+      '깔끔한 재킷 하나로 캐주얼 무드와 포멀 무드를 동시에 챙겨보세요. 미팅부터 저녁 약속까지, 옷을 갈아입지 않아도 자리에 맞게 자연스럽게 녹아드는 조합이에요.',
+    colorPalette: [
+      { name: '샌드 베이지', hex: '#D8C3A0' },
+      { name: '차콜 그레이', hex: '#3A3A3A' },
+      { name: '오프 화이트', hex: '#F2EEE6' },
+    ],
+    photos: ['https://i.pinimg.com/1200x/55/60/18/55601858d817ccd0c52f8a611b7faed0.jpg'],
+  },
 ];
