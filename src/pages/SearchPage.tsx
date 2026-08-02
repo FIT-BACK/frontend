@@ -180,7 +180,7 @@ export default function SearchPage() {
                 <button
                   key={lookbook.id}
                   type='button'
-                  onClick={() => navigate(`/lookbook/${lookbook.id}`)}
+                  onClick={() => navigate(`/lookbooks/${lookbook.id}`)}
                   className='rounded-xl overflow-hidden border border-border bg-white text-left'
                 >
                   <div
@@ -188,7 +188,9 @@ export default function SearchPage() {
                     style={{ backgroundImage: `url(${lookbook.imageUrl})` }}
                   />
                   <div className='p-2'>
-                    <p className='text-xs font-semibold text-text truncate'>{lookbook.comment}</p>
+                    <p className='text-xs font-semibold text-text truncate'>
+                      {lookbook.tags.map((tag) => `#${tag}`).join(' ')}
+                    </p>
                     <p className='text-[11px] text-text-secondary mt-0.5'>@{lookbook.authorNickname}</p>
                   </div>
                 </button>
