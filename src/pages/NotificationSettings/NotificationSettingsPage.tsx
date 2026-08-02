@@ -7,13 +7,13 @@ import {
 import { navigate } from '../../utils/navigate'
 
 const SERVICE_ITEMS: { key: keyof NotificationSettings; title: string; description: string }[] = [
-  { key: 'aiAnalysisComplete', title: 'AI 분석 완료 알림', description: '분석이 완료되면 알려드려요' },
-  { key: 'lookbookLike', title: '룩북 찜 알림', description: '내 룩북을 누군가 찜했을 때' },
-  { key: 'trendUpdate', title: '트렌드 업데이트 알림', description: '새 트렌드가 등록되면 알려드려요' },
+  { key: 'analysisCompleteEnabled', title: 'AI 분석 완료 알림', description: '분석이 완료되면 알려드려요' },
+  { key: 'lookbookLikedEnabled', title: '룩북 찜 알림', description: '내 룩북을 누군가 찜했을 때' },
+  { key: 'trendUpdateEnabled', title: '트렌드 업데이트 알림', description: '새 트렌드가 등록되면 알려드려요' },
 ]
 
 const MARKETING_ITEM = {
-  key: 'marketing' as const,
+  key: 'marketingEnabled' as const,
   title: '이벤트 및 혜택 알림',
   description: '프로모션 정보를 받아볼 수 있어요',
 }
@@ -75,8 +75,8 @@ export default function NotificationSettingsPage() {
             </div>
             <Toggle
               aria-label={MARKETING_ITEM.title}
-              checked={settings.marketing}
-              onChange={(next) => handleToggle('marketing', next)}
+              checked={settings.marketingEnabled}
+              onChange={(next) => handleToggle('marketingEnabled', next)}
             />
           </div>
 

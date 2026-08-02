@@ -33,15 +33,17 @@ interface MyProfileApiResponse {
     email: string
     nickname: string
     profileImageUrl: string
+    loginProvider: 'EMAIL' | 'KAKAO'
     savedCount: number
     analysisCount: number
     uploadCount: number
+    tags: { tagId: number; tagName: string; tagType: string }[]
   }
 }
 
 // 기능별로 USE_MOCK 분리 — 확정 스펙이 다르게 진행되므로 따로 관리
-const USE_MOCK_GET = true
-const USE_MOCK_SAVE = true
+const USE_MOCK_GET = false
+const USE_MOCK_SAVE = false
 const USE_MOCK_NICKNAME_CHECK = true 
 const USE_MOCK_LOGOUT = true
 
@@ -69,8 +71,8 @@ export const getMyProfile = async (): Promise<UserProfile> => {
     name: data.nickname,
     email: data.email,
     avatarUrl: data.profileImageUrl,
-    isSocialLogin: false,
-    styleTags: [],
+    isSocialLogin: data.loginProvider !== 'EMAIL',
+    styleTags: data.tags.map((tag) => tag.tagName),
     stats: {
       saved: data.savedCount,
       analyzed: data.analysisCount,
@@ -123,7 +125,7 @@ export const updateProfile = async (payload: UpdateProfilePayload): Promise<User
 
   const patchResponse = await api.patch<MembersMePatchApiResponse>('/api/v1/members/me', {
     nickname: payload.name,
-    ...(payload.avatarImageId ? { profileImageUrl: payload.avatarImageId } : {}),
+    ...(payload.avatarImageId ? { profileImageId: payload.avatarImageId } : {}),
   })
 
   const tagsResponse = await api.put<MembersMeTagsApiResponse>('/api/v1/members/me/tags', {
@@ -139,16 +141,26 @@ export const updateProfile = async (payload: UpdateProfilePayload): Promise<User
   }
 }
 
+interface NicknameAvailabilityApiResponse {
+  success: boolean
+  code: string
+  message: string
+  data: {
+    nickname: string
+    available: boolean
+  }
+}
+
 export const checkNicknameAvailable = async (nickname: string): Promise<{ available: boolean }> => {
   if (USE_MOCK_NICKNAME_CHECK) {
     await delay(400)
     return { available: nickname !== '이미사용중' }
   }
 
-  const response = await api.get<{ available: boolean }>('/api/users/nickname-check', {
+  const response = await api.get<NicknameAvailabilityApiResponse>('/api/v1/members/me/nickname-availability', {
     params: { nickname },
   })
-  return response.data
+  return { available: response.data.data.available }
 }
 
 export const logout = async (): Promise<void> => {
