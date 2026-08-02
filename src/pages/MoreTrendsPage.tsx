@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TREND_ARTICLES } from '../constants/trendArticles';
+import { useMyProfile } from '../hooks/useMyPage';
 
 const FILTER_TABS = [
   { id: 'all', label: '전체' },
+  { id: 'my-style', label: '내 스타일' },
   { id: 'minimal', label: '#미니멀', tag: '#미니멀' },
   { id: 'street', label: '#스트릿', tag: '#스트릿' },
   { id: 'lovely', label: '#러블리', tag: '#러블리' },
@@ -22,13 +24,20 @@ const MoreTrendsPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState('all');
   const [savedIds, setSavedIds] = useState<Set<number>>(new Set());
+  const { data: profile } = useMyProfile();
 
   const activeTag = FILTER_TABS.find((tab) => tab.id === activeFilter)?.tag;
-
-  const trends = useMemo(
-    () => (activeTag ? TREND_ARTICLES.filter((t) => t.relatedTags.includes(activeTag)) : TREND_ARTICLES),
-    [activeTag],
+  const myStyleTags = useMemo(
+    () => (profile?.styleTags ?? []).map((name) => `#${name}`),
+    [profile],
   );
+
+  const trends = useMemo(() => {
+    if (activeFilter === 'my-style') {
+      return TREND_ARTICLES.filter((t) => t.relatedTags.some((tag) => myStyleTags.includes(tag)));
+    }
+    return activeTag ? TREND_ARTICLES.filter((t) => t.relatedTags.includes(activeTag)) : TREND_ARTICLES;
+  }, [activeFilter, activeTag, myStyleTags]);
 
   const toggleSave = (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
