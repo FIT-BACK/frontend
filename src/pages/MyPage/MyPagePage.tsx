@@ -50,6 +50,7 @@ export default function MyPagePage() {
           disabled={profile.isSocialLogin}
         />
         <SettingsListItem label="로그아웃" onClick={() => setIsLogoutModalOpen(true)} />
+        <SettingsListItem label="회원 탈퇴" onClick={() => navigate('/withdraw')} />
       </div>
 
       <LogoutModal
