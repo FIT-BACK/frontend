@@ -48,8 +48,8 @@ interface ClosetSavesApiResponse {
 }
 
 // 마이클로젯 GET/DELETE는 별도 플래그로 분리 — GET은 스펙 확정, DELETE는 saveId 누락으로 아직 연동 불가
-const USE_MOCK_GET = true
-const USE_MOCK_DELETE = true
+const USE_MOCK_GET = false
+const USE_MOCK_DELETE = false
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const MOCK_CLOSET_ITEMS: ClosetItem[] = [
