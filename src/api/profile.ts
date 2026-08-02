@@ -33,15 +33,17 @@ interface MyProfileApiResponse {
     email: string
     nickname: string
     profileImageUrl: string
+    loginProvider: 'EMAIL' | 'KAKAO'
     savedCount: number
     analysisCount: number
     uploadCount: number
+    tags: { tagId: number; tagName: string; tagType: string }[]
   }
 }
 
 // 기능별로 USE_MOCK 분리 — 확정 스펙이 다르게 진행되므로 따로 관리
-const USE_MOCK_GET = true
-const USE_MOCK_SAVE = true
+const USE_MOCK_GET = false
+const USE_MOCK_SAVE = false
 const USE_MOCK_NICKNAME_CHECK = true 
 const USE_MOCK_LOGOUT = true
 
@@ -69,8 +71,8 @@ export const getMyProfile = async (): Promise<UserProfile> => {
     name: data.nickname,
     email: data.email,
     avatarUrl: data.profileImageUrl,
-    isSocialLogin: false,
-    styleTags: [],
+    isSocialLogin: data.loginProvider !== 'EMAIL',
+    styleTags: data.tags.map((tag) => tag.tagName),
     stats: {
       saved: data.savedCount,
       analyzed: data.analysisCount,
