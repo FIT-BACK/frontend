@@ -34,17 +34,20 @@ export default function UploadSelectSheet({
         <div className='mx-auto mb-5 h-1 w-10 rounded-full bg-border' />
 
         <h2 className='text-base font-bold text-text'>무엇을 하시겠어요?</h2>
+        <p className='mt-1 text-xs text-text-secondary'>보통 이 순서로 진행해요</p>
 
         <div className='mt-5 space-y-3'>
           <SheetOption
+            step={1}
             label='AI 가성비 매칭 분석'
             description='워너비 사진으로 가성비 아이템 찾기'
             icon={<CameraIcon />}
             onClick={() => handleSelect('analysis')}
           />
           <SheetOption
+            step={2}
             label='내 룩북 올리기'
-            description='매칭 후기를 다른 유저와 공유'
+            description='매칭 결과를 다른 유저와 공유 (매칭을 먼저 하면 결과를 그대로 가져올 수 있어요)'
             icon={<GalleryIcon />}
             onClick={() => handleSelect('lookbook')}
           />
@@ -62,21 +65,25 @@ export default function UploadSelectSheet({
 }
 
 interface SheetOptionProps {
+  step: number;
   label: string;
   description: string;
   icon: React.ReactNode;
   onClick: () => void;
 }
 
-function SheetOption({ label, description, icon, onClick }: SheetOptionProps) {
+function SheetOption({ step, label, description, icon, onClick }: SheetOptionProps) {
   return (
     <button
       type='button'
       onClick={onClick}
       className='flex w-full items-center gap-4 rounded-2xl border border-border px-4 py-3.5 text-left transition active:bg-bg'
     >
-      <div className='grid h-11 w-11 shrink-0 place-items-center rounded-full bg-bg-secondary text-primary-400'>
+      <div className='relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-bg-secondary text-primary-400'>
         {icon}
+        <span className='absolute -top-1.5 -left-1.5 grid h-4 w-4 place-items-center rounded-full bg-primary-400 text-[9px] font-bold text-white'>
+          {step}
+        </span>
       </div>
       <div>
         <p className='text-sm font-bold text-text'>{label}</p>

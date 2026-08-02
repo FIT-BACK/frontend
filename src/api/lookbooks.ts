@@ -2,79 +2,148 @@ import { api } from './axiosInstance';
 
 /**
  * ==========================================
- *  룩북 피드 관련 API 통신 정의
+ *  룩북 상세(SCR-04B) / 신고(SCR-04C) 관련 API 통신 정의
  * ==========================================
- * 컴포넌트에서 직접 부르지 말고 src/hooks/useLookbookFeedQuery.ts를 사용하세요.
+ * 컴포넌트에서 직접 부르지 말고 src/hooks/useLookbookDetail.ts를 사용하세요.
  */
 
-export interface LookbookFeedItem {
+// 백엔드 LookbookReportReason과 동일한 값 (Lookbook 컨트롤러 기준)
+export type ReportType =
+  | 'INAPPROPRIATE_IMAGE'
+  | 'COPYRIGHT_INFRINGEMENT'
+  | 'FRAUD_OR_FALSE_INFORMATION'
+  | 'SPAM_OR_ADVERTISEMENT'
+  | 'OTHER';
+
+export interface LookbookTag {
+  tagId: number;
+  tagName: string;
+}
+
+export interface LookbookDetail {
   id: number;
-  authorHandle: string;
+  authorNickname: string;
+  authorProfileImageUrl: string | null;
+  createdAt: string;
+  originalImageUrl: string;
+  matchedImageUrl: string | null;
+  // 매칭 상품이 실제 상품 카탈로그에 있을 때만 채워짐 — 있으면 GET /api/v1/products/{id}로 상세(이름/가격/판매처) 조회
+  matchedProductId: number | null;
+  purchaseUrl: string | null;
+  tags: LookbookTag[];
+  comment: string | null;
   likeCount: number;
   isLiked: boolean;
-  originalImageUrl: string;
-  matchedImageUrl: string;
+  isOwner: boolean;
 }
 
-export interface LookbookListResponse {
-  items: LookbookFeedItem[];
-  hasMore: boolean;
+interface ApiEnvelope<T> {
+  success: boolean;
+  code: string;
+  message: string;
+  data: T;
 }
 
-// 이 값을 false로 바꾸면 실제 서버와 연동됩니다.
-const USE_MOCK = true;
-
+const USE_MOCK = false;
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// 목업 상태에서도 좋아요 토글이 실제로 반영되도록 하는 간단한 인메모리 저장소
-// (새로고침하면 초기화됩니다. 실제 서버 연동 시 이 블록은 필요 없습니다.)
-const mockLikedIds = new Set<number>();
-
-function createMockPage(page: number): LookbookFeedItem[] {
-  return Array.from({ length: page === 0 ? 1 : 20 }).map((_, i) => {
-    const id = page * 1000 + i;
-    return {
-      id,
-      authorHandle: '@minji_style',
-      likeCount: 128 + (mockLikedIds.has(id) ? 1 : 0),
-      isLiked: mockLikedIds.has(id),
-      originalImageUrl: 'https://picsum.photos/seed/fitback-upload/800/1000',
-      matchedImageUrl: 'https://picsum.photos/seed/fitback-upload/800/1000',
-    };
-  });
-}
-
-/** GET /api/v1/lookbooks - 홈 가성비 룩북 피드 목록 (페이지네이션) */
-export const getLookbooks = async (
-  page: number,
-): Promise<LookbookListResponse> => {
-  if (USE_MOCK) {
-    await delay(500);
-    return { items: createMockPage(page), hasMore: page < 1 };
-  }
-  // TODO: 실제 페이지네이션 파라미터 이름(page/cursor 등)은 백엔드 확정되면 맞추기
-  const response = await api.get<LookbookListResponse>('/api/v1/lookbooks', {
-    params: { page },
-  });
-  return response.data;
+const mockDetail: LookbookDetail = {
+  id: 1,
+  authorNickname: '@minji_style',
+  authorProfileImageUrl: null,
+  createdAt: new Date().toISOString(),
+  originalImageUrl: 'https://picsum.photos/seed/original/800/1000',
+  matchedImageUrl: 'https://picsum.photos/seed/matched/800/1000',
+  matchedProductId: 1,
+  purchaseUrl: 'https://example.com',
+  tags: [
+    { tagId: 1, tagName: '미니멀' },
+    { tagId: 2, tagName: '와이드핏' },
+    { tagId: 3, tagName: '베이지톤' },
+  ],
+  comment:
+    '무신사에서 3만원대에 찾았어요! 핏이 거의 똑같고 소재도 생각보다 좋아서 만족 😊',
+  likeCount: 128,
+  isLiked: false,
+  isOwner: false,
 };
 
-/** POST /api/v1/lookbooks/{lookbookId}/like - 좋아요 등록 */
-export const likeLookbook = async (lookbookId: number): Promise<void> => {
+/** GET /api/v1/lookbooks/{lookbookId} */
+export const getLookbookDetail = async (
+  lookbookId: number,
+): Promise<LookbookDetail> => {
   if (USE_MOCK) {
-    await delay(200);
-    mockLikedIds.add(lookbookId);
-    return;
+    await delay(400);
+    return { ...mockDetail, id: lookbookId };
   }
-  await api.post(`/api/v1/lookbooks/${lookbookId}/like`);
+  const response = await api.get<ApiEnvelope<Omit<LookbookDetail, 'id'>>>(
+    `/api/v1/lookbooks/${lookbookId}`,
+  );
+  return { id: lookbookId, ...response.data.data };
 };
 
-/** DELETE /api/v1/lookbooks/{lookbookId}/like - 좋아요 취소 */
-export const unlikeLookbook = async (lookbookId: number): Promise<void> => {
+/** POST /api/v1/lookbooks/{lookbookId}/likes — 좋아요 등록 */
+export const likeLookbook = async (
+  lookbookId: number,
+): Promise<{ isLiked: boolean; likeCount: number }> => {
   if (USE_MOCK) {
     await delay(200);
-    mockLikedIds.delete(lookbookId);
+    return { isLiked: true, likeCount: mockDetail.likeCount + 1 };
+  }
+  const response = await api.post<ApiEnvelope<{ isLiked: boolean; likeCount: number }>>(
+    `/api/v1/lookbooks/${lookbookId}/likes`,
+  );
+  return response.data.data;
+};
+
+/** DELETE /api/v1/lookbooks/{lookbookId}/likes — 좋아요 취소 */
+export const unlikeLookbook = async (
+  lookbookId: number,
+): Promise<{ isLiked: boolean; likeCount: number }> => {
+  if (USE_MOCK) {
+    await delay(200);
+    return { isLiked: false, likeCount: Math.max(mockDetail.likeCount - 1, 0) };
+  }
+  const response = await api.delete<ApiEnvelope<{ isLiked: boolean; likeCount: number }>>(
+    `/api/v1/lookbooks/${lookbookId}/likes`,
+  );
+  return response.data.data;
+};
+
+/**
+ * 룩북 저장(찜)은 룩북 전용 엔드포인트가 없고 공용 마이 클로젯 API를 사용한다
+ * (POST /api/v1/closet-saves, targetType: 'LOOKBOOK'). 삭제는 saveId가 필요한데
+ * 룩북 상세 응답에는 saveId가 내려오지 않아 지금은 저장만 가능하고 저장 취소는
+ * 아직 연동할 수 없다 — closet-saves 목록 쪽에서 saveId를 받아온 뒤 이어서 작업할 것.
+ */
+export const saveLookbook = async (lookbookId: number): Promise<void> => {
+  if (USE_MOCK) {
+    await delay(200);
     return;
   }
-  await api.delete(`/api/v1/lookbooks/${lookbookId}/like`);
+  await api.post('/api/v1/closet-saves', {
+    targetType: 'LOOKBOOK',
+    targetId: lookbookId,
+  });
+};
+
+/** POST /api/v1/lookbooks/{lookbookId}/reports */
+export const reportLookbook = async (
+  lookbookId: number,
+  reason: ReportType,
+): Promise<void> => {
+  if (USE_MOCK) {
+    await delay(300);
+    return;
+  }
+  await api.post(`/api/v1/lookbooks/${lookbookId}/reports`, { reason });
+};
+
+/** DELETE /api/v1/lookbooks/{lookbookId} */
+export const deleteLookbook = async (lookbookId: number): Promise<void> => {
+  if (USE_MOCK) {
+    await delay(300);
+    return;
+  }
+  await api.delete(`/api/v1/lookbooks/${lookbookId}`);
 };

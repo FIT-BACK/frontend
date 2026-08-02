@@ -16,17 +16,14 @@ export interface StyleTag {
 const USE_MOCK = true
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
+// 트렌드 아티클(constants/trendArticles.ts)이 5개 태그로만 운영되는 것과 맞춰
+// 관심 스타일 선택지도 동일한 5개로 제한한다.
 const MOCK_TAGS: StyleTag[] = [
   { tagId: 1, tagName: '미니멀' },
   { tagId: 2, tagName: '스트릿' },
+  { tagId: 7, tagName: '러블리' },
   { tagId: 3, tagName: '캐주얼' },
   { tagId: 4, tagName: '포멀' },
-  { tagId: 5, tagName: '빈티지' },
-  { tagId: 6, tagName: '스포티' },
-  { tagId: 7, tagName: '러블리' },
-  { tagId: 8, tagName: '시크' },
-  { tagId: 9, tagName: '유니크' },
-  { tagId: 10, tagName: '오피스룩' },
 ]
 
 interface TagsApiResponse {
