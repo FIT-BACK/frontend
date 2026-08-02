@@ -9,8 +9,15 @@ export const AiWaitingPage: React.FC = () => {
   const imageUri = useUploadStore((state) => state.imageUri);
   const setAnalysisResult = useUploadStore((state) => state.setAnalysisResult);
 
-  const { mutate: createAnalysis, isPending, isSuccess, isError, error } = useCreateAnalysis();
+  const { mutateAsync: createAnalysis } = useCreateAnalysis();
   const [progress, setProgress] = useState(0);
+  // 분석 성공/실패는 useMutation의 isPending/isSuccess 대신 로컬 상태로 직접 관리한다 —
+  // 이 화면은 진행바 애니메이션 때문에 30ms마다 리렌더되는데, 그 리렌더 빈도 때문인지
+  // useMutation이 노출하는 isPending/isSuccess가 실제로 요청이 성공(네트워크상 201)해도
+  // 계속 pending에 멈춰있는 문제가 있었음 — mutateAsync를 한 번만 호출하고 그 결과를
+  // 직접 로컬 state에 반영하는 방식으로 우회.
+  const [analysisState, setAnalysisState] = useState<'pending' | 'success' | 'error'>('pending');
+  const [analysisErrorMessage, setAnalysisErrorMessage] = useState<string | null>(null);
   const startedRef = useRef(false);
 
   useEffect(() => {
@@ -21,17 +28,26 @@ export const AiWaitingPage: React.FC = () => {
     if (startedRef.current) return;
     startedRef.current = true;
 
-    createAnalysis(imageId, {
-      onSuccess: (data) => {
+    createAnalysis(imageId)
+      .then((data) => {
         setAnalysisResult({
           reportId: data.reportId,
           imageUrl: data.imageUrl,
           matchPercentage: data.matchPercentage,
           suggestedTags: data.suggestedTags,
         });
-      },
-    });
-  }, [imageId, createAnalysis, navigate, setAnalysisResult]);
+        setAnalysisState('success');
+      })
+      .catch((err: Error) => {
+        setAnalysisErrorMessage(err.message);
+        setAnalysisState('error');
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageId]);
+
+  const isPending = analysisState === 'pending';
+  const isSuccess = analysisState === 'success';
+  const isError = analysisState === 'error';
 
   useEffect(() => {
     // UX용 진행바 애니메이션 — 실제 분석 완료 여부와는 별개로 최소 시청 시간을 보장한다.
@@ -89,7 +105,7 @@ export const AiWaitingPage: React.FC = () => {
           </div>
           <div className="text-[12px] text-text-secondary mt-[8px]">
             {isError
-              ? (error?.message ?? '분석 중 오류가 발생했습니다')
+              ? (analysisErrorMessage ?? '분석 중 오류가 발생했습니다')
               : '감성은 그대로, 가격은 가볍게'}
           </div>
         </div>
