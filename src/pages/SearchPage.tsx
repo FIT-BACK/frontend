@@ -192,7 +192,7 @@ export default function SearchPage() {
                   <div className='p-2 flex items-center justify-between'>
                     <div className='flex items-center gap-1.5'>
                       <img 
-                        src={lookbook.authorProfileImageUrl} 
+                        src={lookbook.authorProfileImageUrl ?? undefined} 
                         alt="profile" 
                         className="w-5 h-5 rounded-full object-cover bg-gray-100" 
                       />
