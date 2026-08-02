@@ -9,13 +9,14 @@ import type { NotificationItem } from '../api/notificationFeed';
 // C-17-03 딥링크 처리
 const getDeepLink = (n: NotificationItem): string | null => {
   if (n.targetId == null) return null;
-  switch (n.type) {
-    case 'LIKE':
+  switch (n.targetType) {
+    case 'LOOKBOOK':
       return `/lookbooks/${n.targetId}`;
-    case 'ANALYSIS_DONE':
-      return `/report/${n.targetId}`;
     case 'TREND':
-      return `/trends/${n.targetId}`;
+      return `/trend/${n.targetId}`;
+    case 'ANALYSIS_REPORT':
+      // 과거 리포트를 id로 다시 보는 화면이 아직 없어 마이 클로젯으로 안내
+      return '/closet';
     default:
       return null;
   }
@@ -68,10 +69,13 @@ export default function NotificationListPage() {
                 <div
                   className={`text-xs ${n.isRead ? 'text-gray-500' : 'font-bold'}`}
                 >
-                  {n.message}
+                  {n.title}
                 </div>
+                {n.body && (
+                  <div className='text-[10px] text-gray-400 mt-0.5'>{n.body}</div>
+                )}
                 <div className='text-[9px] text-gray-400 mt-0.5'>
-                  {n.createdAt}
+                  {new Date(n.createdAt).toLocaleString()}
                 </div>
               </div>
               {!n.isRead && (
