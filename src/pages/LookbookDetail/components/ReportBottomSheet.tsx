@@ -10,15 +10,21 @@ const REPORT_OPTIONS: { value: ReportType; label: string }[] = [
   { value: 'OTHER', label: '기타' },
 ];
 
-export default function ReportBottomSheet({
-  lookbookId,
-  onClose,
-}: {
+interface ReportBottomSheetProps {
+  isOpen: boolean;
   lookbookId: number;
   onClose: () => void;
-}) {
+}
+
+export default function ReportBottomSheet({
+  isOpen,
+  lookbookId,
+  onClose,
+}: ReportBottomSheetProps) {
   const [selected, setSelected] = useState<ReportType | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  if (!isOpen) return null;
 
   const handleSubmit = async () => {
     if (!selected) return;
@@ -39,36 +45,68 @@ export default function ReportBottomSheet({
   };
 
   return (
-    <div className='fixed inset-0 bg-black/30 flex items-end' onClick={onClose}>
-      <div
-        className='w-full bg-white rounded-t-2xl p-4'
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className='text-sm font-bold mb-3'>신고 유형을 선택해주세요</div>
-        <div className='flex flex-col'>
-          {REPORT_OPTIONS.map((opt) => (
-            <label
-              key={opt.value}
-              className='flex items-center gap-2.5 py-3 border-b last:border-0'
-            >
-              <input
-                type='radio'
-                name='reportType'
-                checked={selected === opt.value}
-                onChange={() => setSelected(opt.value)}
-              />
-              <span className='text-xs'>{opt.label}</span>
-            </label>
-          ))}
+    <div className='fixed inset-0 z-50 flex items-end justify-center'>
+      {/* 백드롭 배경 딤 처리 - 탭하면 닫힘 */}
+      <button
+        type='button'
+        aria-label='닫기'
+        onClick={onClose}
+        className='absolute inset-0 bg-black/40'
+      />
+
+      {/* 바텀시트 본체 */}
+      <div className='relative z-10 w-full max-w-[375px] rounded-t-3xl bg-white px-5 pb-8 pt-3 border-t border-border shadow-2xl animate-[slideUp_0.25s_ease-out]'>
+        {/* 드래그 핸들 */}
+        <div className='mx-auto mb-5 h-1 w-10 rounded-full bg-border' />
+
+        {/* 타이틀 */}
+        <h2 className='text-base font-bold text-text mb-4'>
+          신고 유형을 선택해주세요
+        </h2>
+
+        {/* 옵션 리스트 */}
+        <div className='flex flex-col space-y-1 mb-6'>
+          {REPORT_OPTIONS.map((opt) => {
+            const isChecked = selected === opt.value;
+            return (
+              <label
+                key={opt.value}
+                className={`flex items-center justify-between rounded-xl border p-3.5 cursor-pointer transition active:bg-bg ${
+                  isChecked
+                    ? 'border-primary-400 bg-primary-50/50 font-medium'
+                    : 'border-border'
+                }`}
+              >
+                <span className='text-sm text-text'>{opt.label}</span>
+                <input
+                  type='radio'
+                  name='reportType'
+                  checked={isChecked}
+                  onChange={() => setSelected(opt.value)}
+                  className='h-4 w-4 accent-primary-500 cursor-pointer'
+                />
+              </label>
+            );
+          })}
         </div>
+
+        {/* 제출 버튼 */}
         <button
-          className='w-full bg-pink-500 text-white rounded-lg py-3 text-xs font-bold mt-3 disabled:bg-gray-300'
+          type='button'
+          className='w-full rounded-xl bg-primary-500 py-3.5 text-sm font-bold text-white transition hover:bg-primary-600 disabled:bg-gray-200 disabled:text-gray-400'
           disabled={!selected || submitting}
           onClick={handleSubmit}
         >
-          신고하기
+          {submitting ? '접수 중...' : '신고하기'}
         </button>
       </div>
+
+      <style>{`
+        @keyframes slideUp {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
