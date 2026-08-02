@@ -44,7 +44,7 @@ interface ApiEnvelope<T> {
   data: T;
 }
 
-const USE_MOCK = true;
+const USE_MOCK = false;
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const mockDetail: LookbookDetail = {
