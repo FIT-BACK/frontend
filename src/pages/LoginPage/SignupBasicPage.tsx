@@ -30,7 +30,9 @@ export default function SignupBasicPage() {
         email: email,
         password: password,
       });
-      console.log('1단계 가입 성공:', response.data);
+      const { accessToken, refreshToken } = response.data.data;
+      localStorage.setItem('accessToken', accessToken);
+      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
       navigate('/signup/profile');
     } catch (error) {
       console.error('가입 실패:', error);
