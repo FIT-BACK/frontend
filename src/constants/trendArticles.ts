@@ -121,12 +121,16 @@ export const TREND_ARTICLES: TrendArticle[] = [
     description: '데일리로 편하게 입기 좋은 캐주얼 코디 모음.',
     relatedTags: ['#캐주얼', '#데일리룩'],
     contentType: 'magazine',
-    intro: '[여기에 실제 소개 문구]',
+    intro:
+      '편안함과 스타일을 동시에 챙기는 데일리 캐주얼 룩! 기본 티셔츠와 데님에 볼캡이나 스니커즈를 믹스매치해 감각적인 이지룩을 연출해보세요.',
     colorPalette: [
-      { name: '[컬러명]', hex: '[HEX코드]' },
-      { name: '[컬러명]', hex: '[HEX코드]' },
+      { name: '멜란지 그레이', hex: '#D1D5DB' },
+      { name: '인디고 데님', hex: '#2563EB' },
+      { name: '크림 베이지', hex: '#F3E5AB' },
     ],
-    photos: ['[실제 이미지 URL 1]', '[실제 이미지 URL 2]'],
+    photos: [
+      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop',
+    ],
   },
   {
     id: 5,
@@ -137,12 +141,16 @@ export const TREND_ARTICLES: TrendArticle[] = [
     description: '단정하면서도 트렌디한 오피스룩 세팅 가이드.',
     relatedTags: ['#포멀', '#오피스룩'],
     contentType: 'magazine',
-    intro: '[여기에 실제 소개 문구]',
+    intro:
+      '격식 있는 자리부터 데일리 출근룩까지 커버하는 오피스 포멀 스타일. 깔끔한 핏의 블레이저와 슬랙스, 미니멀한 숄더백으로 지적인 분위기를 완벽 완성해보세요.',
     colorPalette: [
-      { name: '[컬러명]', hex: '[HEX코드]' },
-      { name: '[컬러명]', hex: '[HEX코드]' },
+      { name: '네이비', hex: '#1E293B' },
+      { name: '차콜', hex: '#475569' },
+      { name: '클래식 화이트', hex: '#F8FAFC' },
     ],
-    photos: ['[실제 이미지 URL 1]', '[실제 이미지 URL 2]'],
+    photos: [
+      'https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=800&auto=format&fit=crop',
+    ],
   },
   {
     id: 6,
