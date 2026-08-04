@@ -12,15 +12,22 @@ const NOTIFICATIONS_QUERY_KEY = ['notifications'];
 export const useNotifications = () =>
   useQuery({
     queryKey: NOTIFICATIONS_QUERY_KEY,
-    queryFn: getNotifications, // NotificationItem[] 그대로 반환
+    queryFn: async () => {
+      const data = await getNotifications();
+      return data.items; // 👈 NotificationPage에서 items 배열만 추출!
+    },
   });
 
 // Header의 🔔 뱃지용 — useNotifications와 같은 쿼리 키를 공유해 중복 요청 없이 캐시를 재사용한다.
 export const useUnreadNotificationCount = () =>
   useQuery({
     queryKey: NOTIFICATIONS_QUERY_KEY,
-    queryFn: getNotifications,
-    select: (items) => items.filter((n) => !n.isRead).length,
+    queryFn: async () => {
+      const data = await getNotifications();
+      return data.items;
+    },
+    select: (items: NotificationItem[]) =>
+      items.filter((n) => !n.isRead).length,
   });
 
 export const useMarkNotificationAsRead = () => {
