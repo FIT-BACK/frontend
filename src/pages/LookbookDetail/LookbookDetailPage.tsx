@@ -14,7 +14,6 @@ import ReportBottomSheet from './components/ReportBottomSheet';
 export default function LookbookDetailPage() {
   const { lookbookId } = useParams();
   const id = Number(lookbookId);
-  const isValidId = Number.isFinite(id) && !Number.isNaN(id);
 
   const { data: lookbook, isLoading, isError } = useLookbookDetail(id);
   const toggleLike = useToggleLike(id);
@@ -37,17 +36,11 @@ export default function LookbookDetailPage() {
     navigate('/');
   };
 
-  if (!isValidId) {
-    return <div className='p-4 text-center'>잘못된 접근이에요</div>;
-  }
-
   if (isLoading) return <div className='p-4 text-center'>불러오는 중...</div>;
   if (isError || !lookbook)
     return <div className='p-4 text-center'>삭제된 콘텐츠입니다</div>;
 
-  const purchaseUrl = product
-    ? (product.affiliateUrl ?? product.purchaseUrl)
-    : lookbook.purchaseUrl;
+  const purchaseUrl = product ? (product.affiliateUrl ?? product.purchaseUrl) : lookbook.purchaseUrl;
 
   return (
     <div className='flex flex-col h-full'>
@@ -75,11 +68,7 @@ export default function LookbookDetailPage() {
       <div className='px-4 pt-3 flex items-center gap-2'>
         <div className='w-7 h-7 rounded-full bg-gray-200 overflow-hidden'>
           {lookbook.authorProfileImageUrl && (
-            <img
-              src={lookbook.authorProfileImageUrl}
-              alt=''
-              className='h-full w-full object-cover'
-            />
+            <img src={lookbook.authorProfileImageUrl} alt='' className='h-full w-full object-cover' />
           )}
         </div>
         <div>
@@ -91,7 +80,7 @@ export default function LookbookDetailPage() {
       </div>
 
       <div className='flex gap-1 flex-wrap px-4 pt-2'>
-        {lookbook.tags?.slice(0, 5).map((tag) => (
+        {lookbook.tags.slice(0, 5).map((tag) => (
           <span
             key={tag.tagId}
             className='text-xs bg-purple-50 text-purple-800 px-2 py-1 rounded-full'
@@ -112,23 +101,17 @@ export default function LookbookDetailPage() {
             <div className='flex items-center gap-2 mb-1'>
               <div className='flex-1'>
                 <div className='text-xs font-semibold'>{product.name}</div>
-                <div className='text-[9px] text-gray-400'>
-                  {product.sellerName}
-                </div>
+                <div className='text-[9px] text-gray-400'>{product.sellerName}</div>
               </div>
               <div className='text-sm font-bold text-purple-800'>
                 {product.price.amount.toLocaleString()}
-                {product.price.currency === 'KRW'
-                  ? '원'
-                  : ` ${product.price.currency}`}
+                {product.price.currency === 'KRW' ? '원' : ` ${product.price.currency}`}
               </div>
             </div>
           )}
           <button
             className='w-full bg-purple-400 text-white rounded-lg py-2 text-xs font-bold mt-1'
-            onClick={() =>
-              window.open(purchaseUrl, '_blank', 'noopener,noreferrer')
-            }
+            onClick={() => window.open(purchaseUrl, '_blank', 'noopener,noreferrer')}
           >
             구매하러 가기 →
           </button>
@@ -143,10 +126,7 @@ export default function LookbookDetailPage() {
           <span>{lookbook.isLiked ? '❤️' : '🤍'}</span>
           <span className='text-xs font-bold'>{lookbook.likeCount}</span>
         </button>
-        <button
-          onClick={() => saveLookbook.mutate()}
-          aria-label='마이 클로젯에 저장'
-        >
+        <button onClick={() => saveLookbook.mutate()} aria-label='마이 클로젯에 저장'>
           📑
         </button>
       </div>
@@ -192,7 +172,6 @@ export default function LookbookDetailPage() {
 
       {showReportSheet && (
         <ReportBottomSheet
-          isOpen={showReportSheet}
           lookbookId={id}
           onClose={() => setShowReportSheet(false)}
         />
