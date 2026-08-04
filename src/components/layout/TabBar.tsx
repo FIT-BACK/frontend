@@ -16,7 +16,7 @@ const TabBar = ({ onUploadClick }: TabBarProps) => {
     `flex flex-col items-center transition-colors ${isActive(path) ? 'text-primary-600' : 'text-text-secondary'}`;
 
   return (
-    <nav className="h-16 w-full flex items-center justify-around border-t border-primary-200 bg-white z-50">
+    <nav className="h-16 w-full flex items-center justify-around border-t border-primary-200 bg-white z-40">
       
       {/* 홈 */}
       <Link to="/" className={getLinkClass('/')}>

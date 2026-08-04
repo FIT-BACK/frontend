@@ -48,6 +48,9 @@ export default function MyPagePage() {
         onUploadedClick={() => navigate('/closet?tab=lookbook')}
       />
 
+      <span className="pb-2 pt-3 text-xs font-bold uppercase tracking-wide text-text-tertiary">
+        계정
+      </span>
       <div className="flex flex-col">
         <SettingsListItem label="회원정보 수정" onClick={() => navigate('/profile-edit')} />
         <SettingsListItem label="알림 설정" onClick={() => navigate('/notifications')} />
