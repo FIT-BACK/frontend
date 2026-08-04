@@ -173,6 +173,7 @@ export default function SearchPage() {
           </p>
         )}
 
+        {/* 💡 트렌드 섹션: id -> trendId, label -> title 수정 완료 */}
         {hasQuery && !isLoading && data && data.trends.length > 0 && (
           <section className='mt-2'>
             <h2 className='text-xs font-bold text-text-secondary mb-2'>
@@ -181,18 +182,14 @@ export default function SearchPage() {
             <div className='flex gap-3 overflow-x-auto pb-1'>
               {data.trends.map((trend) => (
                 <button
-                  key={trend.id}
+                  key={trend.trendId} 
                   type='button'
-                  onClick={() => navigate(`/trend/${trend.id}`)}
+                  onClick={() => navigate(`/trend/${trend.trendId}`)}
                   className='relative w-28 h-28 shrink-0 rounded-xl bg-bg-secondary border border-border overflow-hidden text-left'
                 >
-                  <img
-                    src={trend.imageUrl}
-                    alt={trend.label}
-                    className='h-full w-full object-cover'
-                  />
+                  <img src={trend.imageUrl} alt={trend.title} className='h-full w-full object-cover' />
                   <span className='absolute bottom-2 left-2 rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold text-text'>
-                    #{trend.label}
+                    #{trend.title}
                   </span>
                 </button>
               ))}
@@ -200,28 +197,34 @@ export default function SearchPage() {
           </section>
         )}
 
+        {/* 💡 룩북 섹션: id -> lookbookId, imageUrl -> originalImageUrl 수정 완료, 신규 필드 UI 반영 */}
         {hasQuery && !isLoading && data && data.lookbooks.length > 0 && (
           <section className='mt-6'>
             <h2 className='text-xs font-bold text-text-secondary mb-2'>룩북</h2>
             <div className='grid grid-cols-2 gap-3'>
               {data.lookbooks.map((lookbook) => (
                 <button
-                  key={lookbook.id}
+                  key={lookbook.lookbookId}
                   type='button'
-                  onClick={() => navigate(`/lookbooks/${lookbook.id}`)}
+                  onClick={() => navigate(`/lookbooks/${lookbook.lookbookId}`)}
                   className='rounded-xl overflow-hidden border border-border bg-white text-left'
                 >
                   <div
                     className='aspect-square bg-bg-secondary bg-cover bg-center'
-                    style={{ backgroundImage: `url(${lookbook.imageUrl})` }}
+                    style={{ backgroundImage: `url(${lookbook.originalImageUrl})` }}
                   />
-                  <div className='p-2'>
-                    <p className='text-xs font-semibold text-text truncate'>
-                      {lookbook.tags.map((tag) => `#${tag}`).join(' ')}
-                    </p>
-                    <p className='text-[11px] text-text-secondary mt-0.5'>
-                      @{lookbook.authorNickname}
-                    </p>
+                  <div className='p-2 flex items-center justify-between'>
+                    <div className='flex items-center gap-1.5'>
+                      <img 
+                        src={lookbook.authorProfileImageUrl ?? undefined} 
+                        alt="profile" 
+                        className="w-5 h-5 rounded-full object-cover bg-gray-100" 
+                      />
+                    </div>
+                    <div className='flex items-center gap-1 text-[11px] text-text-secondary'>
+                      <span>{lookbook.isLiked ? '❤️' : '🤍'}</span>
+                      <span>{lookbook.likeCount}</span>
+                    </div>
                   </div>
                 </button>
               ))}

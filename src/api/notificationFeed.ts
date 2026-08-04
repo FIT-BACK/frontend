@@ -64,19 +64,7 @@ interface NotificationListApiResponse {
   pageSize: number;
 }
 
-// 서버 응답(readAt 등)을 프론트 내부 타입(isRead)으로 변환
-const toNotificationItem = (raw: NotificationApiItem): NotificationItem => ({
-  id: raw.notificationId,
-  type: raw.notificationType,
-  title: raw.title,
-  body: raw.body,
-  targetType: raw.targetType,
-  targetId: raw.targetId,
-  isRead: raw.readAt !== null,
-  createdAt: raw.createdAt,
-});
-
-const USE_MOCK = true;
+const USE_MOCK = false;
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // 새 스키마 기준으로 다시 작성한 mock 데이터

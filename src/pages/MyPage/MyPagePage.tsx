@@ -39,7 +39,14 @@ export default function MyPagePage() {
         onAvatarClick={() => navigate('/profile-edit')}
       />
 
-      <StatSummary {...profile.stats} />
+      <StatSummary
+        {...profile.stats}
+        onSavedClick={() => navigate('/closet?tab=all')}
+        onAnalyzedClick={() => navigate('/closet?tab=report')}
+        // "업로드" 수는 내가 만든 룩북 개수인데 클로젯엔 아직 "내가 만든 룩북" 전용 화면이
+        // 없어서(저장한 룩북 탭만 있음) 가장 가까운 화면으로 임시 연결 — 전용 화면 생기면 교체
+        onUploadedClick={() => navigate('/closet?tab=lookbook')}
+      />
 
       <div className="flex flex-col">
         <SettingsListItem label="회원정보 수정" onClick={() => navigate('/profile-edit')} />
@@ -50,6 +57,7 @@ export default function MyPagePage() {
           disabled={profile.isSocialLogin}
         />
         <SettingsListItem label="로그아웃" onClick={() => setIsLogoutModalOpen(true)} />
+        <SettingsListItem label="회원 탈퇴" onClick={() => navigate('/withdraw')} />
       </div>
 
       <LogoutModal
