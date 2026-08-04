@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useContentSearch } from '../hooks/useContentSearch';
 import { useTags } from '../hooks/useTags';
-import { useMyProfile } from '../hooks/useMyPage'; // 추가
 
 const RECENT_SEARCH_KEY = 'fitback:recentSearches';
 const MAX_RECENT = 8;
@@ -24,22 +23,11 @@ export default function SearchPage() {
   const navigate = useNavigate();
   const [input, setInput] = useState('');
   const [keyword, setKeyword] = useState('');
-  const [recentSearches, setRecentSearches] = useState<string[]>(() =>
-    loadRecentSearches(),
-  );
+  const [recentSearches, setRecentSearches] = useState<string[]>(() => loadRecentSearches());
 
   const { data: tags = [] } = useTags();
-  const { data: profile } = useMyProfile(); // 추가
 
-  // 관심 스타일과 겹치는 태그만 우선 노출. 관심 스타일이 없거나
-  // 겹치는 태그가 하나도 없으면 전체 태그 목록으로 폴백한다.
-  const myStyleNames = profile?.styleTags ?? [];
-  const personalizedTags =
-    myStyleNames.length > 0
-      ? tags.filter((tag) => myStyleNames.includes(tag.tagName))
-      : [];
-  const displayTags = personalizedTags.length > 0 ? personalizedTags : tags;
-
+  // 입력 300ms 후에만 검색 실행 (매 타이핑마다 요청 나가는 것 방지)
   useEffect(() => {
     const timer = setTimeout(() => setKeyword(input), 300);
     return () => clearTimeout(timer);
@@ -48,17 +36,14 @@ export default function SearchPage() {
   const { data, isLoading } = useContentSearch(keyword);
 
   const hasQuery = keyword.trim().length > 0;
-  const hasResults =
-    !!data && (data.trends.length > 0 || data.lookbooks.length > 0);
+  const hasResults = !!data && (data.trends.length > 0 || data.lookbooks.length > 0);
 
+  // 실제 검색 결과가 나온 키워드만 최근 검색어에 남긴다 (빈 결과·오타는 제외)
   useEffect(() => {
     if (!hasQuery || isLoading || !hasResults) return;
     const trimmed = keyword.trim();
     setRecentSearches((prev) => {
-      const next = [trimmed, ...prev.filter((term) => term !== trimmed)].slice(
-        0,
-        MAX_RECENT,
-      );
+      const next = [trimmed, ...prev.filter((term) => term !== trimmed)].slice(0, MAX_RECENT);
       saveRecentSearches(next);
       return next;
     });
@@ -106,9 +91,7 @@ export default function SearchPage() {
           <div className='pt-2'>
             {recentSearches.length > 0 && (
               <section className='mb-6'>
-                <h2 className='text-xs font-bold text-text-secondary mb-2'>
-                  최근 검색어
-                </h2>
+                <h2 className='text-xs font-bold text-text-secondary mb-2'>최근 검색어</h2>
                 <div className='flex flex-wrap gap-2'>
                   {recentSearches.map((term) => (
                     <span
@@ -132,13 +115,11 @@ export default function SearchPage() {
               </section>
             )}
 
-            {displayTags.length > 0 && (
+            {tags.length > 0 && (
               <section>
-                <h2 className='text-xs font-bold text-text-secondary mb-2'>
-                  추천 태그
-                </h2>
+                <h2 className='text-xs font-bold text-text-secondary mb-2'>추천 태그</h2>
                 <div className='flex flex-wrap gap-2'>
-                  {displayTags.map((tag) => (
+                  {tags.map((tag) => (
                     <button
                       key={tag.tagId}
                       type='button'
@@ -152,7 +133,7 @@ export default function SearchPage() {
               </section>
             )}
 
-            {recentSearches.length === 0 && displayTags.length === 0 && (
+            {recentSearches.length === 0 && tags.length === 0 && (
               <p className='pt-16 text-center text-xs text-text-secondary'>
                 찾고 싶은 스타일이나 태그를 검색해보세요
               </p>
@@ -160,11 +141,8 @@ export default function SearchPage() {
           </div>
         )}
 
-        {/* 이하 검색 결과 렌더링 부분은 기존과 동일 */}
         {hasQuery && isLoading && (
-          <p className='pt-16 text-center text-xs text-text-secondary'>
-            검색 중...
-          </p>
+          <p className='pt-16 text-center text-xs text-text-secondary'>검색 중...</p>
         )}
 
         {hasQuery && !isLoading && !hasResults && (
@@ -173,26 +151,21 @@ export default function SearchPage() {
           </p>
         )}
 
+        {/* 💡 트렌드 섹션: id -> trendId, label -> title 수정 완료 */}
         {hasQuery && !isLoading && data && data.trends.length > 0 && (
           <section className='mt-2'>
-            <h2 className='text-xs font-bold text-text-secondary mb-2'>
-              트렌드
-            </h2>
+            <h2 className='text-xs font-bold text-text-secondary mb-2'>트렌드</h2>
             <div className='flex gap-3 overflow-x-auto pb-1'>
               {data.trends.map((trend) => (
                 <button
-                  key={trend.id}
+                  key={trend.trendId} 
                   type='button'
-                  onClick={() => navigate(`/trend/${trend.id}`)}
+                  onClick={() => navigate(`/trend/${trend.trendId}`)}
                   className='relative w-28 h-28 shrink-0 rounded-xl bg-bg-secondary border border-border overflow-hidden text-left'
                 >
-                  <img
-                    src={trend.imageUrl}
-                    alt={trend.label}
-                    className='h-full w-full object-cover'
-                  />
+                  <img src={trend.imageUrl} alt={trend.title} className='h-full w-full object-cover' />
                   <span className='absolute bottom-2 left-2 rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold text-text'>
-                    #{trend.label}
+                    #{trend.title}
                   </span>
                 </button>
               ))}
@@ -200,28 +173,34 @@ export default function SearchPage() {
           </section>
         )}
 
+        {/* 💡 룩북 섹션: id -> lookbookId, imageUrl -> originalImageUrl 수정 완료, 신규 필드 UI 반영 */}
         {hasQuery && !isLoading && data && data.lookbooks.length > 0 && (
           <section className='mt-6'>
             <h2 className='text-xs font-bold text-text-secondary mb-2'>룩북</h2>
             <div className='grid grid-cols-2 gap-3'>
               {data.lookbooks.map((lookbook) => (
                 <button
-                  key={lookbook.id}
+                  key={lookbook.lookbookId}
                   type='button'
-                  onClick={() => navigate(`/lookbooks/${lookbook.id}`)}
+                  onClick={() => navigate(`/lookbooks/${lookbook.lookbookId}`)}
                   className='rounded-xl overflow-hidden border border-border bg-white text-left'
                 >
                   <div
                     className='aspect-square bg-bg-secondary bg-cover bg-center'
-                    style={{ backgroundImage: `url(${lookbook.imageUrl})` }}
+                    style={{ backgroundImage: `url(${lookbook.originalImageUrl})` }}
                   />
-                  <div className='p-2'>
-                    <p className='text-xs font-semibold text-text truncate'>
-                      {lookbook.tags.map((tag) => `#${tag}`).join(' ')}
-                    </p>
-                    <p className='text-[11px] text-text-secondary mt-0.5'>
-                      @{lookbook.authorNickname}
-                    </p>
+                  <div className='p-2 flex items-center justify-between'>
+                    <div className='flex items-center gap-1.5'>
+                      <img 
+                        src={lookbook.authorProfileImageUrl ?? undefined} 
+                        alt="profile" 
+                        className="w-5 h-5 rounded-full object-cover bg-gray-100" 
+                      />
+                    </div>
+                    <div className='flex items-center gap-1 text-[11px] text-text-secondary'>
+                      <span>{lookbook.isLiked ? '❤️' : '🤍'}</span>
+                      <span>{lookbook.likeCount}</span>
+                    </div>
                   </div>
                 </button>
               ))}
@@ -235,14 +214,7 @@ export default function SearchPage() {
 
 function BackIcon() {
   return (
-    <svg
-      width='16'
-      height='16'
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='2'
-    >
+    <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
       <path d='M15 18l-6-6 6-6' />
     </svg>
   );
@@ -250,14 +222,7 @@ function BackIcon() {
 
 function SearchIcon() {
   return (
-    <svg
-      width='16'
-      height='16'
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='2'
-    >
+    <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
       <circle cx='11' cy='11' r='7' />
       <line x1='21' y1='21' x2='16.65' y2='16.65' />
     </svg>

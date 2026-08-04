@@ -8,69 +8,78 @@ import { api } from './axiosInstance';
  */
 
 export interface TrendItem {
-  id: number;
+  trendId: number;
   imageUrl: string;
-  label: string;
-  styleTags: string[];
+  title: string;
+  tags: string[];
+  isSaved: boolean;
 }
 
 export interface TrendDetail extends TrendItem {
   description?: string;
 }
 
-// 이 값을 false로 바꾸면 실제 서버와 연동됩니다.
-const USE_MOCK = true;
+// 💡 실서버 연동 상태 유지
+const USE_MOCK = false;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const MOCK_TRENDS: TrendItem[] = [
   {
-    id: 1,
+    trendId: 1,
     imageUrl: 'https://picsum.photos/seed/trend1/300/300',
-    label: '베이지 트렌치코트',
-    styleTags: ['미니멀', '포멀'],
+    title: '베이지 트렌치코트',
+    tags: ['가을', '클래식'],
+    isSaved: false,
   },
   {
-    id: 2,
+    trendId: 2,
     imageUrl: 'https://picsum.photos/seed/trend2/300/300',
-    label: '화이트 셔츠',
-    styleTags: ['미니멀', '캐주얼'],
+    title: '화이트 셔츠',
+    tags: ['베이직', '미니멀'],
+    isSaved: true,
   },
   {
-    id: 3,
+    trendId: 3,
     imageUrl: 'https://picsum.photos/seed/trend3/300/300',
-    label: '블랙 슬랙스',
-    styleTags: ['미니멀', '포멀'],
+    title: '블랙 슬랙스',
+    tags: ['오피스룩', '시크'],
+    isSaved: false,
   },
   {
-    id: 4,
+    trendId: 4,
     imageUrl: 'https://picsum.photos/seed/trend4/300/300',
-    label: '오버사이즈 후드',
-    styleTags: ['스트릿', '캐주얼'],
+    title: '오버사이즈 후드',
+    tags: ['스트릿', '캐주얼'],
+    isSaved: false,
   },
   {
-    id: 5,
+    trendId: 5,
     imageUrl: 'https://picsum.photos/seed/trend5/300/300',
-    label: '카고 팬츠',
-    styleTags: ['스트릿', '고프코어'],
+    title: '카고 팬츠',
+    tags: ['스트릿', '고프코어'],
+    isSaved: false,
   },
   {
-    id: 6,
+    trendId: 6,
     imageUrl: 'https://picsum.photos/seed/trend6/300/300',
-    label: '레이스 블라우스',
-    styleTags: ['페미닌', '빈티지'],
+    title: '레이스 블라우스',
+    tags: ['페미닌', '빈티지'],
+    isSaved: false,
   },
   {
-    id: 7,
+    trendId: 7,
     imageUrl: 'https://picsum.photos/seed/trend7/300/300',
-    label: '트랙 자켓',
-    styleTags: ['스포티', '캐주얼'],
+    title: '트랙 자켓',
+    tags: ['스포티', '캐주얼'],
+    isSaved: false,
   },
   {
-    id: 8,
+    trendId: 8,
     imageUrl: 'https://picsum.photos/seed/trend8/300/300',
-    label: '와이드 데님',
-    styleTags: ['빈티지', '캐주얼'],
+    title: '와이드 데님',
+    tags: ['빈티지', '캐주얼'],
+    isSaved: false,
   },
 ];
 
@@ -80,23 +89,26 @@ export const getTrends = async (): Promise<TrendItem[]> => {
     await delay(400);
     return MOCK_TRENDS;
   }
-  const response = await api.get<TrendItem[]>('/api/v1/trends');
-  return response.data;
+  
+  const response = await api.get<{ data: TrendItem[] }>('/api/v1/trends');
+  return response.data.data;
 };
 
 /** GET /api/v1/trends/{trendId} - 트렌드 카드 선택 시 상세 조회 */
 export const getTrendDetail = async (trendId: number): Promise<TrendDetail> => {
   if (USE_MOCK) {
     await delay(400);
-    const found = MOCK_TRENDS.find((t) => t.id === trendId);
+    const found = MOCK_TRENDS.find((t) => t.trendId === trendId);
     return {
-      id: trendId,
+      trendId: trendId,
       imageUrl: found?.imageUrl ?? MOCK_TRENDS[0].imageUrl,
-      label: found?.label ?? '트렌드',
-      styleTags: found?.styleTags ?? [],
+      title: found?.title ?? '트렌드',
+      tags: found?.tags ?? [],
+      isSaved: found?.isSaved ?? false,
       description: '이 시즌 인기 있는 스타일이에요.',
     };
   }
-  const response = await api.get<TrendDetail>(`/api/v1/trends/${trendId}`);
-  return response.data;
+  
+  const response = await api.get<{ data: TrendDetail }>(`/api/v1/trends/${trendId}`);
+  return response.data.data;
 };
