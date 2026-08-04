@@ -1,11 +1,18 @@
 import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import type { ClosetItem } from '../../api/closet'
 import { useClosetItems, useDeleteClosetItem } from '../../hooks/useMyCloset'
 import CategoryTabs, { type ClosetTab } from './components/CategoryTabs'
 import ClosetGrid from './components/ClosetGrid'
 
+const VALID_TABS: ClosetTab[] = ['all', 'trend', 'lookbook', 'report']
+
 export default function MyClosetPage() {
-  const [activeTab, setActiveTab] = useState<ClosetTab>('all')
+  const [searchParams] = useSearchParams()
+  const initialTab = searchParams.get('tab')
+  const [activeTab, setActiveTab] = useState<ClosetTab>(
+    VALID_TABS.includes(initialTab as ClosetTab) ? (initialTab as ClosetTab) : 'all',
+  )
   const { data: items = [], isLoading, isError } = useClosetItems()
   const { mutate: deleteItem } = useDeleteClosetItem()
 

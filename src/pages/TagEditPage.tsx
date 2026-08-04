@@ -12,7 +12,12 @@ export const TagEditPage: React.FC = () => {
   const setTags = useUploadStore((state) => state.setAiTags);
   const setRecommendations = useUploadStore((state) => state.setRecommendations);
 
-  const { mutate: getRecommendations, isPending, isError, error } = useItemMatching(reportId ?? 0);
+  const { mutateAsync: getRecommendations } = useItemMatching(reportId ?? 0);
+  // useMutation의 isPending/isSuccess 대신 로컬 state로 직접 관리 —
+  // AiWaitingPage.tsx와 같은 이유(잦은 리렌더와 맞물리면 mutation 관찰자 상태가
+  // 실제 요청 완료를 못 따라가는 문제가 있었음). mutateAsync 결과를 직접 반영.
+  const [isMatching, setIsMatching] = useState(false);
+  const [matchError, setMatchError] = useState<string | null>(null);
 
   const [tagWarning, setTagWarning] = useState(false);
 
@@ -55,8 +60,8 @@ export const TagEditPage: React.FC = () => {
     setIsBottomSheetOpen(false);
   };
 
-  const handleConfirm = () => {
-    if (!reportId) return;
+  const handleConfirm = async () => {
+    if (!reportId || isMatching) return;
 
     // 현재 화면에 남아있는 태그를 원본 추천 태그(tagId 보유)와 대조해
     // 확정된 기본 태그(confirmedTagIds)와 사용자가 직접 추가한 태그(customTagNames)로 분리한다.
@@ -66,19 +71,20 @@ export const TagEditPage: React.FC = () => {
       .filter((tagId): tagId is number => tagId !== undefined);
     const customTagNames = tags.filter((tag) => !suggestedByName.has(tag));
 
-    getRecommendations(
-      { confirmedTagIds, customTagNames, matchPercentage: matchLevel },
-      {
-        onSuccess: (data) => {
-          setRecommendations({
-            recommendationGroups: data.recommendationGroups,
-            partial: data.partial,
-            warnings: data.warnings,
-          });
-          navigate('/result');
-        },
-      },
-    );
+    setIsMatching(true);
+    setMatchError(null);
+    try {
+      const data = await getRecommendations({ confirmedTagIds, customTagNames, matchPercentage: matchLevel });
+      setRecommendations({
+        recommendationGroups: data.recommendationGroups,
+        partial: data.partial,
+        warnings: data.warnings,
+      });
+      navigate('/result');
+    } catch (err) {
+      setMatchError(err instanceof Error ? err.message : '추천 결과를 생성하지 못했습니다. 다시 시도해 주세요.');
+      setIsMatching(false);
+    }
   };
 
   return (
@@ -132,10 +138,8 @@ export const TagEditPage: React.FC = () => {
         {/* Spacer */}
         <div className="flex-1"></div>
 
-        {isError && (
-          <p className="text-[11px] text-error-400 text-center">
-            {error?.message ?? '추천 결과를 생성하지 못했습니다. 다시 시도해 주세요.'}
-          </p>
+        {matchError && (
+          <p className="text-[11px] text-error-400 text-center">{matchError}</p>
         )}
 
         {/* Slider Card */}
@@ -175,10 +179,10 @@ export const TagEditPage: React.FC = () => {
         {/* Confirm Button */}
         <button
           onClick={handleConfirm}
-          disabled={isPending || !reportId}
+          disabled={isMatching || !reportId}
           className="w-full text-bg text-[15px] font-bold border-none rounded-[14px] p-[16px] bg-primary-400 hover:bg-primary-500 transition-colors disabled:opacity-50 shrink-0 mt-2"
         >
-          {isPending ? '매칭 중...' : '이대로 매칭하기'}
+          {isMatching ? '매칭 중...' : '이대로 매칭하기'}
         </button>
       </div>
 
