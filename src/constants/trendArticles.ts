@@ -67,13 +67,16 @@ export const TREND_ARTICLES: TrendArticle[] = [
       '군더더기 없는 깔끔한 실루엣과 뉴트럴 컬러로 완성하는 미니멀 스타일. 이번 시즌 가장 핫한 트렌드예요.',
     relatedTags: ['#미니멀', '#뉴트럴', '#와이드핏'],
     contentType: 'magazine',
-    intro: '미니멀은 작은 악세서리와 함께 매치하면 더 아름답게 연출할 수 있어요',
+    intro:
+      '미니멀은 작은 악세서리와 함께 매치하면 더 아름답게 연출할 수 있어요',
     colorPalette: [
       { name: '화이트', hex: '#FFFFFF' },
       { name: '블랙', hex: '#1C1C1C' },
       { name: '아이보리', hex: '#F0E4D0' },
     ],
-    photos: ['https://i.pinimg.com/1200x/6f/fe/1e/6ffe1ea673bc95190a513535c00678b9.jpg'],
+    photos: [
+      'https://i.pinimg.com/1200x/6f/fe/1e/6ffe1ea673bc95190a513535c00678b9.jpg',
+    ],
   },
   {
     id: 2,
@@ -81,10 +84,12 @@ export const TREND_ARTICLES: TrendArticle[] = [
     title: '스트릿패션을 표현하는 방법',
     tagColor: '#3c3489',
     bgGradient: 'linear-gradient(160deg, #F0EDF9, #DDD5F5)',
-    description: '오버사이즈 실루엣과 레이어드 룩으로 완성하는 스트릿 스타일링.',
+    description:
+      '오버사이즈 실루엣과 레이어드 룩으로 완성하는 스트릿 스타일링.',
     relatedTags: ['#스트릿', '#오버사이즈', '#캐주얼'],
     contentType: 'magazine',
-    intro: '스트릿은 오버사이즈 아이템에 포인트 액세서리를 더하면 개성있게 연출할 수 있어요',
+    intro:
+      '스트릿은 오버사이즈 아이템에 포인트 액세서리를 더하면 개성있게 연출할 수 있어요',
     colorPalette: [
       { name: '화이트', hex: '#FFFFFF' },
       { name: '블랙', hex: '#1C1C1C' },
@@ -115,8 +120,13 @@ export const TREND_ARTICLES: TrendArticle[] = [
     bgGradient: 'linear-gradient(160deg, #FEF5E8, #FAD9A0)',
     description: '데일리로 편하게 입기 좋은 캐주얼 코디 모음.',
     relatedTags: ['#캐주얼', '#데일리룩'],
-    contentType: 'photo',
-    imageUrl: 'https://picsum.photos/seed/trend-casual/600/400',
+    contentType: 'magazine',
+    intro: '[여기에 실제 소개 문구]',
+    colorPalette: [
+      { name: '[컬러명]', hex: '[HEX코드]' },
+      { name: '[컬러명]', hex: '[HEX코드]' },
+    ],
+    photos: ['[실제 이미지 URL 1]', '[실제 이미지 URL 2]'],
   },
   {
     id: 5,
@@ -124,10 +134,15 @@ export const TREND_ARTICLES: TrendArticle[] = [
     title: '오피스 포멀 무드',
     tagColor: '#3c3489',
     bgGradient: 'linear-gradient(160deg, #EAF0FA, #C9D9F0)',
-    description: '단정하면서도 트렌디한 오피스룩 세팅 가이드 영상.',
+    description: '단정하면서도 트렌디한 오피스룩 세팅 가이드.',
     relatedTags: ['#포멀', '#오피스룩'],
-    contentType: 'youtube',
-    youtubeVideoId: 'dQw4w9WgXcQ',
+    contentType: 'magazine',
+    intro: '[여기에 실제 소개 문구]',
+    colorPalette: [
+      { name: '[컬러명]', hex: '[HEX코드]' },
+      { name: '[컬러명]', hex: '[HEX코드]' },
+    ],
+    photos: ['[실제 이미지 URL 1]', '[실제 이미지 URL 2]'],
   },
   {
     id: 6,
@@ -135,7 +150,8 @@ export const TREND_ARTICLES: TrendArticle[] = [
     title: '어떤 자리에서도 손색없는 캐주얼+포멀조합',
     tagColor: '#7A5C2E',
     bgGradient: 'linear-gradient(160deg, #F5EFE6, #E4D3B8)',
-    description: '캐주얼함은 유지하면서 포멀한 자리에서도 손색없는 밸런스를 잡은 조합.',
+    description:
+      '캐주얼함은 유지하면서 포멀한 자리에서도 손색없는 밸런스를 잡은 조합.',
     // 캐주얼/포멀 태그를 둘 다 선택한 사람 모두에게 노출되도록 두 태그를 함께 등록
     relatedTags: ['#캐주얼', '#포멀'],
     contentType: 'magazine',
@@ -146,6 +162,8 @@ export const TREND_ARTICLES: TrendArticle[] = [
       { name: '차콜 그레이', hex: '#3A3A3A' },
       { name: '오프 화이트', hex: '#F2EEE6' },
     ],
-    photos: ['https://i.pinimg.com/1200x/55/60/18/55601858d817ccd0c52f8a611b7faed0.jpg'],
+    photos: [
+      'https://i.pinimg.com/1200x/55/60/18/55601858d817ccd0c52f8a611b7faed0.jpg',
+    ],
   },
 ];
