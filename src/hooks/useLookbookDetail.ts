@@ -16,6 +16,7 @@ export const useLookbookDetail = (lookbookId: number) =>
   useQuery({
     queryKey: detailKey(lookbookId),
     queryFn: () => getLookbookDetail(lookbookId),
+    enabled: Number.isFinite(lookbookId),
   });
 
 export const useToggleLike = (lookbookId: number) => {
@@ -43,7 +44,9 @@ export const useToggleLike = (lookbookId: number) => {
     },
     onSuccess: (result) => {
       queryClient.setQueryData<LookbookDetail>(detailKey(lookbookId), (old) =>
-        old ? { ...old, isLiked: result.isLiked, likeCount: result.likeCount } : old,
+        old
+          ? { ...old, isLiked: result.isLiked, likeCount: result.likeCount }
+          : old,
       );
     },
     onError: (_err, _vars, context) => {
