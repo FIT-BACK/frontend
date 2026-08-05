@@ -28,12 +28,14 @@ import MoreTrendsPage from './pages/MoreTrendsPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import LookbookDetailPage from './pages/LookbookDetail/LookbookDetailPage';
 import NotificationListPage from './pages/NotificationListPage';
+import { useSaveTrend } from './hooks/useMyCloset';
 
 // 홈 화면 콜백을 실제 라우트로 연결. 이전에 병합 충돌을 해결하면서 이 부분이
 // 실수로 옛날 버전(검색 콜백만 있는 버전)으로 되돌아가 "더보기"·트렌드 카드·
 // 룩북 카드 클릭이 다시 무반응이 됐었음 — 재발 방지로 다시 연결.
 function HomeRoute() {
   const navigate = useNavigate();
+  const saveTrend = useSaveTrend();
   return (
     <HomePage
       onOpenSearch={() => navigate('/search')}
@@ -41,6 +43,7 @@ function HomeRoute() {
       onSeeMoreTrends={() => navigate('/trends')}
       onOpenTrendDetail={(id) => navigate(`/trend/${id}`)}
       onOpenLookbookDetail={(id) => navigate(`/lookbooks/${id}`)}
+      onSaveTrend={(id) => saveTrend.mutate(Number(id))}
     />
   );
 }
