@@ -36,6 +36,7 @@ export interface RecommendationItem {
   purchaseUrl: string
   availability: string
   isSaved: boolean
+  reasonCode?: string
 }
 
 export interface RecommendationGroup {
