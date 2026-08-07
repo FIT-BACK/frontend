@@ -85,3 +85,11 @@ export const deleteClosetItem = async (id: number): Promise<void> => {
 
   await api.delete(`/api/v1/closet-saves/${id}`)
 }
+
+// 홈 화면 트렌드 카드의 "저장" 버튼용. trendId는 트렌드 콘텐츠(constants/trendArticles.ts)의 id.
+export const saveTrendToCloset = async (trendId: number): Promise<void> => {
+  await api.post('/api/v1/closet-saves', {
+    targetType: 'TREND',
+    targetId: trendId,
+  })
+}
