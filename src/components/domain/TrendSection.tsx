@@ -1,10 +1,12 @@
-import { TREND_ARTICLES, type TrendArticle } from '../../constants/trendArticles';
+import {
+  TREND_ARTICLES,
+  type TrendArticle,
+} from '../../constants/trendArticles';
 import { useMyProfile } from '../../hooks/useMyPage';
 
 interface TrendSectionProps {
   onOpenTrendDetail?: (id: string) => void;
   onSaveTrend?: (id: string) => void;
-  /** "더보기" 클릭 시 호출. 트렌드 전체 목록 화면이 아직 없다면 콜백을 안 넘겨도 됩니다. */
   onSeeMoreTrends?: () => void;
 }
 
@@ -21,7 +23,6 @@ export default function TrendSection({
 }: TrendSectionProps) {
   const { data: profile } = useMyProfile();
 
-  // 회원가입/마이페이지에서 고른 관심 스타일 중 첫 번째를 개인화 기준으로 사용
   const primaryStyle = profile?.styleTags?.[0];
   const primaryTag = primaryStyle ? `#${primaryStyle}` : undefined;
 
@@ -29,62 +30,71 @@ export default function TrendSection({
     ? TREND_ARTICLES.filter((item) => item.relatedTags.includes(primaryTag))
     : [];
 
-  // 선택한 스타일과 맞는 트렌드가 있을 때만 "당신을 위한" 개인화 피드로 전환하고,
-  // 없으면 원래의 전체 트렌드 피드를 그대로 보여준다.
-  const isPersonalized = matchedItems.length > 0;
-  const visibleItems = isPersonalized ? matchedItems : TREND_ARTICLES;
+  const visibleItems = matchedItems.length > 0 ? matchedItems : TREND_ARTICLES;
 
   return (
-    <section className='mt-6 px-5'>
-      <div className='flex items-center justify-between'>
-        <h2 className='text-sm font-bold text-text'>나를 위한 트렌드</h2>
+    <section className='mt-5 px-5'>
+      <div className='mb-3 flex items-center justify-between'>
+        <h2 className='text-base font-bold text-text'>🔥 요즘 트렌드</h2>
 
         <button
           type='button'
           onClick={onSeeMoreTrends}
-          className='text-xs text-text-secondary cursor-pointer'
+          className='text-sm text-text-tertiary'
         >
           더보기 &gt;
         </button>
       </div>
 
-      <div className='mt-3 flex gap-3 overflow-x-auto pb-2 snap-x'>
+      <div className='scrollbar-hide flex gap-4 overflow-x-auto pb-2'>
         {visibleItems.map((item) => {
           const thumbnail = getTrendThumbnail(item);
+
           return (
             <button
               key={item.id}
               type='button'
               onClick={() => onOpenTrendDetail?.(String(item.id))}
-              className='relative w-[260px] shrink-0 snap-start rounded-2xl border border-border bg-white overflow-hidden text-left'
+              className='relative h-[170px] w-[150px] shrink-0 overflow-hidden rounded-3xl text-left'
             >
+              {/* 배경 */}
               <div
-                className='h-[150px] w-full bg-cover bg-center relative'
+                className='absolute inset-0 bg-cover bg-center'
                 style={
                   thumbnail
-                    ? { backgroundImage: `url(${thumbnail})` }
-                    : { background: item.bgGradient }
+                    ? {
+                        backgroundImage: `url(${thumbnail})`,
+                      }
+                    : {
+                        background: item.bgGradient,
+                      }
                 }
+              />
+
+              {/* 어둡게 */}
+              <div className='absolute inset-0 bg-black/15' />
+
+              {/* 저장 버튼 */}
+              <button
+                type='button'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSaveTrend?.(String(item.id));
+                }}
+                className='absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-text-secondary'
               >
-                <span className='absolute top-2.5 left-2.5 rounded-full bg-primary-400 px-2.5 py-1 text-[10px] font-bold text-white'>
+                <BookmarkIcon />
+              </button>
+
+              {/* 태그 + 제목 */}
+              <div className='absolute bottom-3 left-3 right-3'>
+                <span className='inline-block rounded-full bg-white px-2 py-1 text-[10px] font-semibold text-primary-600'>
                   {item.tag}
                 </span>
 
-                <span
-                  role='button'
-                  aria-label='마이 클로젯에 저장'
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSaveTrend?.(String(item.id));
-                  }}
-                  className='absolute top-2.5 right-2.5 grid h-7 w-7 place-items-center rounded-full bg-white/85 text-text-secondary'
-                >
-                  <BookmarkIcon />
-                </span>
-              </div>
-
-              <div className='px-3 py-2.5'>
-                <p className='text-[13px] font-bold text-text leading-snug'>{item.title}</p>
+                <p className='mt-2 text-[17px] font-bold leading-tight text-white drop-shadow'>
+                  {item.title}
+                </p>
               </div>
             </button>
           );
@@ -97,8 +107,8 @@ export default function TrendSection({
 function BookmarkIcon() {
   return (
     <svg
-      width='14'
-      height='14'
+      width='15'
+      height='15'
       viewBox='0 0 24 24'
       fill='none'
       stroke='currentColor'

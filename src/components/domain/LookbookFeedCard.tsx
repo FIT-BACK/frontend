@@ -1,26 +1,18 @@
+import { useToggleLike } from '../../hooks/useLookbookDetail';
 import { DUMMY_UPLOAD_IMAGE_URL } from '../../constants/dummyData';
-
-interface LookbookFeedItem {
-  id: string;
-  authorHandle: string;
-  likeCount: number;
-  originalImageUrl?: string;
-  matchedImageUrl?: string;
-}
+import type { LookbookFeedItem } from '../../api/lookbooks';
 
 interface LookbookFeedCardProps {
   item: LookbookFeedItem;
-  liked: boolean;
   onOpenDetail: () => void;
-  onToggleLike: () => void;
 }
 
 export default function LookbookFeedCard({
   item,
-  liked,
   onOpenDetail,
-  onToggleLike,
 }: LookbookFeedCardProps) {
+  const toggleLike = useToggleLike(item.id);
+
   return (
     <div
       onClick={onOpenDetail}
@@ -56,9 +48,17 @@ export default function LookbookFeedCard({
 
       <div className='flex items-center justify-between px-3 py-2'>
         <div className='flex items-center gap-2'>
-          <div className='h-5 w-5 rounded-full bg-primary-50' />
+          <div className='h-5 w-5 rounded-full bg-primary-50 overflow-hidden'>
+            {item.authorProfileImageUrl && (
+              <img
+                src={item.authorProfileImageUrl}
+                alt=''
+                className='h-full w-full object-cover'
+              />
+            )}
+          </div>
           <span className='text-xs text-text-secondary'>
-            {item.authorHandle}
+            {item.authorNickname}
           </span>
         </div>
 
@@ -67,12 +67,12 @@ export default function LookbookFeedCard({
           aria-label='좋아요'
           onClick={(e) => {
             e.stopPropagation();
-            onToggleLike();
+            toggleLike.mutate(item.isLiked);
           }}
           className='flex items-center gap-1 text-xs text-text-secondary'
         >
-          <HeartIcon filled={liked} />
-          {item.likeCount + (liked ? 1 : 0)}
+          <HeartIcon filled={item.isLiked} />
+          {item.likeCount}
         </button>
       </div>
     </div>

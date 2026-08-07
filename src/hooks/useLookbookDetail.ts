@@ -6,6 +6,7 @@ import {
   saveLookbook,
   reportLookbook,
   deleteLookbook,
+  getLookbookFeed,
   type LookbookDetail,
   type ReportType,
 } from '../api/lookbooks';
@@ -43,7 +44,9 @@ export const useToggleLike = (lookbookId: number) => {
     },
     onSuccess: (result) => {
       queryClient.setQueryData<LookbookDetail>(detailKey(lookbookId), (old) =>
-        old ? { ...old, isLiked: result.isLiked, likeCount: result.likeCount } : old,
+        old
+          ? { ...old, isLiked: result.isLiked, likeCount: result.likeCount }
+          : old,
       );
     },
     onError: (_err, _vars, context) => {
@@ -70,4 +73,10 @@ export const useReportLookbook = (lookbookId: number) =>
 export const useDeleteLookbook = (lookbookId: number) =>
   useMutation({
     mutationFn: () => deleteLookbook(lookbookId),
+  });
+
+export const useLookbookFeed = () =>
+  useQuery({
+    queryKey: ['lookbookFeed'],
+    queryFn: () => getLookbookFeed(),
   });
