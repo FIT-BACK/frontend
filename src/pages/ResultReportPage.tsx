@@ -4,6 +4,7 @@ import { useSaveReport } from '../hooks/useSaveReport';
 import { useUploadStore } from '../store/useUploadStore';
 import type { RecommendationItem } from '../api/analysis';
 import type { LookbookUploadNavState } from './LookbookUpload/LookbookUploadPage';
+import { REASON_CODE_MAP } from '../constants/tag';
 
 const CATEGORY_LABELS: Record<string, string> = {
   OUTER: '아우터',
@@ -134,6 +135,13 @@ export const ResultReportPage: React.FC = () => {
         <div className="flex-1 min-w-0 flex flex-col justify-center">
           <div className="text-[12px] text-text font-bold truncate">{item.name}</div>
           <div className="text-[10px] text-text-secondary mt-[2px]">{item.sellerName}</div>
+          {item.reasonCode && REASON_CODE_MAP[item.reasonCode] && (
+            <div className="mt-[6px]">
+              <span className={`px-[6px] py-[3px] text-[10px] leading-none rounded-full ${REASON_CODE_MAP[item.reasonCode].color}`}>
+                {REASON_CODE_MAP[item.reasonCode].label}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col items-end">
