@@ -4,6 +4,7 @@ import { useSaveReport } from '../hooks/useSaveReport';
 import { useUploadStore } from '../store/useUploadStore';
 import type { RecommendationItem } from '../api/analysis';
 import { REASON_CODE_MAP } from '../constants/tag';
+import type { LookbookUploadNavState } from './LookbookUpload/LookbookUploadPage';
 
 const CATEGORY_LABELS: Record<string, string> = {
   OUTER: '아우터',
@@ -19,7 +20,10 @@ const CATEGORY_LABELS: Record<string, string> = {
 export const ResultReportPage: React.FC = () => {
   const navigate = useNavigate();
   const reportId = useUploadStore((state) => state.reportId);
+  const imageId = useUploadStore((state) => state.imageId);
+  const imageUri = useUploadStore((state) => state.imageUri);
   const tags = useUploadStore((state) => state.aiTags);
+  const suggestedTags = useUploadStore((state) => state.suggestedTags);
   const recommendationGroups = useUploadStore((state) => state.recommendationGroups);
   const partial = useUploadStore((state) => state.partial);
   const warnings = useUploadStore((state) => state.warnings);
@@ -55,6 +59,36 @@ export const ResultReportPage: React.FC = () => {
 
   const handleSelect = (category: string, productId: number) => {
     setSelectedByCategory((prev) => ({ ...prev, [category]: productId }));
+  };
+
+  // 룩북은 "매칭 상품" 하나만 지원(백엔드 LookbookRequest.matchedProductId가 단일 값) —
+  // 여러 카테고리를 선택했다면 첫 번째 선택을 대표 상품으로 사용한다.
+  const handleUploadAsLookbook = () => {
+    if (!reportId || !imageId || !allSelected) return;
+    const firstSelectedProductId = Object.values(selectedByCategory)[0];
+    const matchedItem = nonEmptyGroups
+      .flatMap((group) => group.items)
+      .find((item) => item.productId === firstSelectedProductId);
+    if (!matchedItem) return;
+
+    const suggestedByName = new Map(suggestedTags.map((tag) => [tag.tagName, tag]));
+    const confirmedTags = tags
+      .map((tagName) => suggestedByName.get(tagName))
+      .filter((tag): tag is (typeof suggestedTags)[number] => tag !== undefined);
+
+    const navState: LookbookUploadNavState = {
+      originalImageId: imageId,
+      originalImageUrl: imageUri,
+      sourceReportId: reportId,
+      matchedProduct: {
+        productId: matchedItem.productId,
+        imageUrl: matchedItem.imageUrl,
+        name: matchedItem.name,
+        purchaseUrl: matchedItem.purchaseUrl,
+      },
+      tags: confirmedTags,
+    };
+    navigate('/upload', { state: navState });
   };
 
   const ItemCard = ({
@@ -184,7 +218,7 @@ export const ResultReportPage: React.FC = () => {
       {/* Fixed Bottom Button */}
       <div className="absolute bottom-[20px] left-[20px] right-[20px] z-20">
         <button
-          onClick={() => navigate('/upload')}
+          onClick={handleUploadAsLookbook}
           disabled={!allSelected}
           className="w-full text-bg text-[15px] font-bold border-none rounded-[14px] p-[16px] bg-primary-400 hover:bg-primary-500 transition-colors shadow-[0_5px_12px_rgba(127,119,221,0.3)] disabled:bg-border disabled:text-text-secondary disabled:shadow-none"
         >

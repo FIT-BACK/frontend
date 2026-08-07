@@ -11,6 +11,7 @@ export default function SignupBasicPage() {
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleNextStep = async () => {
+    // 1. 프론트엔드 자체 유효성 검사
     if (!email || !password) {
       setErrorMessage('이메일과 비밀번호를 모두 입력해주세요.');
       return;
@@ -23,6 +24,8 @@ export default function SignupBasicPage() {
       setErrorMessage('비밀번호가 일치하지 않습니다.');
       return;
     }
+    
+    // 에러 메시지 초기화 후 API 호출
     setErrorMessage('');
 
     try {
@@ -30,13 +33,28 @@ export default function SignupBasicPage() {
         email: email,
         password: password,
       });
+      
       const { accessToken, refreshToken } = response.data.data;
       localStorage.setItem('accessToken', accessToken);
       if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+      
       navigate('/signup/profile');
-    } catch (error) {
+    } catch (error: any) {
       console.error('가입 실패:', error);
-      setErrorMessage('회원가입에 실패했습니다. 다시 시도해주세요.');
+
+      // 서버 응답 데이터 추출
+      const status = error.response?.status;
+      const errorCode = error.response?.data?.code;
+      const errorMessageFromServer = error.response?.data?.message;
+
+      // 2. 이메일 중복 에러 처리
+      if (status === 409 || errorCode === 'AUTH409_1') {
+        setErrorMessage(errorMessageFromServer || '이미 사용 중인 이메일입니다.');
+      } 
+      // 3. 그 외의 서버 에러 처리
+      else {
+        setErrorMessage('회원가입에 실패했습니다. 다시 시도해주세요.');
+      }
     }
   };
 

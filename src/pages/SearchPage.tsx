@@ -151,7 +151,7 @@ export default function SearchPage() {
           </p>
         )}
 
-        {/* 💡 트렌드 섹션: id -> trendId, label -> title 수정 완료 */}
+        {/* 트렌드 섹션: id -> trendId, label -> title 수정 완료 */}
         {hasQuery && !isLoading && data && data.trends.length > 0 && (
           <section className='mt-2'>
             <h2 className='text-xs font-bold text-text-secondary mb-2'>트렌드</h2>
@@ -173,7 +173,7 @@ export default function SearchPage() {
           </section>
         )}
 
-        {/* 💡 룩북 섹션: id -> lookbookId, imageUrl -> originalImageUrl 수정 완료, 신규 필드 UI 반영 */}
+        {/* 룩북 섹션: id -> lookbookId, imageUrl -> originalImageUrl 수정 완료, 신규 필드 UI 반영 */}
         {hasQuery && !isLoading && data && data.lookbooks.length > 0 && (
           <section className='mt-6'>
             <h2 className='text-xs font-bold text-text-secondary mb-2'>룩북</h2>
