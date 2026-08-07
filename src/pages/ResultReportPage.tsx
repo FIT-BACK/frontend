@@ -28,7 +28,7 @@ export const ResultReportPage: React.FC = () => {
   const partial = useUploadStore((state) => state.partial);
   const warnings = useUploadStore((state) => state.warnings);
 
-  const { mutate: submitSaveReport, isPending } = useSaveReport();
+  const { mutate: submitSaveReport, isPending, isSuccess: isSaved } = useSaveReport();
 
   // 카테고리별로 선택된 상품 productId
   const [selectedByCategory, setSelectedByCategory] = useState<Record<string, number>>({});
@@ -192,12 +192,8 @@ export const ResultReportPage: React.FC = () => {
         <div className="flex flex-col items-center">
           <span className="text-[16px] font-bold text-text">분석 결과</span>
         </div>
-        <span
-          onClick={handleSave}
-          className={`text-[14px] font-bold text-primary-400 cursor-pointer p-1 ${isPending ? 'opacity-50 pointer-events-none' : !allSelected ? 'opacity-50' : ''}`}
-        >
-          {isPending ? '저장 중...' : '저장'}
-        </span>
+        {/* 저장은 하단 버튼으로 옮겨서(룩북 올리기와 나란히) 둘 다 눈에 잘 띄게 함 — 자리 균형용 spacer */}
+        <span className="w-[30px]" aria-hidden="true" />
       </div>
 
       {/* Tags */}
@@ -216,7 +212,7 @@ export const ResultReportPage: React.FC = () => {
       )}
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto px-[20px] flex flex-col gap-[12px] pb-[130px] pt-[14px]">
+      <div className="flex-1 overflow-y-auto px-[20px] flex flex-col gap-[12px] pb-[190px] pt-[14px]">
         {nonEmptyGroups.length === 0 && (
           <p className="py-10 text-center text-xs text-text-secondary">추천 결과가 없습니다</p>
         )}
@@ -243,19 +239,28 @@ export const ResultReportPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Fixed Bottom Button */}
-      <div className="absolute bottom-[20px] left-[20px] right-[20px] z-20 flex flex-col items-center gap-[6px]">
+      {/* Fixed Bottom Buttons — 저장하기가 주 행동, 룩북 올리기는 "저장했다면 이어서
+          올려보자"는 제안 톤의 보조 버튼으로 분리 (기존엔 룩북 올리기만 있었고 저장은
+          헤더의 작은 텍스트 링크라 눈에 잘 안 띄었음) */}
+      <div className="absolute bottom-[20px] left-[20px] right-[20px] z-20 flex flex-col items-center gap-[8px]">
         {!allSelected && nonEmptyGroups.length > 0 && (
           <p className="text-[11px] text-text-secondary bg-bg/90 px-[10px] py-[4px] rounded-full">
             상품이 있는 카테고리마다 하나씩 선택해주세요
           </p>
         )}
         <button
-          onClick={handleUploadAsLookbook}
-          disabled={!allSelected}
+          onClick={handleSave}
+          disabled={!allSelected || isPending}
           className="w-full text-bg text-[15px] font-bold border-none rounded-[14px] p-[16px] bg-primary-400 hover:bg-primary-500 transition-colors shadow-[0_5px_12px_rgba(127,119,221,0.3)] disabled:bg-border disabled:text-text-secondary disabled:shadow-none"
         >
-          이 조합으로 내 룩북 올리기
+          {isPending ? '저장 중...' : isSaved ? '저장 완료 ✓' : '저장하기'}
+        </button>
+        <button
+          onClick={handleUploadAsLookbook}
+          disabled={!allSelected}
+          className="w-full text-primary-600 text-[13px] font-semibold rounded-[14px] p-[12px] bg-white border border-primary-200 hover:bg-primary-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {isSaved ? '이 조합, 내 룩북으로도 올려볼까요? →' : '저장 후 이 조합을 룩북으로 올릴 수도 있어요 →'}
         </button>
       </div>
     </div>

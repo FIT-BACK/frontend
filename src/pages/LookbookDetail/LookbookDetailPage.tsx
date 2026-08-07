@@ -148,7 +148,9 @@ export default function LookbookDetailPage() {
 
       {showMoreSheet && (
         <div
-          className='fixed inset-0 bg-black/30 flex items-end'
+          // z-index가 없어서 하단 TabBar의 동동 뜬 업로드 버튼(z-40)한테 클릭이
+          // 가로채였음 — TabBar보다 높은 z-index로 고정.
+          className='fixed inset-0 z-50 bg-black/30 flex items-end'
           onClick={() => setShowMoreSheet(false)}
         >
           <div
