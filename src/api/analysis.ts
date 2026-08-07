@@ -29,11 +29,13 @@ export interface RecommendationPrice {
 export interface RecommendationItem {
   productId: number
   rank: number
-  imageUrl: string
-  name: string
-  sellerName: string
-  price: RecommendationPrice
-  purchaseUrl: string
+  // availability가 TEMPORARILY_UNRESOLVED일 때는 상품 상세를 아직 못 가져온 상태라
+  // 아래 필드들이 전부 null로 내려온다.
+  imageUrl: string | null
+  name: string | null
+  sellerName: string | null
+  price: RecommendationPrice | null
+  purchaseUrl: string | null
   availability: string
   isSaved: boolean
   reasonCode?: string
