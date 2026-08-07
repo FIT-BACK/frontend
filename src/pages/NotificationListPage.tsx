@@ -21,6 +21,82 @@ const getDeepLink = (n: NotificationItem): string | null => {
       return null;
   }
 };
+const NotificationIcon = ({ type }: { type: NotificationItem['type'] }) => {
+  const config = {
+    LOOKBOOK_LIKED: {
+      bg: 'bg-purple-400',
+      icon: (
+        <svg
+          width='14'
+          height='14'
+          viewBox='0 0 24 24'
+          fill='#fff'
+          stroke='#fff'
+          strokeWidth='1'
+        >
+          <path d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78z' />
+        </svg>
+      ),
+    },
+    ANALYSIS_COMPLETE: {
+      bg: 'bg-[#1D9E75]',
+      icon: (
+        <svg
+          width='14'
+          height='14'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='#fff'
+          strokeWidth='2'
+        >
+          <circle cx='12' cy='12' r='10' />
+          <line x1='12' y1='8' x2='12' y2='12' />
+          <line x1='12' y1='16' x2='12.01' y2='16' />
+        </svg>
+      ),
+    },
+    TREND_UPDATE: {
+      bg: 'bg-gray-100',
+      icon: (
+        <svg
+          width='14'
+          height='14'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='#9E9BB0'
+          strokeWidth='2'
+        >
+          <polyline points='17 1 21 5 17 9' />
+          <path d='M3 11V9a4 4 0 0 1 4-4h14' />
+        </svg>
+      ),
+    },
+    MARKETING: {
+      bg: 'bg-gray-100',
+      icon: (
+        <svg
+          width='14'
+          height='14'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='#9E9BB0'
+          strokeWidth='2'
+        >
+          <rect x='3' y='5' width='18' height='14' rx='2' />
+          <path d='M3 7l9 6 9-6' />
+        </svg>
+      ),
+    },
+  }[type];
+
+  return (
+    <div
+      className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${config.bg}`}
+    >
+      {config.icon}
+    </div>
+  );
+};
 
 export default function NotificationListPage() {
   const { data: notifications = [], isLoading } = useNotifications();
@@ -33,7 +109,7 @@ export default function NotificationListPage() {
     if (!n.isRead) markAsRead.mutate(n.id);
     const link = getDeepLink(n);
     if (link) navigate(link);
-    else alert('삭제된 콘텐츠입니다');
+    else alert('아직 준비 중인 화면이에요');
   };
 
   if (isLoading) return <div className='p-4 text-center'>불러오는 중...</div>;
@@ -61,10 +137,9 @@ export default function NotificationListPage() {
             <button
               key={n.id}
               onClick={() => handleClick(n)}
-              className={`flex items-center gap-2.5 px-4 py-2.5 text-left border-b ${
-                n.isRead ? 'bg-white' : 'bg-purple-50'
-              }`}
+              className={`flex items-center gap-2.5 px-4 py-2.5 text-left border-b ${n.isRead ? 'bg-white' : 'bg-purple-50'}`}
             >
+              <NotificationIcon type={n.type} />
               <div className='flex-1'>
                 <div
                   className={`text-xs ${n.isRead ? 'text-gray-500' : 'font-bold'}`}
@@ -72,7 +147,9 @@ export default function NotificationListPage() {
                   {n.title}
                 </div>
                 {n.body && (
-                  <div className='text-[10px] text-gray-400 mt-0.5'>{n.body}</div>
+                  <div className='text-[10px] text-gray-400 mt-0.5'>
+                    {n.body}
+                  </div>
                 )}
                 <div className='text-[9px] text-gray-400 mt-0.5'>
                   {new Date(n.createdAt).toLocaleString()}

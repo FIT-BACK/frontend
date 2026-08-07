@@ -10,10 +10,10 @@ const Header = () => {
     <header className="h-16 w-full flex items-center justify-between px-4 border-b border-primary-200 bg-white">
       {/* 1. 로고 영역 */}
       <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-        <img 
-          src={logoImage} 
-          alt="FIT BACK 로고" 
-          className="w-8 h-8 object-contain rounded-md" 
+        <img
+          src={logoImage}
+          alt="FIT BACK 로고"
+          className="w-8 h-8 object-contain rounded-md"
         />
         <div className="font-bold text-lg text-primary-900">FIT BACK</div>
       </div>
@@ -22,7 +22,7 @@ const Header = () => {
       <button
         className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
         onClick={() => navigate('/alerts')}
-        aria-label="알림"
+        aria-label='알림'
       >
         {/* 예쁜 선형 종 모양 SVG 아이콘 */}
         <svg 
