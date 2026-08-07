@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { TREND_ARTICLES } from '../constants/trendArticles';
-
-const RELATED_LOOKBOOKS = [
-  { id: 1, bgGradient: 'linear-gradient(135deg, #E8E4F5, #D0C9EE)' },
-  { id: 2, bgGradient: 'linear-gradient(135deg, #C9C4F2, #AFA9EC)' },
-  { id: 3, bgGradient: 'linear-gradient(135deg, #AFA9EC, #8A82E0)' },
-];
+import { useLookbooksByTag } from '../hooks/useLookbookDetail';
 
 const TrendDetailPage: React.FC = () => {
   const navigate = useNavigate();
@@ -14,6 +9,9 @@ const TrendDetailPage: React.FC = () => {
   const [isSaved, setIsSaved] = useState(false);
 
   const trend = TREND_ARTICLES.find((t) => t.id === Number(id)) ?? TREND_ARTICLES[0];
+  const { data: relatedLookbooks, isLoading: isRelatedLoading } = useLookbooksByTag(
+    trend.tag.replace('#', ''),
+  );
 
   const toggleSave = () => setIsSaved((prev) => !prev);
 
@@ -21,9 +19,8 @@ const TrendDetailPage: React.FC = () => {
     navigate(`/search?q=${encodeURIComponent(tag.replace('#', ''))}`);
   };
 
-  const handleLookbookClick = () => {
-    // 룩북 상세 페이지(SCR-04B)로 이동
-    // navigate(`/lookbook/${lookbookId}`);
+  const handleLookbookClick = (lookbookId: number) => {
+    navigate(`/lookbooks/${lookbookId}`);
   };
 
   const handleMatchStartClick = () => {
@@ -158,15 +155,23 @@ const TrendDetailPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Related Lookbooks */}
+        {/* Related Lookbooks — 이 트렌드 태그와 같은 태그를 가진 실제 룩북 */}
         <h3 className="text-[14px] font-bold text-text mb-3">이 트렌드의 가성비 룩북</h3>
         <div className="flex gap-2 mb-5 overflow-x-auto scrollbar-hide">
-          {RELATED_LOOKBOOKS.map((lb) => (
+          {isRelatedLoading && (
+            <p className="text-[12px] text-text-secondary">불러오는 중...</p>
+          )}
+          {!isRelatedLoading && (relatedLookbooks?.items.length ?? 0) === 0 && (
+            <p className="text-[12px] text-text-secondary">
+              아직 이 트렌드로 올라온 룩북이 없어요
+            </p>
+          )}
+          {relatedLookbooks?.items.map((lb) => (
             <div
               key={lb.id}
-              onClick={() => handleLookbookClick()}
-              className="w-[110px] shrink-0 aspect-[0.8] rounded-xl cursor-pointer transition-transform active:scale-95"
-              style={{ background: lb.bgGradient }}
+              onClick={() => handleLookbookClick(lb.id)}
+              className="w-[110px] shrink-0 aspect-[0.8] rounded-xl cursor-pointer overflow-hidden bg-bg-secondary bg-cover bg-center transition-transform active:scale-95"
+              style={{ backgroundImage: `url(${lb.originalImageUrl})` }}
             />
           ))}
         </div>

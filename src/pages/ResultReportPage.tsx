@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useSaveReport } from '../hooks/useSaveReport';
 import { useUploadStore } from '../store/useUploadStore';
 import type { RecommendationItem } from '../api/analysis';
-import type { LookbookUploadNavState } from './LookbookUpload/LookbookUploadPage';
 import { REASON_CODE_MAP } from '../constants/tag';
+import type { LookbookUploadNavState } from './LookbookUpload/LookbookUploadPage';
 
 const CATEGORY_LABELS: Record<string, string> = {
   OUTER: '아우터',

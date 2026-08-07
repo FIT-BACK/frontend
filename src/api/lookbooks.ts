@@ -90,9 +90,9 @@ export const likeLookbook = async (
     await delay(200);
     return { isLiked: true, likeCount: mockDetail.likeCount + 1 };
   }
-  const response = await api.post<ApiEnvelope<{ isLiked: boolean; likeCount: number }>>(
-    `/api/v1/lookbooks/${lookbookId}/likes`,
-  );
+  const response = await api.post<
+    ApiEnvelope<{ isLiked: boolean; likeCount: number }>
+  >(`/api/v1/lookbooks/${lookbookId}/likes`);
   return response.data.data;
 };
 
@@ -104,9 +104,9 @@ export const unlikeLookbook = async (
     await delay(200);
     return { isLiked: false, likeCount: Math.max(mockDetail.likeCount - 1, 0) };
   }
-  const response = await api.delete<ApiEnvelope<{ isLiked: boolean; likeCount: number }>>(
-    `/api/v1/lookbooks/${lookbookId}/likes`,
-  );
+  const response = await api.delete<
+    ApiEnvelope<{ isLiked: boolean; likeCount: number }>
+  >(`/api/v1/lookbooks/${lookbookId}/likes`);
   return response.data.data;
 };
 
@@ -146,4 +146,97 @@ export const deleteLookbook = async (lookbookId: number): Promise<void> => {
     return;
   }
   await api.delete(`/api/v1/lookbooks/${lookbookId}`);
+};
+
+/**
+ * ==========================================
+ *  룩북 피드 목록(SCR-04 홈) 관련 API 통신 정의
+ * ==========================================
+ */
+export interface LookbookFeedItem {
+  id: number;
+  authorNickname: string;
+  authorProfileImageUrl: string | null;
+  originalImageUrl: string;
+  matchedImageUrl: string | null;
+  matchedProductId: number | null;
+  tags: string[];
+  likeCount: number;
+  isLiked: boolean;
+}
+
+// 서버 응답 원본 형태 (lookbookId 등 Swagger 그대로)
+interface LookbookFeedApiItem {
+  lookbookId: number;
+  originalImageUrl: string;
+  matchedImageUrl: string | null;
+  matchedProductId: number | null;
+  authorNickname: string;
+  authorProfileImageUrl: string | null;
+  tags: string[];
+  likeCount: number;
+  isLiked: boolean;
+}
+
+interface LookbookFeedApiResponse {
+  items: LookbookFeedApiItem[];
+  nextCursor: number | null;
+  hasNext: boolean;
+  pageSize: number;
+}
+
+const toFeedItem = (raw: LookbookFeedApiItem): LookbookFeedItem => ({
+  id: raw.lookbookId,
+  authorNickname: raw.authorNickname,
+  authorProfileImageUrl: raw.authorProfileImageUrl,
+  originalImageUrl: raw.originalImageUrl,
+  matchedImageUrl: raw.matchedImageUrl,
+  matchedProductId: raw.matchedProductId,
+  tags: raw.tags,
+  likeCount: raw.likeCount,
+  isLiked: raw.isLiked,
+});
+
+const USE_MOCK_FEED = false;
+
+const mockFeedRaw: LookbookFeedApiItem[] = [
+  {
+    lookbookId: 1,
+    originalImageUrl: 'https://picsum.photos/seed/feed1-original/600/600',
+    matchedImageUrl: 'https://picsum.photos/seed/feed1-matched/600/600',
+    matchedProductId: 1,
+    authorNickname: '@minji_style',
+    authorProfileImageUrl: null,
+    tags: ['미니멀', '와이드핏'],
+    likeCount: 128,
+    isLiked: false,
+  },
+];
+
+/** GET /api/v1/lookbooks - 홈 화면 가성비 룩북 피드 목록 (tag를 주면 해당 태그로 필터링) */
+export const getLookbookFeed = async (
+  cursor?: number,
+  tag?: string,
+): Promise<{
+  items: LookbookFeedItem[];
+  hasNext: boolean;
+  nextCursor: number | null;
+}> => {
+  if (USE_MOCK_FEED) {
+    await delay(400);
+    return {
+      items: mockFeedRaw.map(toFeedItem),
+      hasNext: false,
+      nextCursor: null,
+    };
+  }
+  const response = await api.get<ApiEnvelope<LookbookFeedApiResponse>>(
+    '/api/v1/lookbooks',
+    { params: { ...(cursor ? { cursor } : {}), ...(tag ? { tag } : {}) } },
+  );
+  return {
+    items: response.data.data.items.map(toFeedItem),
+    hasNext: response.data.data.hasNext,
+    nextCursor: response.data.data.nextCursor,
+  };
 };

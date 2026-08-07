@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useItemMatching } from '../hooks/useItemMatching';
 import { useUploadStore } from '../store/useUploadStore';
+import { TagChip } from '../components/common/TagChip';
+import type { CategoryType } from '../types/tag';
+import { TAG_CATEGORIES, TAG_MASTER_DB } from '../constants/tag';
 
 export const TagEditPage: React.FC = () => {
   const navigate = useNavigate();
@@ -23,11 +26,39 @@ export const TagEditPage: React.FC = () => {
 
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [newTagInput, setNewTagInput] = useState('');
-  // [Mock Data Flow]: 직접 입력 외에 노출되는 추천 태그 더미 리스트입니다.
-  // [Real API Flow]: 추후 필요하다면 서버의 추천 태그 API와 연동합니다.
-  const recommendedTags = ['스트릿', '캐주얼', '빈티지', '고프코어', '아메카지', '프레피'];
+  
+  // Accordion State: Which categories are open
+  const [openCategories, setOpenCategories] = useState<Record<CategoryType, boolean>>({
+    STYLE: true,
+    SILHOUETTE: false,
+    MATERIAL: false,
+    DETAIL: false,
+    COLOR: false,
+  });
 
   const [matchLevel, setMatchLevel] = useState(70);
+
+  // Grouping tags based on CategoryType
+  const groupedTags = useMemo(() => {
+    const groups: Record<CategoryType, typeof TAG_MASTER_DB> = {
+      STYLE: [],
+      SILHOUETTE: [],
+      MATERIAL: [],
+      DETAIL: [],
+      COLOR: [],
+    };
+    TAG_MASTER_DB.forEach(tag => {
+      groups[tag.categoryType].push(tag);
+    });
+    return groups;
+  }, []);
+
+  const toggleCategory = (category: CategoryType) => {
+    setOpenCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
 
   useEffect(() => {
     if (!reportId) {
@@ -58,6 +89,14 @@ export const TagEditPage: React.FC = () => {
     setTags([...tags, trimmed]);
     setNewTagInput('');
     setIsBottomSheetOpen(false);
+  };
+
+  const handleToggleTag = (tagToToggle: string) => {
+    if (tags.includes(tagToToggle)) {
+      handleDelete(tagToToggle);
+    } else {
+      handleAddTag(tagToToggle);
+    }
   };
 
   const handleConfirm = async () => {
@@ -106,8 +145,8 @@ export const TagEditPage: React.FC = () => {
           style={{ backgroundImage: imageUri ? `url('${imageUri}')` : undefined }}
         ></div>
 
-        {/* Tags */}
-        <div className="mt-2">
+        {/* Selected Tags */}
+        <div className="mt-2 shrink-0">
           <div className="flex items-center gap-2 mb-[6px]">
             <span className="text-[10px] font-bold text-text-secondary">추출된 스타일 태그</span>
             {tagWarning && (
@@ -118,32 +157,74 @@ export const TagEditPage: React.FC = () => {
           </div>
           <div className="flex gap-[5px] flex-wrap items-center">
             {tags.map((tag) => (
-              <div key={tag} className="inline-flex items-center gap-[5px] text-[12px] bg-primary-50 text-primary-800 px-[12px] py-[6px] rounded-full font-semibold">
-                #{tag}
-                <span onClick={() => handleDelete(tag)} className="cursor-pointer text-[10px] flex items-center justify-center rounded-full bg-primary-900/15 w-[14px] h-[14px] ml-1">✕</span>
-              </div>
+              <TagChip
+                key={tag}
+                label={tag}
+                variant="deletable"
+                onDelete={() => handleDelete(tag)}
+              />
             ))}
 
             {tags.length < 8 && (
-              <div
+              <TagChip
+                label="추가"
+                variant="add"
                 onClick={() => setIsBottomSheetOpen(true)}
-                className="cursor-pointer text-[12px] border border-dashed border-primary-200 text-primary-400 px-[12px] py-[6px] rounded-full font-semibold"
-              >
-                + 추가
-              </div>
+              />
             )}
           </div>
         </div>
 
+        {/* Accordion Categories */}
+        <div className="flex flex-col gap-[12px] mt-4 mb-4">
+          {TAG_CATEGORIES.map((category) => {
+            const isOpen = openCategories[category.type];
+            const categoryTags = groupedTags[category.type];
+            return (
+              <div key={category.type} className="border border-border rounded-[12px] overflow-hidden shrink-0">
+                <button
+                  onClick={() => toggleCategory(category.type)}
+                  className="w-full flex justify-between items-center bg-bg-secondary p-[16px] focus:outline-none transition-colors"
+                >
+                  <span className="text-[14px] font-bold text-text">{category.label}</span>
+                  <svg
+                    className={`w-4 h-4 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <div
+                  className={`transition-all duration-300 ease-in-out ${
+                    isOpen ? 'max-h-[500px] opacity-100 p-[16px]' : 'max-h-0 opacity-0 p-[0_16px]'
+                  } bg-bg overflow-hidden flex flex-wrap gap-[8px]`}
+                >
+                  {categoryTags.map((tag) => (
+                    <TagChip
+                      key={tag.tagName}
+                      label={tag.tagName}
+                      variant="default"
+                      selected={tags.includes(tag.tagName)}
+                      onClick={() => handleToggleTag(tag.tagName)}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {matchError && (
+          <p className="text-[11px] text-error-400 text-center shrink-0">{matchError}</p>
+        )}
+
         {/* Spacer */}
         <div className="flex-1"></div>
 
-        {matchError && (
-          <p className="text-[11px] text-error-400 text-center">{matchError}</p>
-        )}
-
         {/* Slider Card */}
-        <div className="bg-bg-secondary p-[14px] rounded-[12px] shrink-0 mt-4 border border-border">
+        <div className="bg-bg-secondary p-[14px] rounded-[12px] shrink-0 border border-border">
           <div className="flex justify-between items-center mb-[12px]">
             <span className="text-[12px] font-bold text-text">매칭 정도</span>
             <span className="text-[14px] font-extrabold text-primary-400">{matchLevel}%</span>
@@ -194,10 +275,10 @@ export const TagEditPage: React.FC = () => {
             onClick={() => setIsBottomSheetOpen(false)}
           ></div>
 
-          <div className="relative bg-bg w-full rounded-t-[24px] p-[12px_20px_34px] shadow-xl">
-            <div className="w-[40px] h-[4px] bg-border rounded-full mx-auto mb-[18px]"></div>
+          <div className="relative bg-bg w-full rounded-t-[24px] p-[12px_20px_34px] shadow-xl flex flex-col max-h-[90vh]">
+            <div className="w-[40px] h-[4px] bg-border rounded-full mx-auto mb-[18px] shrink-0"></div>
 
-            <div className="text-[15px] font-bold text-text mb-[14px]">태그 추가</div>
+            <div className="text-[15px] font-bold text-text mb-[14px] shrink-0">직접 태그 입력</div>
 
             <input
               type="text"
@@ -207,22 +288,9 @@ export const TagEditPage: React.FC = () => {
                 if (e.key === 'Enter') handleAddTag(newTagInput);
               }}
               placeholder="직접 입력 후 엔터"
-              className="w-full bg-bg text-text border border-border rounded-[12px] p-[14px_16px] text-[14px] outline-none focus:border-primary-400 focus:bg-primary-50 mb-[20px] transition-colors"
+              className="w-full bg-bg text-text border border-border rounded-[12px] p-[14px_16px] text-[14px] outline-none focus:border-primary-400 focus:bg-primary-50 transition-colors shrink-0"
               autoFocus
             />
-
-            <div className="text-[12px] font-bold text-text-secondary mb-[10px]">추천 태그</div>
-            <div className="flex flex-wrap gap-[6px]">
-              {recommendedTags.map((tag) => (
-                <div
-                  key={tag}
-                  onClick={() => handleAddTag(tag)}
-                  className="cursor-pointer inline-flex items-center gap-[5px] text-[12px] bg-primary-50 text-primary-800 px-[12px] py-[6px] rounded-full font-semibold"
-                >
-                  #{tag}
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       )}

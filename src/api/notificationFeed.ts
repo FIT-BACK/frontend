@@ -14,7 +14,11 @@ export type NotificationType =
   | 'TREND_UPDATE'
   | 'MARKETING';
 
-export type NotificationTargetType = 'ANALYSIS_REPORT' | 'LOOKBOOK' | 'TREND' | null;
+export type NotificationTargetType =
+  | 'ANALYSIS_REPORT'
+  | 'LOOKBOOK'
+  | 'TREND'
+  | null;
 
 export interface NotificationItem {
   id: number;
@@ -60,10 +64,23 @@ interface NotificationListApiResponse {
   pageSize: number;
 }
 
+// 서버 응답(readAt 등)을 프론트 내부 타입(isRead)으로 변환
+const toNotificationItem = (raw: NotificationApiItem): NotificationItem => ({
+  id: raw.notificationId,
+  type: raw.notificationType,
+  title: raw.title,
+  body: raw.body,
+  targetType: raw.targetType,
+  targetId: raw.targetId,
+  isRead: raw.readAt !== null,
+  createdAt: raw.createdAt,
+});
+
 const USE_MOCK = false;
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const mockNotifications: NotificationItem[] = [
+// 새 스키마 기준으로 다시 작성한 mock 데이터
+const baseMockNotifications: Omit<NotificationItem, 'isRead'>[] = [
   {
     id: 1,
     type: 'LOOKBOOK_LIKED',
@@ -71,8 +88,7 @@ const mockNotifications: NotificationItem[] = [
     body: '',
     targetType: 'LOOKBOOK',
     targetId: 101,
-    isRead: false,
-    createdAt: new Date().toISOString(),
+    createdAt: new Date(Date.now() - 1000 * 60).toISOString(), // 방금
   },
   {
     id: 2,
@@ -81,8 +97,7 @@ const mockNotifications: NotificationItem[] = [
     body: '',
     targetType: 'ANALYSIS_REPORT',
     targetId: 202,
-    isRead: false,
-    createdAt: new Date().toISOString(),
+    createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(), // 5분 전
   },
   {
     id: 3,
@@ -91,65 +106,61 @@ const mockNotifications: NotificationItem[] = [
     body: '',
     targetType: 'TREND',
     targetId: 303,
-    isRead: true,
-    createdAt: new Date().toISOString(),
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 어제
   },
 ];
 
-export const getNotifications = async (): Promise<NotificationPage> => {
+// 세션 동안 읽음 처리를 기억하는 간단한 인메모리 저장소
+// (새로고침하면 초기화됨. 실제 서버 연동 시 이 블록 삭제)
+const mockReadIds = new Set<number>([3]); // id=3(트렌드)은 원래 읽은 상태로 시작
+const mockDeletedIds = new Set<number>();
+
+const buildMockList = (): NotificationItem[] =>
+  baseMockNotifications
+    .filter((n) => !mockDeletedIds.has(n.id))
+    .map((n) => ({ ...n, isRead: mockReadIds.has(n.id) }));
+
+/** GET /api/v1/notifications - 알림 목록 조회 */
+export const getNotifications = async (): Promise<NotificationItem[]> => {
   if (USE_MOCK) {
     await delay(400);
-    return {
-      items: mockNotifications,
-      unreadCount: mockNotifications.filter((n) => !n.isRead).length,
-      nextCursor: null,
-      hasNext: false,
-    };
+    return buildMockList();
   }
-  const response = await api.get<ApiEnvelope<NotificationListApiResponse>>(
+  const { data } = await api.get<ApiEnvelope<NotificationListApiResponse>>(
     '/api/v1/notifications',
   );
-  const data = response.data.data;
-  return {
-    items: data.items.map((item) => ({
-      id: item.notificationId,
-      type: item.notificationType,
-      title: item.title,
-      body: item.body,
-      targetType: item.targetType,
-      targetId: item.targetId,
-      isRead: item.readAt != null,
-      createdAt: item.createdAt,
-    })),
-    unreadCount: data.unreadCount,
-    nextCursor: data.nextCursor,
-    hasNext: data.hasNext,
-  };
+  return data.data.items.map(toNotificationItem);
 };
 
+/** PATCH /api/v1/notifications/{notificationId}/read - 개별 읽음 처리 */
 export const markNotificationAsRead = async (
   notificationId: number,
 ): Promise<void> => {
   if (USE_MOCK) {
     await delay(200);
+    mockReadIds.add(notificationId);
     return;
   }
   await api.patch(`/api/v1/notifications/${notificationId}/read`);
 };
 
+/** PATCH /api/v1/notifications/read - 전체 읽음 처리 */
 export const markAllNotificationsAsRead = async (): Promise<void> => {
   if (USE_MOCK) {
     await delay(200);
+    baseMockNotifications.forEach((n) => mockReadIds.add(n.id));
     return;
   }
   await api.patch('/api/v1/notifications/read');
 };
 
+/** DELETE /api/v1/notifications/{notificationId} - 개별 삭제 */
 export const deleteNotification = async (
   notificationId: number,
 ): Promise<void> => {
   if (USE_MOCK) {
     await delay(200);
+    mockDeletedIds.add(notificationId);
     return;
   }
   await api.delete(`/api/v1/notifications/${notificationId}`);

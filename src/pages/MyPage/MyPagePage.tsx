@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Bell, Lock, LogOut, User, UserX } from 'lucide-react'
 import { navigate } from '../../utils/navigate'
 import { useMyProfile, useLogout } from '../../hooks/useMyPage'
 import ProfileHeader from './components/ProfileHeader'
@@ -48,16 +49,36 @@ export default function MyPagePage() {
         onUploadedClick={() => navigate('/closet?tab=lookbook')}
       />
 
+      <span className="pb-2 pt-3 text-xs font-bold uppercase tracking-wide text-text-tertiary">
+        계정
+      </span>
       <div className="flex flex-col">
-        <SettingsListItem label="회원정보 수정" onClick={() => navigate('/profile-edit')} />
-        <SettingsListItem label="알림 설정" onClick={() => navigate('/notifications')} />
+        <SettingsListItem
+          label="회원정보 수정"
+          icon={<User size={16} />}
+          onClick={() => navigate('/profile-edit')}
+        />
+        <SettingsListItem
+          label="알림 설정"
+          icon={<Bell size={16} />}
+          onClick={() => navigate('/notifications')}
+        />
         <SettingsListItem
           label="비밀번호 변경"
+          icon={<Lock size={16} />}
           onClick={() => navigate('/change-password')}
           disabled={profile.isSocialLogin}
         />
-        <SettingsListItem label="로그아웃" onClick={() => setIsLogoutModalOpen(true)} />
-        <SettingsListItem label="회원 탈퇴" onClick={() => navigate('/withdraw')} />
+        <SettingsListItem
+          label="로그아웃"
+          icon={<LogOut size={16} />}
+          onClick={() => setIsLogoutModalOpen(true)}
+        />
+        <SettingsListItem
+          label="회원 탈퇴"
+          icon={<UserX size={16} />}
+          onClick={() => navigate('/withdraw')}
+        />
       </div>
 
       <LogoutModal

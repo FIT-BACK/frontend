@@ -44,11 +44,11 @@ interface MyProfileApiResponse {
 // 기능별로 USE_MOCK 분리 — 확정 스펙이 다르게 진행되므로 따로 관리
 const USE_MOCK_GET = false
 const USE_MOCK_SAVE = false
-const USE_MOCK_NICKNAME_CHECK = true 
-const USE_MOCK_LOGOUT = true
+const USE_MOCK_NICKNAME_CHECK = false
+const USE_MOCK_LOGOUT = false
 
-const USE_MOCK_CHANGE_PASSWORD = true
-const USE_MOCK_WITHDRAW = true
+const USE_MOCK_CHANGE_PASSWORD = false
+const USE_MOCK_WITHDRAW = false
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
