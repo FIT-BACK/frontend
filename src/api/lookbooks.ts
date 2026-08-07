@@ -213,9 +213,10 @@ const mockFeedRaw: LookbookFeedApiItem[] = [
   },
 ];
 
-/** GET /api/v1/lookbooks - 홈 화면 가성비 룩북 피드 목록 */
+/** GET /api/v1/lookbooks - 홈 화면 가성비 룩북 피드 목록 (tag를 주면 해당 태그로 필터링) */
 export const getLookbookFeed = async (
   cursor?: number,
+  tag?: string,
 ): Promise<{
   items: LookbookFeedItem[];
   hasNext: boolean;
@@ -231,7 +232,7 @@ export const getLookbookFeed = async (
   }
   const response = await api.get<ApiEnvelope<LookbookFeedApiResponse>>(
     '/api/v1/lookbooks',
-    { params: cursor ? { cursor } : undefined },
+    { params: { ...(cursor ? { cursor } : {}), ...(tag ? { tag } : {}) } },
   );
   return {
     items: response.data.data.items.map(toFeedItem),

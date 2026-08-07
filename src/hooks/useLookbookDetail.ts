@@ -80,3 +80,11 @@ export const useLookbookFeed = () =>
     queryKey: ['lookbookFeed'],
     queryFn: () => getLookbookFeed(),
   });
+
+// 트렌드 상세 화면의 "이 트렌드의 가성비 룩북" — 같은 태그를 가진 룩북만 조회
+export const useLookbooksByTag = (tag: string) =>
+  useQuery({
+    queryKey: ['lookbookFeed', 'byTag', tag],
+    queryFn: () => getLookbookFeed(undefined, tag),
+    enabled: !!tag,
+  });
