@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useSaveReport } from '../hooks/useSaveReport';
 import { useUploadStore } from '../store/useUploadStore';
 import type { RecommendationItem } from '../api/analysis';
+import type { LookbookUploadNavState } from './LookbookUpload/LookbookUploadPage';
+import { REASON_CODE_MAP } from '../constants/tag';
 
 const CATEGORY_LABELS: Record<string, string> = {
   OUTER: '아우터',
@@ -18,7 +20,10 @@ const CATEGORY_LABELS: Record<string, string> = {
 export const ResultReportPage: React.FC = () => {
   const navigate = useNavigate();
   const reportId = useUploadStore((state) => state.reportId);
+  const imageId = useUploadStore((state) => state.imageId);
+  const imageUri = useUploadStore((state) => state.imageUri);
   const tags = useUploadStore((state) => state.aiTags);
+  const suggestedTags = useUploadStore((state) => state.suggestedTags);
   const recommendationGroups = useUploadStore((state) => state.recommendationGroups);
   const partial = useUploadStore((state) => state.partial);
   const warnings = useUploadStore((state) => state.warnings);
@@ -56,6 +61,38 @@ export const ResultReportPage: React.FC = () => {
     setSelectedByCategory((prev) => ({ ...prev, [category]: productId }));
   };
 
+  // 룩북은 "매칭 상품" 하나만 지원(백엔드 LookbookRequest.matchedProductId가 단일 값) —
+  // 여러 카테고리를 선택했다면 첫 번째 선택을 대표 상품으로 사용한다.
+  const handleUploadAsLookbook = () => {
+    if (!reportId || !imageId || !allSelected) return;
+    const firstSelectedProductId = Object.values(selectedByCategory)[0];
+    const matchedItem = nonEmptyGroups
+      .flatMap((group) => group.items)
+      .find((item) => item.productId === firstSelectedProductId);
+    // TEMPORARILY_UNRESOLVED 상품은 선택 자체가 막혀있어 보통 여기 안 걸리지만,
+    // 타입상 imageUrl/name/purchaseUrl이 null일 수 있으니 방어적으로 한 번 더 확인한다.
+    if (!matchedItem || !matchedItem.imageUrl || !matchedItem.name || !matchedItem.purchaseUrl) return;
+
+    const suggestedByName = new Map(suggestedTags.map((tag) => [tag.tagName, tag]));
+    const confirmedTags = tags
+      .map((tagName) => suggestedByName.get(tagName))
+      .filter((tag): tag is (typeof suggestedTags)[number] => tag !== undefined);
+
+    const navState: LookbookUploadNavState = {
+      originalImageId: imageId,
+      originalImageUrl: imageUri,
+      sourceReportId: reportId,
+      matchedProduct: {
+        productId: matchedItem.productId,
+        imageUrl: matchedItem.imageUrl,
+        name: matchedItem.name,
+        purchaseUrl: matchedItem.purchaseUrl,
+      },
+      tags: confirmedTags,
+    };
+    navigate('/upload', { state: navState });
+  };
+
   const ItemCard = ({
     item,
     category,
@@ -70,12 +107,14 @@ export const ResultReportPage: React.FC = () => {
         isSelected ? 'border-primary-400 bg-primary-50' : 'border-border bg-white'
       }`}
     >
-      {/* Radio Button — 룩북 조합용 선택 */}
+      {/* Radio Button — 룩북 조합용 선택. 상세 정보를 아직 못 가져온 상품(TEMPORARILY_UNRESOLVED)은
+          선택할 수 없게 막는다 — 선택해봐야 저장/룩북 연동에 쓸 데이터가 없다. */}
       <button
         type="button"
         onClick={() => handleSelect(category, item.productId)}
+        disabled={item.availability === 'TEMPORARILY_UNRESOLVED'}
         aria-label="이 상품 선택"
-        className={`w-[18px] h-[18px] rounded-full border-[1.5px] flex items-center justify-center shrink-0 ${
+        className={`w-[18px] h-[18px] rounded-full border-[1.5px] flex items-center justify-center shrink-0 disabled:opacity-40 disabled:cursor-not-allowed ${
           isSelected ? 'border-primary-400 bg-primary-400' : 'border-border bg-bg-secondary'
         }`}
       >
@@ -86,11 +125,13 @@ export const ResultReportPage: React.FC = () => {
         )}
       </button>
 
-      {/* 이미지/이름 — 상품 상세로 이동 */}
+      {/* 이미지/이름 — 상품 상세로 이동. availability가 TEMPORARILY_UNRESOLVED면 상세 정보가
+          아직 없는 상태라(imageUrl/name/price 등이 null) 안내 문구만 보여준다. */}
       <button
         type="button"
         onClick={() => navigate(`/product/${item.productId}`)}
-        className="flex flex-1 min-w-0 gap-[10px] items-center text-left"
+        disabled={item.availability === 'TEMPORARILY_UNRESOLVED'}
+        className="flex flex-1 min-w-0 gap-[10px] items-center text-left disabled:cursor-not-allowed"
       >
         <div
           className="w-[44px] h-[44px] rounded-[8px] bg-bg-secondary shrink-0 bg-cover bg-center"
@@ -98,8 +139,19 @@ export const ResultReportPage: React.FC = () => {
         ></div>
 
         <div className="flex-1 min-w-0 flex flex-col justify-center">
-          <div className="text-[12px] text-text font-bold truncate">{item.name}</div>
-          <div className="text-[10px] text-text-secondary mt-[2px]">{item.sellerName}</div>
+          <div className="text-[12px] text-text font-bold truncate">
+            {item.name ?? '상품 정보를 불러오는 중이에요'}
+          </div>
+          {item.sellerName && (
+            <div className="text-[10px] text-text-secondary mt-[2px]">{item.sellerName}</div>
+          )}
+          {item.reasonCode && REASON_CODE_MAP[item.reasonCode] && (
+            <div className="mt-[6px]">
+              <span className={`px-[6px] py-[3px] text-[10px] leading-none rounded-full ${REASON_CODE_MAP[item.reasonCode].color}`}>
+                {REASON_CODE_MAP[item.reasonCode].label}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col items-end">
@@ -107,7 +159,9 @@ export const ResultReportPage: React.FC = () => {
             {item.rank}위 매칭
           </div>
           <div className="text-[14px] font-extrabold text-primary-800">
-            {item.price.amount.toLocaleString()}{item.price.currency === 'KRW' ? '원' : ` ${item.price.currency}`}
+            {item.price
+              ? `${item.price.amount.toLocaleString()}${item.price.currency === 'KRW' ? '원' : ` ${item.price.currency}`}`
+              : '가격 확인 중'}
           </div>
         </div>
       </button>
@@ -176,7 +230,7 @@ export const ResultReportPage: React.FC = () => {
       {/* Fixed Bottom Button */}
       <div className="absolute bottom-[20px] left-[20px] right-[20px] z-20">
         <button
-          onClick={() => navigate('/upload')}
+          onClick={handleUploadAsLookbook}
           disabled={!allSelected}
           className="w-full text-bg text-[15px] font-bold border-none rounded-[14px] p-[16px] bg-primary-400 hover:bg-primary-500 transition-colors shadow-[0_5px_12px_rgba(127,119,221,0.3)] disabled:bg-border disabled:text-text-secondary disabled:shadow-none"
         >

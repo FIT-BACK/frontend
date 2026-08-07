@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { Button, TagSelectBottomSheet, TextInput } from '../../components/common'
 import { useTags } from '../../hooks/useTags'
 import type { StyleTag } from '../../api/tags'
+import type { SuggestedTag } from '../../api/analysis'
 import { useImageUpload } from '../../hooks/useImageUpload'
 import { useLookbookUpload } from '../../hooks/useLookbookUpload'
 import ImageUploadField from './components/ImageUploadField'
@@ -9,10 +11,29 @@ import ImageUploadField from './components/ImageUploadField'
 const URL_PATTERN = /^https?:\/\/[^\s]+$/
 const MAX_TAGS = 5
 
+// ResultReportPage에서 "이 조합으로 내 룩북 올리기"로 넘어올 때 전달하는 상태 —
+// 분석에서 이미 업로드된 원본 이미지와 선택한 추천 상품을 그대로 재사용해
+// 이 화면에서 사진을 다시 올리지 않아도 되게 한다.
+export interface LookbookUploadNavState {
+  originalImageId: string
+  originalImageUrl: string | null
+  sourceReportId: number
+  matchedProduct: {
+    productId: number
+    imageUrl: string
+    name: string
+    purchaseUrl: string
+  }
+  tags: SuggestedTag[]
+}
+
 export default function LookbookUploadPage() {
-  const [selectedTags, setSelectedTags] = useState<StyleTag[]>([])
+  const location = useLocation()
+  const fromAnalysis = (location.state as LookbookUploadNavState | null) ?? null
+
+  const [selectedTags, setSelectedTags] = useState<StyleTag[]>(fromAnalysis?.tags ?? [])
   const [isTagSheetOpen, setIsTagSheetOpen] = useState(false)
-  const [purchaseLink, setPurchaseLink] = useState('')
+  const [purchaseLink, setPurchaseLink] = useState(fromAnalysis?.matchedProduct.purchaseUrl ?? '')
   const [linkError, setLinkError] = useState<string | null>(null)
   const [comment, setComment] = useState('')
 
@@ -20,19 +41,22 @@ export default function LookbookUploadPage() {
 
   // useImageUpload가 uploadImage()의 결과를 반환하지 않고 내부 상태(imageId/lastFile)로 들고 있는 방식이라
   // 여기서도 로컬 state로 별도 관리하지 않고 훅의 상태를 그대로 사용
+  // (분석 결과에서 넘어온 경우에는 이 훅들을 아예 쓰지 않는다 — 사진을 다시 안 올리기 때문)
   const originalLookUpload = useImageUpload('LOOKBOOK')
   const valueMatchUpload = useImageUpload('LOOKBOOK')
   const { mutate, isPending, isError, isSuccess } = useLookbookUpload()
 
-  // 백엔드가 매칭 이미지/매칭 상품 중 정확히 하나만 요구함(둘 다 없거나 둘 다 있으면 에러) —
-  // 이 화면은 분석 결과 연동 없이 직접 올리는 흐름이라 매칭 이미지를 필수로 받는다.
-  const canSubmit =
-    !!originalLookUpload.imageId &&
-    !!valueMatchUpload.imageId &&
-    selectedTags.length > 0 &&
-    !isPending &&
-    !originalLookUpload.isUploading &&
-    !valueMatchUpload.isUploading
+  // 백엔드가 매칭 이미지/매칭 상품 중 정확히 하나만 요구함(둘 다 없거나 둘 다 있으면 에러).
+  // 분석 결과에서 넘어온 경우: matchedProductId(+sourceReportId)를 그대로 쓰고 재업로드 불필요.
+  // 직접 올리는 경우: 원본/매칭 사진 둘 다 새로 업로드해야 함.
+  const canSubmit = fromAnalysis
+    ? selectedTags.length > 0 && !isPending
+    : !!originalLookUpload.imageId &&
+      !!valueMatchUpload.imageId &&
+      selectedTags.length > 0 &&
+      !isPending &&
+      !originalLookUpload.isUploading &&
+      !valueMatchUpload.isUploading
 
   const handlePurchaseLinkChange = (value: string) => {
     setPurchaseLink(value)
@@ -40,12 +64,25 @@ export default function LookbookUploadPage() {
   }
 
   const handleSubmit = () => {
-    if (!canSubmit || !originalLookUpload.imageId || !valueMatchUpload.imageId) return
+    if (!canSubmit) return
     if (purchaseLink && !URL_PATTERN.test(purchaseLink)) {
       setLinkError('올바른 링크 형식을 입력해주세요')
       return
     }
 
+    if (fromAnalysis) {
+      mutate({
+        originalImageId: fromAnalysis.originalImageId,
+        matchedProductId: fromAnalysis.matchedProduct.productId,
+        sourceReportId: fromAnalysis.sourceReportId,
+        tagIds: selectedTags.map((tag) => tag.tagId),
+        purchaseUrl: purchaseLink || undefined,
+        comment: comment || undefined,
+      })
+      return
+    }
+
+    if (!originalLookUpload.imageId || !valueMatchUpload.imageId) return
     mutate({
       originalImageId: originalLookUpload.imageId,
       matchedImageId: valueMatchUpload.imageId,
@@ -59,22 +96,49 @@ export default function LookbookUploadPage() {
     <div className="mx-auto flex max-w-md flex-col gap-6 bg-bg p-4">
       <h1 className="text-lg font-semibold text-text">내 룩북 올리기</h1>
 
-      <div className="grid grid-cols-2 gap-3">
-        <ImageUploadField
-          label="원본 룩 사진"
-          onChange={originalLookUpload.uploadImage}
-          isUploading={originalLookUpload.isUploading}
-          uploadError={originalLookUpload.error}
-          onRetry={originalLookUpload.retryUpload}
-        />
-        <ImageUploadField
-          label="가성비 매칭 사진"
-          onChange={valueMatchUpload.uploadImage}
-          isUploading={valueMatchUpload.isUploading}
-          uploadError={valueMatchUpload.error}
-          onRetry={valueMatchUpload.retryUpload}
-        />
-      </div>
+      {fromAnalysis ? (
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-text">원본 룩 사진</span>
+            <div className="h-40 w-full overflow-hidden rounded-lg bg-bg-secondary">
+              {fromAnalysis.originalImageUrl && (
+                <img
+                  src={fromAnalysis.originalImageUrl}
+                  alt="원본 룩 사진"
+                  className="h-full w-full object-cover"
+                />
+              )}
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-text">가성비 매칭 상품</span>
+            <div className="h-40 w-full overflow-hidden rounded-lg bg-bg-secondary">
+              <img
+                src={fromAnalysis.matchedProduct.imageUrl}
+                alt={fromAnalysis.matchedProduct.name}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          <ImageUploadField
+            label="원본 룩 사진"
+            onChange={originalLookUpload.uploadImage}
+            isUploading={originalLookUpload.isUploading}
+            uploadError={originalLookUpload.error}
+            onRetry={originalLookUpload.retryUpload}
+          />
+          <ImageUploadField
+            label="가성비 매칭 사진"
+            onChange={valueMatchUpload.uploadImage}
+            isUploading={valueMatchUpload.isUploading}
+            uploadError={valueMatchUpload.error}
+            onRetry={valueMatchUpload.retryUpload}
+          />
+        </div>
+      )}
 
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium text-text">스타일 태그</span>
