@@ -110,7 +110,7 @@ export const TREND_ARTICLES: TrendArticle[] = [
     description: '부드러운 실루엣과 파스텔 컬러로 완성하는 러블리 스타일링.',
     relatedTags: ['#러블리', '#페미닌'],
     contentType: 'photo',
-    imageUrl: 'https://picsum.photos/seed/trend-lovely/600/400',
+    imageUrl: 'https://i.pinimg.com/1200x/9a/7d/47/9a7d473fb2b6d3e7ba3b82f7fe2e50a2.jpg',
   },
   {
     id: 4,
