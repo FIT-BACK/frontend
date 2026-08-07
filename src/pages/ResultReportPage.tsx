@@ -33,8 +33,22 @@ export const ResultReportPage: React.FC = () => {
   // 카테고리별로 선택된 상품 productId
   const [selectedByCategory, setSelectedByCategory] = useState<Record<string, number>>({});
 
+  // 백엔드 선정 자체는 태그 매칭 점수 기준(가격 미반영)이라 이미 뽑힌 대안들 중에서는
+  // 여전히 매칭 순위가 진짜 순위다. 다만 "가성비" 화면인 만큼, 보여주는 순서는
+  // 가격이 낮은 것부터 보이도록 정렬한다 (가격 미확정 상품은 맨 뒤로).
   const nonEmptyGroups = useMemo(
-    () => recommendationGroups.filter((group) => group.items.length > 0),
+    () =>
+      recommendationGroups
+        .filter((group) => group.items.length > 0)
+        .map((group) => ({
+          ...group,
+          items: [...group.items].sort((a, b) => {
+            if (a.price == null && b.price == null) return 0;
+            if (a.price == null) return 1;
+            if (b.price == null) return -1;
+            return a.price.amount - b.price.amount;
+          }),
+        })),
     [recommendationGroups],
   );
 
@@ -168,8 +182,10 @@ export const ResultReportPage: React.FC = () => {
     </div>
   );
 
+  // min-h-screen(100vh)만 쓰면 모바일 브라우저의 주소창/툴바 높이가 빠진 채로 계산돼서
+  // 하단 고정 버튼이 실제 보이는 화면 아래로 밀려날 수 있음 — dvh(동적 뷰포트 높이)로 보정
   return (
-    <div className="max-w-[375px] min-h-screen mx-auto bg-bg flex flex-col text-text relative">
+    <div className="max-w-[375px] min-h-screen min-h-[100dvh] mx-auto bg-bg flex flex-col text-text relative">
       {/* Header */}
       <div className="flex items-center justify-between p-[12px_20px_8px] shrink-0 bg-bg z-10 sticky top-0">
         <span onClick={() => navigate(-1)} className="text-[22px] text-text-secondary cursor-pointer p-1">←</span>
@@ -200,7 +216,7 @@ export const ResultReportPage: React.FC = () => {
       )}
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto px-[20px] flex flex-col gap-[12px] pb-[100px] pt-[14px]">
+      <div className="flex-1 overflow-y-auto px-[20px] flex flex-col gap-[12px] pb-[130px] pt-[14px]">
         {nonEmptyGroups.length === 0 && (
           <p className="py-10 text-center text-xs text-text-secondary">추천 결과가 없습니다</p>
         )}
@@ -228,7 +244,12 @@ export const ResultReportPage: React.FC = () => {
       </div>
 
       {/* Fixed Bottom Button */}
-      <div className="absolute bottom-[20px] left-[20px] right-[20px] z-20">
+      <div className="absolute bottom-[20px] left-[20px] right-[20px] z-20 flex flex-col items-center gap-[6px]">
+        {!allSelected && nonEmptyGroups.length > 0 && (
+          <p className="text-[11px] text-text-secondary bg-bg/90 px-[10px] py-[4px] rounded-full">
+            상품이 있는 카테고리마다 하나씩 선택해주세요
+          </p>
+        )}
         <button
           onClick={handleUploadAsLookbook}
           disabled={!allSelected}
