@@ -81,7 +81,9 @@ export default function SearchPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder='스타일, 브랜드, 태그 검색'
-            className='flex-1 text-sm outline-none bg-transparent placeholder:text-text-secondary'
+            // 모바일 브라우저는 input의 폰트 크기가 16px보다 작으면 포커스 시 자동으로
+            // 화면을 확대함 — text-sm(14px) 대신 text-base(16px)로 올려서 확대를 막는다.
+            className='flex-1 text-base outline-none bg-transparent placeholder:text-text-secondary'
           />
         </div>
       </header>
@@ -189,15 +191,25 @@ export default function SearchPage() {
                     className='aspect-square bg-bg-secondary bg-cover bg-center'
                     style={{ backgroundImage: `url(${lookbook.originalImageUrl})` }}
                   />
-                  <div className='p-2 flex items-center justify-between'>
-                    <div className='flex items-center gap-1.5'>
-                      <img 
-                        src={lookbook.authorProfileImageUrl ?? undefined} 
-                        alt="profile" 
-                        className="w-5 h-5 rounded-full object-cover bg-gray-100" 
-                      />
+                  <div className='p-2 flex items-center justify-between gap-1.5'>
+                    <div className='flex items-center gap-1.5 min-w-0'>
+                      {/* 프로필 사진이 없는 유저가 대부분인데 src가 undefined인 img를 그대로 그려서
+                          브라우저 기본 '깨진 이미지' 아이콘이 뜨고 비율이 깨졌음 — 값 있을 때만
+                          img를 그리고, 없으면 배경색 원으로 대체(다른 화면들과 동일 패턴). */}
+                      <div className='w-5 h-5 rounded-full bg-bg-secondary overflow-hidden shrink-0'>
+                        {lookbook.authorProfileImageUrl && (
+                          <img
+                            src={lookbook.authorProfileImageUrl}
+                            alt=''
+                            className='h-full w-full object-cover'
+                          />
+                        )}
+                      </div>
+                      <span className='text-[11px] text-text-secondary truncate'>
+                        {lookbook.authorNickname}
+                      </span>
                     </div>
-                    <div className='flex items-center gap-1 text-[11px] text-text-secondary'>
+                    <div className='flex items-center gap-1 text-[11px] text-text-secondary shrink-0'>
                       <span>{lookbook.isLiked ? '❤️' : '🤍'}</span>
                       <span>{lookbook.likeCount}</span>
                     </div>
