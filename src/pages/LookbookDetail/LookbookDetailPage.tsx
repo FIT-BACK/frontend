@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { navigate } from '../../utils/navigate';
 import { getProductDetail } from '../../api/products';
 import {
   useLookbookDetail,
@@ -12,6 +11,7 @@ import {
 import ReportBottomSheet from './components/ReportBottomSheet';
 
 export default function LookbookDetailPage() {
+  const navigate = useNavigate();
   const { lookbookId } = useParams();
   const id = Number(lookbookId);
 
@@ -47,23 +47,29 @@ export default function LookbookDetailPage() {
   return (
     <div className='flex flex-col h-full'>
       <div className='flex items-center justify-between px-4 py-2'>
-        <button onClick={() => navigate(-1 as unknown as string)}>←</button>
+        <button onClick={() => navigate(-1)}>←</button>
         <span className='font-bold text-sm'>룩북</span>
         <button onClick={() => setShowMoreSheet(true)}>⋮</button>
       </div>
 
       <div className='flex gap-1.5 px-4'>
-        <img
-          src={lookbook.originalImageUrl}
-          alt='원본 룩'
-          className='flex-1 rounded-xl'
-        />
-        {lookbook.matchedImageUrl && (
+        {/* 폰카메라 원본처럼 큰 사진이 들어와도 화면 밖으로 안 넘치도록 정사각 비율로 잘라서 보여준다
+            (flex-1 img만 있으면 이미지 원본 크기 때문에 가로 스크롤이 생겼음 — 피드 카드와 동일 패턴) */}
+        <div className='flex-1 aspect-square rounded-xl bg-bg-secondary overflow-hidden'>
           <img
-            src={lookbook.matchedImageUrl}
-            alt='가성비 매칭'
-            className='flex-1 rounded-xl'
+            src={lookbook.originalImageUrl}
+            alt='원본 룩'
+            className='h-full w-full object-cover'
           />
+        </div>
+        {lookbook.matchedImageUrl && (
+          <div className='flex-1 aspect-square rounded-xl bg-bg-secondary overflow-hidden'>
+            <img
+              src={lookbook.matchedImageUrl}
+              alt='가성비 매칭'
+              className='h-full w-full object-cover'
+            />
+          </div>
         )}
       </div>
 
@@ -148,7 +154,9 @@ export default function LookbookDetailPage() {
 
       {showMoreSheet && (
         <div
-          className='fixed inset-0 bg-black/30 flex items-end'
+          // z-index가 없어서 하단 TabBar의 동동 뜬 업로드 버튼(z-40)한테 클릭이
+          // 가로채였음 — TabBar보다 높은 z-index로 고정.
+          className='fixed inset-0 z-50 bg-black/30 flex items-end'
           onClick={() => setShowMoreSheet(false)}
         >
           <div

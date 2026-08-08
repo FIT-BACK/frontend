@@ -5,6 +5,7 @@ import TabBar from './TabBar';
 import UploadSelectSheet, {
   type UploadPurpose,
 } from '../domain/UploadSelectSheet';
+import OnboardingTutorial from '../domain/OnboardingTutorial';
 
 const Layout = () => {
   const navigate = useNavigate();
@@ -37,6 +38,9 @@ const Layout = () => {
           onClose={() => setIsSheetOpen(false)}
           onSelected={handleSelectPurpose}
         />
+
+        {/* 처음 앱을 켠 사용자를 위한 1회성 사용법 안내 */}
+        <OnboardingTutorial />
       </div>
     </div>
   );
