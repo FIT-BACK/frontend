@@ -101,6 +101,14 @@ export const TagEditPage: React.FC = () => {
 
   const handleConfirm = async () => {
     if (!reportId || isMatching) return;
+    // 백엔드가 "확정 태그 합계 1개 이상"을 요구하는데(RecommendationGenerateRequest
+    // .hasValidCombinedTagCount), 화면에서 태그가 0개인 채로도 눌려서 400을 그대로
+    // 사용자에게 보여주는 문제가 있었음 — 여기서 먼저 막는다.
+    if (tags.length === 0) {
+      setTagWarning(true);
+      setTimeout(() => setTagWarning(false), 2000);
+      return;
+    }
 
     // 현재 화면에 남아있는 태그를 원본 추천 태그(tagId 보유)와 대조해
     // 확정된 기본 태그(confirmedTagIds)와 사용자가 직접 추가한 태그(customTagNames)로 분리한다.
@@ -121,7 +129,13 @@ export const TagEditPage: React.FC = () => {
       });
       navigate('/result');
     } catch (err) {
-      setMatchError(err instanceof Error ? err.message : '추천 결과를 생성하지 못했습니다. 다시 시도해 주세요.');
+      // axios 에러의 기본 message("Request failed with status code 400")는 사용자한테
+      // 의미가 없으니, 서버가 내려준 실제 사유(ApiResponse.message)가 있으면 그걸 우선 보여준다.
+      const serverMessage =
+        typeof err === 'object' && err !== null && 'response' in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      setMatchError(serverMessage ?? '추천 결과를 생성하지 못했습니다. 다시 시도해 주세요.');
       setIsMatching(false);
     }
   };
