@@ -2,7 +2,6 @@ import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUploadStore } from '../store/useUploadStore';
 import { useImageUpload } from '../hooks/useImageUpload';
-import ImageCropModal from '../components/domain/ImageCropModal';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -18,9 +17,6 @@ export default function ImageUploadPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  // 크롭 전 원본 파일 — "다시 자르기"를 눌렀을 때 다시 크롭 화면을 띄우기 위해 별도로 들고 있는다.
-  const [rawFile, setRawFile] = useState<File | null>(null);
-  const [cropTarget, setCropTarget] = useState<{ url: string; file: File } | null>(null);
 
   const validateAndSetFile = (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -32,9 +28,8 @@ export default function ImageUploadPage() {
       return;
     }
     setError(null);
-    setRawFile(file);
-    // 바로 업로드하지 않고, 옷 부분만 잘라낼 수 있게 크롭 화면부터 띄운다.
-    setCropTarget({ url: URL.createObjectURL(file), file });
+    setSelectedFile(file);
+    setImage(URL.createObjectURL(file));
   };
 
   const handleDropZoneClick = () => fileInputRef.current?.click();
@@ -43,25 +38,6 @@ export default function ImageUploadPage() {
     const file = e.target.files?.[0];
     if (file) validateAndSetFile(file);
     e.target.value = ''; // 같은 파일 재선택 가능하도록 초기화
-  };
-
-  const handleCropConfirm = (croppedFile: File) => {
-    setCropTarget(null);
-    setSelectedFile(croppedFile);
-    setImage(URL.createObjectURL(croppedFile));
-  };
-
-  const handleCropCancel = () => {
-    setCropTarget(null);
-    // 크롭을 취소했는데 이전에 이미 잘라둔 사진이 없으면(첫 선택) 완전히 초기화한다.
-    if (!selectedFile) {
-      setRawFile(null);
-    }
-  };
-
-  const handleRecrop = () => {
-    if (!rawFile) return;
-    setCropTarget({ url: URL.createObjectURL(rawFile), file: rawFile });
   };
 
   const handleStartAnalysis = async () => {
@@ -76,7 +52,6 @@ export default function ImageUploadPage() {
   const handleRetake = () => {
     resetUpload();
     setSelectedFile(null);
-    setRawFile(null);
     setError(null);
   };
 
@@ -105,9 +80,6 @@ export default function ImageUploadPage() {
           인플루언서 룩, 핀터레스트 컷 등 따라하고 싶은 패션 사진을 업로드하면
           AI가 스타일과 핏을 분석해 가성비 아이템을 찾아드려요.
         </p>
-        <p className='mt-2 text-xs font-semibold text-primary-600 leading-normal'>
-          상의·하의·원피스·아우터 중 하나만 나오게 올려주세요 — 사진을 올리면 잘라낼 수 있어요.
-        </p>
       </div>
 
       {/* 숨겨진 파일 인풋 (실제 갤러리 피커 트리거) */}
@@ -129,22 +101,13 @@ export default function ImageUploadPage() {
               className='h-[320px] w-full object-cover'
             />
             {!isUploading && (
-              <div className='absolute top-3 right-3 flex gap-1.5'>
-                <button
-                  type='button'
-                  onClick={handleRecrop}
-                  className='rounded-full bg-black/50 px-3 py-1 text-[11px] text-white'
-                >
-                  다시 자르기
-                </button>
-                <button
-                  type='button'
-                  onClick={handleRetake}
-                  className='rounded-full bg-black/50 px-3 py-1 text-[11px] text-white'
-                >
-                  다시 선택
-                </button>
-              </div>
+              <button
+                type='button'
+                onClick={handleRetake}
+                className='absolute top-3 right-3 rounded-full bg-black/50 px-3 py-1 text-[11px] text-white'
+              >
+                다시 선택
+              </button>
             )}
             {isUploading && (
               <div className='absolute inset-x-0 bottom-0 bg-black/60 px-3 py-2 text-[11px] text-white'>
@@ -190,16 +153,6 @@ export default function ImageUploadPage() {
           {isUploading ? '업로드 중...' : '분석 시작하기'}
         </button>
       </div>
-
-      {cropTarget && (
-        <ImageCropModal
-          imageUrl={cropTarget.url}
-          fileName={cropTarget.file.name}
-          fileType={cropTarget.file.type}
-          onCancel={handleCropCancel}
-          onConfirm={handleCropConfirm}
-        />
-      )}
     </div>
   );
 }
