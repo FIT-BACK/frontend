@@ -61,8 +61,10 @@ export const TagEditPage: React.FC = () => {
   };
 
   useEffect(() => {
+    // '/analyze'는 실제로 존재하지 않는 경로였음 — 업로드 화면의 진짜 경로인
+    // '/image-upload'로 보내야 리다이렉트가 실제로 동작한다.
     if (!reportId) {
-      navigate('/analyze');
+      navigate('/image-upload');
     }
   }, [reportId, navigate]);
 
