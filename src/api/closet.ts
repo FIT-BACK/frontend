@@ -15,6 +15,8 @@ export interface ClosetItem {
   id: number
   category: ClosetCategory
   imageUrl: string
+  // 원본/매칭 비교 UI를 쓰는 룩북 항목만 값이 있고, 나머지 카테고리는 null
+  matchedImageUrl: string | null
   title: string
 }
 
@@ -32,6 +34,8 @@ interface ClosetSaveApiItem {
   targetType: ClosetTargetType
   targetId: number
   thumbnailUrl: string
+  // 원본/매칭 비교 UI 를 쓰는 룩북만 값, 나머지 타입은 null
+  matchedImageUrl: string | null
   tags: string[]
 }
 
@@ -53,11 +57,11 @@ const USE_MOCK_DELETE = false
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const MOCK_CLOSET_ITEMS: ClosetItem[] = [
-  { id: 1, category: 'trend', imageUrl: 'https://picsum.photos/seed/trend1/300', title: '오버사이즈 자켓 트렌드' },
-  { id: 2, category: 'trend', imageUrl: 'https://picsum.photos/seed/trend2/300', title: '와이드 데님 트렌드' },
-  { id: 3, category: 'lookbook', imageUrl: 'https://picsum.photos/seed/look1/300', title: '미니멀 캐주얼 룩북' },
-  { id: 4, category: 'lookbook', imageUrl: 'https://picsum.photos/seed/look2/300', title: '스트릿 룩북' },
-  { id: 5, category: 'report', imageUrl: 'https://picsum.photos/seed/report1/300', title: '7월 스타일 분석 리포트' },
+  { id: 1, category: 'trend', imageUrl: 'https://picsum.photos/seed/trend1/300', matchedImageUrl: null, title: '오버사이즈 자켓 트렌드' },
+  { id: 2, category: 'trend', imageUrl: 'https://picsum.photos/seed/trend2/300', matchedImageUrl: null, title: '와이드 데님 트렌드' },
+  { id: 3, category: 'lookbook', imageUrl: 'https://picsum.photos/seed/look1/300', matchedImageUrl: 'https://picsum.photos/seed/look1-matched/300', title: '미니멀 캐주얼 룩북' },
+  { id: 4, category: 'lookbook', imageUrl: 'https://picsum.photos/seed/look2/300', matchedImageUrl: 'https://picsum.photos/seed/look2-matched/300', title: '스트릿 룩북' },
+  { id: 5, category: 'report', imageUrl: 'https://picsum.photos/seed/report1/300', matchedImageUrl: null, title: '7월 스타일 분석 리포트' },
 ]
 
 export const getClosetItems = async (): Promise<ClosetItem[]> => {
@@ -71,6 +75,7 @@ export const getClosetItems = async (): Promise<ClosetItem[]> => {
     id: item.saveId,
     category: TARGET_TYPE_TO_CATEGORY[item.targetType],
     imageUrl: item.thumbnailUrl,
+    matchedImageUrl: item.matchedImageUrl,
     // TODO: 실제 응답엔 title 필드가 없어 tags로 임시 대체 — 화면 표시 문구는 기획 확인 필요
     title: item.tags.join(', '),
   }))

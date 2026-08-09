@@ -22,6 +22,8 @@ export interface LookbookTag {
 
 export interface LookbookDetail {
   id: number;
+  // 마이 클로젯 저장 항목 ID. 내가 저장한 적 없으면 null — 저장 취소(DELETE) 호출 시 필요하다.
+  saveId: number | null;
   authorNickname: string;
   authorProfileImageUrl: string | null;
   createdAt: string;
@@ -49,6 +51,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const mockDetail: LookbookDetail = {
   id: 1,
+  saveId: null,
   authorNickname: '@minji_style',
   authorProfileImageUrl: null,
   createdAt: new Date().toISOString(),
@@ -112,19 +115,30 @@ export const unlikeLookbook = async (
 
 /**
  * 룩북 저장(찜)은 룩북 전용 엔드포인트가 없고 공용 마이 클로젯 API를 사용한다
- * (POST /api/v1/closet-saves, targetType: 'LOOKBOOK'). 삭제는 saveId가 필요한데
- * 룩북 상세 응답에는 saveId가 내려오지 않아 지금은 저장만 가능하고 저장 취소는
- * 아직 연동할 수 없다 — closet-saves 목록 쪽에서 saveId를 받아온 뒤 이어서 작업할 것.
+ * (POST /api/v1/closet-saves, targetType: 'LOOKBOOK'). 생성된 saveId를 돌려줘서
+ * 화면 상태를 바로 "저장됨"으로 갱신하고, 이후 저장 취소(unsaveLookbook) 호출에 쓴다.
  */
-export const saveLookbook = async (lookbookId: number): Promise<void> => {
+export const saveLookbook = async (
+  lookbookId: number,
+): Promise<{ saveId: number }> => {
+  if (USE_MOCK) {
+    await delay(200);
+    return { saveId: 1 };
+  }
+  const response = await api.post<ApiEnvelope<{ saveId: number }>>(
+    '/api/v1/closet-saves',
+    { targetType: 'LOOKBOOK', targetId: lookbookId },
+  );
+  return { saveId: response.data.data.saveId };
+};
+
+/** DELETE /api/v1/closet-saves/{saveId} — 룩북 저장 취소 */
+export const unsaveLookbook = async (saveId: number): Promise<void> => {
   if (USE_MOCK) {
     await delay(200);
     return;
   }
-  await api.post('/api/v1/closet-saves', {
-    targetType: 'LOOKBOOK',
-    targetId: lookbookId,
-  });
+  await api.delete(`/api/v1/closet-saves/${saveId}`);
 };
 
 /** POST /api/v1/lookbooks/{lookbookId}/reports */

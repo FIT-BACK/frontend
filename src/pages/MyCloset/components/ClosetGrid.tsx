@@ -49,7 +49,23 @@ export default function ClosetGrid({ items, onSelect, onDelete }: ClosetGridProp
           onPointerLeave={cancelPress}
           className="flex flex-col overflow-hidden rounded-lg border border-border bg-white text-left"
         >
-          <img src={item.imageUrl} alt={item.title} className="h-32 w-full object-cover" />
+          {item.matchedImageUrl ? (
+            // 룩북: 원본 vs 매칭 상품 비교 — 두 장을 나란히 보여준다
+            <div className="flex h-32 w-full gap-[1px]">
+              <img
+                src={item.imageUrl}
+                alt={`${item.title} 원본`}
+                className="h-full w-1/2 object-cover"
+              />
+              <img
+                src={item.matchedImageUrl}
+                alt={`${item.title} 매칭 상품`}
+                className="h-full w-1/2 object-cover"
+              />
+            </div>
+          ) : (
+            <img src={item.imageUrl} alt={item.title} className="h-32 w-full object-cover" />
+          )}
           <span className="p-2 text-sm text-text">{item.title}</span>
         </button>
       ))}

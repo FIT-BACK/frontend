@@ -4,6 +4,7 @@ import {
   likeLookbook,
   unlikeLookbook,
   saveLookbook,
+  unsaveLookbook,
   reportLookbook,
   deleteLookbook,
   getLookbookFeed,
@@ -145,14 +146,34 @@ export const useToggleLike = (lookbookId: number) => {
   });
 };
 
-// 저장 취소는 saveId가 없어 아직 연동 불가 — api/lookbooks.ts의 saveLookbook 주석 참고
-export const useSaveLookbook = (lookbookId: number) =>
-  useMutation({
+export const useSaveLookbook = (lookbookId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
     mutationFn: () => saveLookbook(lookbookId),
-    onSuccess: () => {
+    onSuccess: ({ saveId }) => {
+      // 응답으로 받은 saveId를 상세 캐시에 바로 반영 — 재조회 없이도 버튼이 즉시
+      // "저장됨" 상태(저장 취소 가능)로 바뀐다.
+      queryClient.setQueryData<LookbookDetail>(detailKey(lookbookId), (old) =>
+        old ? { ...old, saveId } : old,
+      );
+      queryClient.invalidateQueries({ queryKey: ['closetItems'] });
       alert('마이 클로젯에 저장했어요');
     },
   });
+};
+
+export const useUnsaveLookbook = (lookbookId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (saveId: number) => unsaveLookbook(saveId),
+    onSuccess: () => {
+      queryClient.setQueryData<LookbookDetail>(detailKey(lookbookId), (old) =>
+        old ? { ...old, saveId: null } : old,
+      );
+      queryClient.invalidateQueries({ queryKey: ['closetItems'] });
+    },
+  });
+};
 
 export const useReportLookbook = (lookbookId: number) =>
   useMutation({
