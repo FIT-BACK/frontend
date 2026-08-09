@@ -1,7 +1,10 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ReactCrop, { type Crop, type PixelCrop } from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
 import { useUploadStore } from '../store/useUploadStore';
 import { useImageUpload } from '../hooks/useImageUpload';
+import { getCroppedImg } from '../utils/cropImage';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -15,29 +18,56 @@ export default function ImageUploadPage() {
   const { uploadImage, isUploading, uploadProgress, error: uploadError } = useImageUpload('ANALYSIS');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const validateAndSetFile = (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      setError('이미지 파일만 업로드 가능합니다');
-      return;
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      setError('5MB 이하 이미지만 업로드 가능합니다');
-      return;
-    }
-    setError(null);
-    setSelectedFile(file);
-    setImage(URL.createObjectURL(file));
-  };
+  // Crop states
+  const [isCropping, setIsCropping] = useState(false);
+  const [tempImageUri, setTempImageUri] = useState<string | null>(null);
+  const [crop, setCrop] = useState<Crop>();
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
 
   const handleDropZoneClick = () => fileInputRef.current?.click();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) validateAndSetFile(file);
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        setError('이미지 파일만 업로드 가능합니다');
+        return;
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        setError('5MB 이하 이미지만 업로드 가능합니다');
+        return;
+      }
+      setError(null);
+      setTempImageUri(URL.createObjectURL(file));
+      setIsCropping(true);
+    }
     e.target.value = ''; // 같은 파일 재선택 가능하도록 초기화
+  };
+
+  const handleCropCancel = () => {
+    setIsCropping(false);
+    setTempImageUri(null);
+    setCrop(undefined);
+    setCompletedCrop(null);
+  };
+
+  const handleCropComplete = async () => {
+    if (!imgRef.current || !completedCrop) return;
+    try {
+      const croppedFile = await getCroppedImg(imgRef.current, completedCrop, 'cropped.jpg');
+      if (croppedFile) {
+        setSelectedFile(croppedFile);
+        setImage(URL.createObjectURL(croppedFile));
+      }
+      setIsCropping(false);
+      setTempImageUri(null);
+    } catch (e) {
+      setError('이미지 크롭 중 오류가 발생했습니다');
+    }
   };
 
   const handleStartAnalysis = async () => {
@@ -54,6 +84,61 @@ export default function ImageUploadPage() {
     setSelectedFile(null);
     setError(null);
   };
+
+  if (isCropping && tempImageUri) {
+    return (
+      <div className='max-w-[375px] min-h-screen mx-auto bg-bg flex flex-col text-text px-5 pb-8 pt-6'>
+        <header className='flex items-center gap-3'>
+          <button
+            type='button'
+            onClick={handleCropCancel}
+            aria-label='취소'
+            className='grid h-9 w-9 place-items-center rounded-full border border-border bg-white'
+          >
+            <BackIcon />
+          </button>
+          <h2 className='text-lg font-extrabold text-text'>사진 자르기</h2>
+        </header>
+
+        <div className='mt-6 text-center mb-6'>
+          <p className='text-base font-bold text-text mb-2'>
+            정확한 분석을 위해 옷 부분만 잘라주세요.
+          </p>
+          <p className='text-sm text-gray-500'>
+            * 상의, 하의, 원피스, 아우터 중 하나만 선택해주세요. (신발, 액세서리 제외)
+          </p>
+        </div>
+
+        <div className='flex justify-center'>
+          <div className='h-auto inline-block bg-bg-secondary rounded-2xl overflow-hidden border border-border'>
+            <ReactCrop
+              crop={crop}
+              onChange={(_, percentCrop) => setCrop(percentCrop)}
+              onComplete={(c) => setCompletedCrop(c)}
+            >
+              <img
+                ref={imgRef}
+                src={tempImageUri}
+                alt='Crop preview'
+                className='max-h-[60vh] max-w-full w-auto h-auto block'
+              />
+            </ReactCrop>
+          </div>
+        </div>
+
+        <div className='mt-8'>
+          <button
+            type='button'
+            onClick={handleCropComplete}
+            disabled={!completedCrop?.width || !completedCrop?.height}
+            className='w-full rounded-xl bg-primary-400 py-4 text-sm font-bold text-white transition active:scale-[0.98] disabled:opacity-40'
+          >
+            크롭 완료
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='max-w-[375px] min-h-screen mx-auto bg-bg flex flex-col text-text px-5 pb-8 pt-6'>
@@ -98,7 +183,7 @@ export default function ImageUploadPage() {
             <img
               src={imageUri}
               alt='업로드한 사진 미리보기'
-              className='h-[320px] w-full object-cover'
+              className='max-h-[400px] w-full object-contain bg-black/5'
             />
             {!isUploading && (
               <button
@@ -140,10 +225,8 @@ export default function ImageUploadPage() {
         )}
       </div>
 
-      <div className='flex-1' />
-
       {/* C-05-03 분석 시작하기 */}
-      <div className='mt-6'>
+      <div className='mt-8'>
         <button
           type='button'
           onClick={handleStartAnalysis}
