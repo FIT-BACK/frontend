@@ -28,8 +28,9 @@ const TrendDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-bg">
-      {/* Header */}
+    <div className="h-screen bg-bg flex justify-center">
+      <div className="w-full max-w-[480px] bg-bg h-screen flex flex-col shadow-lg relative">
+        {/* Header */}
       <header className="flex items-center justify-between p-5 shrink-0 bg-bg">
         <button onClick={() => navigate(-1)} className="text-xl font-bold cursor-pointer">
           ←
@@ -184,6 +185,7 @@ const TrendDetailPage: React.FC = () => {
           이 트렌드로 매칭 시작하기
         </button>
         </div>
+      </div>
       </div>
     </div>
   );
