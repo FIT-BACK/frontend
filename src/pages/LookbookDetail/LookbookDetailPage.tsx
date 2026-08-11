@@ -6,6 +6,7 @@ import {
   useLookbookDetail,
   useToggleLike,
   useSaveLookbook,
+  useUnsaveLookbook,
   useDeleteLookbook,
 } from '../../hooks/useLookbookDetail';
 import ReportBottomSheet from './components/ReportBottomSheet';
@@ -18,6 +19,7 @@ export default function LookbookDetailPage() {
   const { data: lookbook, isLoading, isError } = useLookbookDetail(id);
   const toggleLike = useToggleLike(id);
   const saveLookbook = useSaveLookbook(id);
+  const unsaveLookbook = useUnsaveLookbook(id);
   const deleteLookbookMutation = useDeleteLookbook(id);
 
   // 매칭 상품이 실제 카탈로그 상품일 때만 상세(이름/가격/판매처)를 조회한다.
@@ -34,6 +36,16 @@ export default function LookbookDetailPage() {
     if (!confirm('정말 삭제하시겠어요?')) return;
     await deleteLookbookMutation.mutateAsync();
     navigate('/');
+  };
+
+  const isSaved = lookbook?.saveId != null;
+  const handleToggleSave = () => {
+    if (!lookbook) return;
+    if (lookbook.saveId != null) {
+      unsaveLookbook.mutate(lookbook.saveId);
+    } else {
+      saveLookbook.mutate();
+    }
   };
 
   if (isLoading) return <div className='p-4 text-center'>불러오는 중...</div>;
@@ -145,10 +157,12 @@ export default function LookbookDetailPage() {
           <span className='text-xs font-bold'>{lookbook.likeCount}</span>
         </button>
         <button
-          onClick={() => saveLookbook.mutate()}
-          aria-label='마이 클로젯에 저장'
+          onClick={handleToggleSave}
+          disabled={saveLookbook.isPending || unsaveLookbook.isPending}
+          aria-label={isSaved ? '마이 클로젯 저장 취소' : '마이 클로젯에 저장'}
+          className='disabled:opacity-40'
         >
-          📑
+          {isSaved ? '📑' : '🔖'}
         </button>
       </div>
 

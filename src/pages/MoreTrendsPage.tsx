@@ -53,8 +53,9 @@ const MoreTrendsPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-bg">
-      {/* Header */}
+    <div className="h-screen bg-bg flex justify-center">
+      <div className="w-full max-w-[480px] bg-bg h-screen flex flex-col shadow-lg relative">
+        {/* Header */}
       <header className="flex items-center justify-between p-5 shrink-0">
         <button onClick={() => navigate(-1)} className="text-xl font-bold cursor-pointer">
           ←
@@ -150,6 +151,7 @@ const MoreTrendsPage: React.FC = () => {
             ))}
           </div>
         )}
+      </div>
       </div>
     </div>
   );
