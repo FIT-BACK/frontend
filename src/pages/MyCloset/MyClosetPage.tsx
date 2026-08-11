@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import type { ClosetItem } from '../../api/closet'
 import { useClosetItems, useDeleteClosetItem } from '../../hooks/useMyCloset'
 import CategoryTabs, { type ClosetTab } from './components/CategoryTabs'
@@ -8,6 +8,7 @@ import ClosetGrid from './components/ClosetGrid'
 const VALID_TABS: ClosetTab[] = ['all', 'trend', 'lookbook', 'report']
 
 export default function MyClosetPage() {
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const initialTab = searchParams.get('tab')
   const [activeTab, setActiveTab] = useState<ClosetTab>(
@@ -22,7 +23,15 @@ export default function MyClosetPage() {
   )
 
   const handleSelect = (item: ClosetItem) => {
-    console.log('선택한 클로젯 아이템', item)
+    if (item.category === 'trend') {
+      navigate(`/trend/${item.targetId}`)
+      return
+    }
+    if (item.category === 'lookbook') {
+      navigate(`/lookbooks/${item.targetId}`)
+      return
+    }
+    // 분석 리포트는 아직 저장 목록에서 다시 볼 수 있는 상세 라우트가 없음 — 백엔드/라우팅 정리 후 연결
   }
 
   const handleDelete = (item: ClosetItem) => {

@@ -13,6 +13,8 @@ export type ClosetCategory = 'trend' | 'lookbook' | 'report'
 
 export interface ClosetItem {
   id: number
+  // 상세 화면 이동에 쓰는 실제 대상(트렌드/룩북/리포트) ID. id(saveId)와는 다름.
+  targetId: number
   category: ClosetCategory
   imageUrl: string
   // 원본/매칭 비교 UI를 쓰는 룩북 항목만 값이 있고, 나머지 카테고리는 null
@@ -57,11 +59,11 @@ const USE_MOCK_DELETE = false
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const MOCK_CLOSET_ITEMS: ClosetItem[] = [
-  { id: 1, category: 'trend', imageUrl: 'https://picsum.photos/seed/trend1/300', matchedImageUrl: null, title: '오버사이즈 자켓 트렌드' },
-  { id: 2, category: 'trend', imageUrl: 'https://picsum.photos/seed/trend2/300', matchedImageUrl: null, title: '와이드 데님 트렌드' },
-  { id: 3, category: 'lookbook', imageUrl: 'https://picsum.photos/seed/look1/300', matchedImageUrl: 'https://picsum.photos/seed/look1-matched/300', title: '미니멀 캐주얼 룩북' },
-  { id: 4, category: 'lookbook', imageUrl: 'https://picsum.photos/seed/look2/300', matchedImageUrl: 'https://picsum.photos/seed/look2-matched/300', title: '스트릿 룩북' },
-  { id: 5, category: 'report', imageUrl: 'https://picsum.photos/seed/report1/300', matchedImageUrl: null, title: '7월 스타일 분석 리포트' },
+  { id: 1, targetId: 101, category: 'trend', imageUrl: 'https://picsum.photos/seed/trend1/300', matchedImageUrl: null, title: '오버사이즈 자켓 트렌드' },
+  { id: 2, targetId: 102, category: 'trend', imageUrl: 'https://picsum.photos/seed/trend2/300', matchedImageUrl: null, title: '와이드 데님 트렌드' },
+  { id: 3, targetId: 201, category: 'lookbook', imageUrl: 'https://picsum.photos/seed/look1/300', matchedImageUrl: 'https://picsum.photos/seed/look1-matched/300', title: '미니멀 캐주얼 룩북' },
+  { id: 4, targetId: 202, category: 'lookbook', imageUrl: 'https://picsum.photos/seed/look2/300', matchedImageUrl: 'https://picsum.photos/seed/look2-matched/300', title: '스트릿 룩북' },
+  { id: 5, targetId: 301, category: 'report', imageUrl: 'https://picsum.photos/seed/report1/300', matchedImageUrl: null, title: '7월 스타일 분석 리포트' },
 ]
 
 export const getClosetItems = async (): Promise<ClosetItem[]> => {
@@ -73,6 +75,7 @@ export const getClosetItems = async (): Promise<ClosetItem[]> => {
   const response = await api.get<ClosetSavesApiResponse>('/api/v1/closet-saves')
   return response.data.data.items.map((item) => ({
     id: item.saveId,
+    targetId: item.targetId,
     category: TARGET_TYPE_TO_CATEGORY[item.targetType],
     imageUrl: item.thumbnailUrl,
     matchedImageUrl: item.matchedImageUrl,
