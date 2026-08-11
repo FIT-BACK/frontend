@@ -67,11 +67,37 @@ export interface SaveReportSelectedItem {
   productId: number
 }
 
+export interface SavedAnalysisItem {
+  category: string
+  productId: number
+  rank: number
+  imageUrl: string | null
+  name: string | null
+  sellerName: string | null
+  price: RecommendationPrice | null
+  purchaseUrl: string | null
+}
+
 export interface SaveReportResult {
   reportId: number
   saved: boolean
   savedAt: string | null
-  selectedItems: unknown[]
+  selectedItems: SavedAnalysisItem[]
+}
+
+// GET /api/v1/analyses/{reportId} 전체 응답 — 생성 직후(AnalysisResult, 태그만 있음)와 달리
+// 추천/저장 상태까지 포함된 리포트 상세. 마이 클로젯에서 저장된 리포트를 다시 볼 때 씀.
+export interface AnalysisReportDetail {
+  reportId: number
+  imageUrl: string
+  matchPercentage: number
+  tags: string[]
+  recommendationStatus: string
+  scoreVersion: string | null
+  recommendationGroups: RecommendationGroup[]
+  saved: boolean
+  savedAt: string | null
+  selectedItems: SavedAnalysisItem[]
 }
 
 interface ApiEnvelope<T> {
@@ -86,8 +112,8 @@ export const createAnalysis = async (imageId: string): Promise<AnalysisResult> =
   return response.data.data
 }
 
-export const getAnalysis = async (reportId: number): Promise<AnalysisResult> => {
-  const response = await api.get<ApiEnvelope<AnalysisResult>>(`/api/v1/analyses/${reportId}`)
+export const getAnalysis = async (reportId: number): Promise<AnalysisReportDetail> => {
+  const response = await api.get<ApiEnvelope<AnalysisReportDetail>>(`/api/v1/analyses/${reportId}`)
   return response.data.data
 }
 
