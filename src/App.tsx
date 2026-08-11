@@ -27,6 +27,7 @@ import TrendDetailPage from './pages/TrendDetailPage';
 import MoreTrendsPage from './pages/MoreTrendsPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import LookbookDetailPage from './pages/LookbookDetail/LookbookDetailPage';
+import ReportDetailPage from './pages/ReportDetail/ReportDetailPage';
 import NotificationListPage from './pages/NotificationListPage';
 import { useSaveTrend } from './hooks/useMyCloset';
 
@@ -63,6 +64,7 @@ function App() {
           <Route path='image-upload' element={<ImageUploadPage />} />
           <Route path='search' element={<SearchPage />} />
           <Route path='lookbooks/:lookbookId' element={<LookbookDetailPage />} />
+          <Route path='reports/:reportId' element={<ReportDetailPage />} />
           <Route path='alerts' element={<NotificationListPage />} />
         </Route>
 
