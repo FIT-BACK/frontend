@@ -51,15 +51,23 @@ export default function LoginPage() {
     </>
   );
 
-  // 이메일 로그인 처리 함수
+  // 이메일 로그인 처리 함수 (5회 실패 에러 AUTH429_1 분기 처리 추가)
   const handleLogin = async () => {
     try {
       const response = await loginUser({ email, password });
       localStorage.setItem('accessToken', response.data.accessToken);
       alert('로그인 성공!');
       navigate('/');
-    } catch (error) {
-      alert('로그인 실패: 이메일과 비밀번호를 확인해주세요.');
+    } catch (error: any) {
+      const errorCode = error.response?.data?.code;
+
+      if (errorCode === 'AUTH401_1') {
+        alert('이메일 또는 비밀번호가 올바르지 않습니다.');
+      } else if (errorCode === 'AUTH429_1') {
+        alert('로그인 시도 횟수를 초과하여 해당 이메일이 일시 잠겼습니다.');
+      } else {
+        alert('로그인에 실패했습니다. 입력한 정보를 다시 확인해주세요.');
+      }
     }
   };
 
