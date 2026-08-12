@@ -36,7 +36,10 @@ export const TagEditPage: React.FC = () => {
     COLOR: false,
   });
 
-  const [matchLevel, setMatchLevel] = useState(70);
+  // 기본값 70은 이미지유사도×0.7+태그일치도×0.3 공식에서 tagMatch가 거의 항상 낮게 나와
+  // 결과가 0개로 뜨는 문제가 있었음(백엔드 서버 기본값은 50으로 이미 조정됨, PR #317/#318).
+  // 사용자가 슬라이더를 만지지 않아도 서버 기본값과 일치하도록 프론트도 50으로 맞춤.
+  const [matchLevel, setMatchLevel] = useState(50);
 
   // Grouping tags based on CategoryType
   const groupedTags = useMemo(() => {
