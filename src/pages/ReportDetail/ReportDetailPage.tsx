@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getAnalysis } from '../../api/analysis';
+import { getAnalysis, type SavedAnalysisItem } from '../../api/analysis';
+import { getAllTags } from '../../api/tags';
+import type { LookbookUploadNavState } from '../LookbookUpload/LookbookUploadPage';
 
 const CATEGORY_LABELS: Record<string, string> = {
   OUTER: '아우터',
@@ -27,10 +29,43 @@ export default function ReportDetailPage() {
     enabled: Number.isFinite(id),
   });
 
+  // 룩북으로 올릴 때 확정 태그(이름만 있고 tagId가 없음)를 tagId 있는 형태로 되찾기 위해
+  // 전체 태그 카탈로그를 이름으로 대조한다.
+  const { data: allTags = [] } = useQuery({ queryKey: ['allTags'], queryFn: getAllTags });
+
   if (isLoading) return <div className="p-4 text-center text-sm text-text-secondary">불러오는 중...</div>;
   if (isError || !report) {
     return <div className="p-4 text-center text-sm text-text-secondary">삭제되었거나 볼 수 없는 리포트입니다</div>;
   }
+
+  // 룩북 조합용 대표 상품 — 매칭 이미지/상품 중 하나만 요구하는 백엔드 계약상 표시 정보가
+  // 전부 갖춰진(구매 링크까지 있는) 첫 저장 상품을 대표로 쓴다.
+  const matchableItem = report.selectedItems.find(
+    (item): item is SavedAnalysisItem & { imageUrl: string; name: string; purchaseUrl: string } =>
+      !!item.imageUrl && !!item.name && !!item.purchaseUrl,
+  );
+
+  const handleUploadAsLookbook = () => {
+    if (!matchableItem) return;
+    const tagByName = new Map(allTags.map((tag) => [tag.tagName, tag]));
+    const matchedTags = report.tags
+      .map((tagName) => tagByName.get(tagName))
+      .filter((tag): tag is (typeof allTags)[number] => tag !== undefined);
+
+    const navState: LookbookUploadNavState = {
+      originalImageId: report.originalImageId,
+      originalImageUrl: report.imageUrl,
+      sourceReportId: report.reportId,
+      matchedProduct: {
+        productId: matchableItem.productId,
+        imageUrl: matchableItem.imageUrl,
+        name: matchableItem.name,
+        purchaseUrl: matchableItem.purchaseUrl,
+      },
+      tags: matchedTags,
+    };
+    navigate('/upload', { state: navState });
+  };
 
   const itemsByCategory = report.selectedItems.reduce<Record<string, typeof report.selectedItems>>(
     (acc, item) => {
@@ -111,6 +146,24 @@ export default function ReportDetailPage() {
           ))
         )}
       </div>
+
+      {report.selectedItems.length > 0 && (
+        <div className="sticky bottom-0 bg-bg border-t border-border px-[20px] py-[14px]">
+          <button
+            type="button"
+            onClick={handleUploadAsLookbook}
+            disabled={!matchableItem}
+            className="w-full text-bg text-[15px] font-bold border-none rounded-[14px] p-[16px] bg-primary-400 hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            이 조합으로 룩북 올리기
+          </button>
+          {!matchableItem && (
+            <p className="mt-[6px] text-center text-[11px] text-text-secondary">
+              저장된 상품의 정보를 아직 불러오지 못해 지금은 올릴 수 없어요
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

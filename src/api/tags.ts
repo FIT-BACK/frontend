@@ -45,3 +45,11 @@ export const getTags = async (): Promise<StyleTag[]> => {
     .filter((tag): tag is TagApiItem => tag !== undefined)
     .map((tag) => ({ tagId: tag.tagId, tagName: tag.tagName }))
 }
+
+// getTags()와 달리 관심 스타일 5개로 좁히지 않고 전체 태그(STYLE/SILHOUETTE/MATERIAL/
+// DETAIL/COLOR)를 그대로 반환한다. 분석 리포트의 확정 태그(이름만 있고 tagId가 없음)를
+// 룩북 업로드용 tagId 있는 형태로 되찾을 때 이름으로 매칭하는 용도로 쓴다.
+export const getAllTags = async (): Promise<StyleTag[]> => {
+  const response = await api.get<TagsApiResponse>('/api/v1/tags')
+  return response.data.data.items.map((tag) => ({ tagId: tag.tagId, tagName: tag.tagName }))
+}
