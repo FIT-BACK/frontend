@@ -10,13 +10,18 @@ export default function SignupProfilePage() {
   const { kakaoNickname, kakaoProfileImage } = location.state || {};
 
   const { data: tags = [] } = useTags();
-  const { uploadImage, isUploading } = useImageUpload('PROFILE');
+  const { uploadImage, isUploading, error: uploadError } = useImageUpload('PROFILE');
 
   const [nickname, setNickname] = useState(kakaoNickname || '');
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(kakaoProfileImage || null);
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // uploadImage()의 error는 실제 제출(가입 완료) 시점에만 채워져서, 사진을 고르자마자
+  // 형식/용량이 안 맞는 걸 알려줄 방법이 없었음 — 미리보기가 정상으로 뜨고 나중에야
+  // "업로드에 실패했습니다"만 뜨는 게 원인 파악이 안 되는 문제였을 가능성이 높음(특히
+  // 아이폰 기본 사진 형식인 HEIC는 여기서 허용하는 JPEG/PNG/WEBP가 아님). 선택 즉시 검증.
+  const [selectError, setSelectError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -37,13 +42,34 @@ export default function SignupProfilePage() {
     fileInputRef.current?.click();
   };
 
-  // 유저가 이미지를 선택하면 화면에 미리보기를 띄워주고, 실제 파일은 제출 시 업로드
+  // 유저가 이미지를 선택하면 화면에 미리보기를 띄워주고, 실제 파일은 제출 시 업로드.
+  // uploadImage()와 동일한 규칙(JPEG/PNG/WEBP, 5MB 이하)을 선택 시점에도 먼저 검사해서,
+  // 안 맞는 파일을 골랐을 때 미리보기가 뜬 채로 방치되지 않고 바로 이유를 보여준다.
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+  const MAX_SIZE = 5 * 1024 * 1024;
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setProfileImageFile(file);
-      setProfileImagePreview(URL.createObjectURL(file));
+    if (!file) return;
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setSelectError(
+        file.type === 'image/heic' || file.type === 'image/heif' || file.type === ''
+          ? 'HEIC 등 아이폰 기본 사진 형식은 지원하지 않아요. JPG/PNG/WEBP로 변환하거나 다른 사진을 선택해주세요.'
+          : 'JPG, PNG, WEBP 형식의 이미지 파일만 업로드할 수 있습니다.',
+      );
+      e.target.value = '';
+      return;
     }
+    if (file.size > MAX_SIZE) {
+      setSelectError('파일 용량은 최대 5MB를 초과할 수 없습니다.');
+      e.target.value = '';
+      return;
+    }
+
+    setSelectError(null);
+    setProfileImageFile(file);
+    setProfileImagePreview(URL.createObjectURL(file));
   };
 
   const handleComplete = async () => {
@@ -135,6 +161,11 @@ export default function SignupProfilePage() {
             </div>
           </div>
           <p className="mt-3 text-xs text-text-tertiary">프로필 사진을 등록해주세요</p>
+          {(selectError || uploadError) && (
+            <p className="mt-2 text-xs text-error-400 text-center max-w-[260px]">
+              {selectError || uploadError}
+            </p>
+          )}
 
           {/* 실제 사진 업로드 인풋 (화면에서는 숨김) */}
           <input
