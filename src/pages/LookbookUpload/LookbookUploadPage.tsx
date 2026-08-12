@@ -44,7 +44,7 @@ export default function LookbookUploadPage() {
   // (분석 결과에서 넘어온 경우에는 이 훅들을 아예 쓰지 않는다 — 사진을 다시 안 올리기 때문)
   const originalLookUpload = useImageUpload('LOOKBOOK')
   const valueMatchUpload = useImageUpload('LOOKBOOK')
-  const { mutate, isPending, isError, isSuccess } = useLookbookUpload()
+  const { mutate, isPending, isError, isSuccess, error } = useLookbookUpload()
 
   // 백엔드가 매칭 이미지/매칭 상품 중 정확히 하나만 요구함(둘 다 없거나 둘 다 있으면 에러).
   // 분석 결과에서 넘어온 경우: matchedProductId(+sourceReportId)를 그대로 쓰고 재업로드 불필요.
@@ -185,7 +185,7 @@ export default function LookbookUploadPage() {
 
       {isError && (
         <p className="text-center text-sm text-error-400">
-          업로드에 실패했습니다. 다시 시도해주세요
+          {error instanceof Error && error.message ? error.message : '업로드에 실패했습니다. 다시 시도해주세요'}
         </p>
       )}
       {isSuccess && (
