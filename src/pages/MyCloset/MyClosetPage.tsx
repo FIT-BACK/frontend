@@ -31,7 +31,9 @@ export default function MyClosetPage() {
       navigate(`/lookbooks/${item.targetId}`)
       return
     }
-    // 분석 리포트는 아직 저장 목록에서 다시 볼 수 있는 상세 라우트가 없음 — 백엔드/라우팅 정리 후 연결
+    if (item.category === 'report') {
+      navigate(`/reports/${item.targetId}`)
+    }
   }
 
   const handleDelete = (item: ClosetItem) => {

@@ -111,10 +111,16 @@ export const ResultReportPage: React.FC = () => {
     item,
     category,
     isSelected,
+    displayRank,
   }: {
     item: RecommendationItem;
     category: string;
     isSelected: boolean;
+    // item.rank는 백엔드가 매긴 "매칭 품질" 순위인데, 화면은 가성비 화면 취지에 맞게
+    // 가격순으로 다시 정렬해서 보여준다 — 그 원본 rank를 그대로 배지에 쓰면 화면에
+    // 보이는 순서(가격순)와 배지 숫자(매칭순)가 어긋나 1위 다음에 3위, 2위 순으로
+    // 뒤죽박죽 보이는 문제가 있었음. 배지는 항상 "지금 보이는 순서" 기준으로 표시.
+    displayRank: number;
   }) => (
     <div
       className={`flex gap-[10px] rounded-[11px] p-[10px] items-center transition-colors border-[1px] ${
@@ -170,7 +176,7 @@ export const ResultReportPage: React.FC = () => {
 
         <div className="flex flex-col items-end">
           <div className="text-[10px] px-[6px] py-[2px] rounded-[6px] font-extrabold bg-[#FAEEDA] text-[#633806] mb-[4px]">
-            {item.rank}위 매칭
+            {displayRank}위 매칭
           </div>
           <div className="text-[14px] font-extrabold text-primary-800">
             {item.price
@@ -226,12 +232,13 @@ export const ResultReportPage: React.FC = () => {
               </span>
             </div>
             <div className="flex flex-col gap-[8px] mb-[10px]">
-              {group.items.map((item) => (
+              {group.items.map((item, index) => (
                 <ItemCard
                   key={item.productId}
                   item={item}
                   category={group.category}
                   isSelected={selectedByCategory[group.category] === item.productId}
+                  displayRank={index + 1}
                 />
               ))}
             </div>
