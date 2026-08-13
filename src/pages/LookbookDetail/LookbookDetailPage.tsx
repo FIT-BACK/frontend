@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getProductDetail } from '../../api/products';
+import { TREND_ARTICLES } from '../../constants/trendArticles';
 import {
   useLookbookDetail,
   useToggleLike,
@@ -55,6 +56,12 @@ export default function LookbookDetailPage() {
   const purchaseUrl = product
     ? (product.affiliateUrl ?? product.purchaseUrl)
     : lookbook.purchaseUrl;
+
+  // 룩북 태그와 겹치는 트렌드가 있으면 뱃지로 연결 (화면설계서 C-04B-06)
+  const lookbookTagNames = lookbook.tags.map((tag) => `#${tag.tagName}`);
+  const relatedTrend = TREND_ARTICLES.find((trend) =>
+    trend.relatedTags.some((relatedTag) => lookbookTagNames.includes(relatedTag)),
+  );
 
   return (
     <div className='flex flex-col h-full'>
@@ -116,6 +123,19 @@ export default function LookbookDetailPage() {
 
       {lookbook.comment && (
         <p className='px-4 pt-2 text-xs leading-relaxed'>{lookbook.comment}</p>
+      )}
+
+      {relatedTrend && (
+        <div className='flex items-center gap-1.5 px-4 pt-2 text-[11px] text-text-tertiary'>
+          <span>관련 트렌드</span>
+          <button
+            type='button'
+            onClick={() => navigate(`/trend/${relatedTrend.id}`)}
+            className='rounded-full bg-teal-50 text-teal-700 px-2 py-0.5 font-semibold'
+          >
+            {relatedTrend.title} →
+          </button>
+        </div>
       )}
 
       {purchaseUrl && (

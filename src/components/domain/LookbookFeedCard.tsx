@@ -46,6 +46,24 @@ export default function LookbookFeedCard({
         </span>
       </div>
 
+      {item.tags.length > 0 && (
+        <div className='flex flex-wrap gap-1 px-3 pt-2'>
+          {item.tags.slice(0, 3).map((tag) => (
+            <span
+              key={tag}
+              className='rounded-full bg-primary-50 px-2 py-0.5 text-[10px] font-semibold text-primary-600'
+            >
+              #{tag}
+            </span>
+          ))}
+          {item.tags.length > 3 && (
+            <span className='rounded-full bg-bg-secondary px-2 py-0.5 text-[10px] font-semibold text-text-tertiary'>
+              +{item.tags.length - 3}
+            </span>
+          )}
+        </div>
+      )}
+
       <div className='flex items-center justify-between px-3 py-2'>
         <div className='flex items-center gap-2'>
           <div className='h-5 w-5 rounded-full bg-primary-50 overflow-hidden'>
