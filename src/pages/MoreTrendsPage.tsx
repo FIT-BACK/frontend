@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TREND_ARTICLES } from '../constants/trendArticles';
 import { useMyProfile } from '../hooks/useMyPage';
+import { useClosetItems, useDeleteClosetItem, useSaveTrend } from '../hooks/useMyCloset';
 
 const FILTER_TABS = [
   { id: 'all', label: '전체' },
@@ -23,8 +24,20 @@ const CONTENT_TYPE_ICON: Record<string, string> = {
 const MoreTrendsPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState('all');
-  const [savedIds, setSavedIds] = useState<Set<number>>(new Set());
   const { data: profile } = useMyProfile();
+
+  // 저장 여부를 로컬 Set으로만 흉내내던 것 — 실제로는 마이 클로젯에 반영이 안 됐음
+  // (새로고침하면 사라짐). 진짜 저장/삭제 API로 교체.
+  const { data: closetItems = [] } = useClosetItems();
+  const savedItemByTrendId = useMemo(() => {
+    const map = new Map<number, number>(); // trendId -> closetSave id
+    closetItems.forEach((item) => {
+      if (item.category === 'trend') map.set(item.targetId, item.id);
+    });
+    return map;
+  }, [closetItems]);
+  const saveTrend = useSaveTrend();
+  const deleteClosetItem = useDeleteClosetItem();
 
   const activeTag = FILTER_TABS.find((tab) => tab.id === activeFilter)?.tag;
   const myStyleTags = useMemo(
@@ -39,13 +52,14 @@ const MoreTrendsPage: React.FC = () => {
     return activeTag ? TREND_ARTICLES.filter((t) => t.relatedTags.includes(activeTag)) : TREND_ARTICLES;
   }, [activeFilter, activeTag, myStyleTags]);
 
-  const toggleSave = (e: React.MouseEvent, id: number) => {
+  const toggleSave = (e: React.MouseEvent, trendId: number) => {
     e.stopPropagation();
-    setSavedIds((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+    const savedId = savedItemByTrendId.get(trendId);
+    if (savedId != null) {
+      deleteClosetItem.mutate(savedId);
+    } else {
+      saveTrend.mutate(trendId);
+    }
   };
 
   const handleTrendClick = (id: number) => {
@@ -117,9 +131,9 @@ const MoreTrendsPage: React.FC = () => {
                     width="16"
                     height="16"
                     viewBox="0 0 24 24"
-                    fill={savedIds.has(trend.id) ? '#3c3489' : 'none'}
-                    stroke={savedIds.has(trend.id) ? '#3c3489' : '#3c3489'}
-                    strokeWidth={savedIds.has(trend.id) ? '1' : '2'}
+                    fill={savedItemByTrendId.has(trend.id) ? '#3c3489' : 'none'}
+                    stroke={savedItemByTrendId.has(trend.id) ? '#3c3489' : '#3c3489'}
+                    strokeWidth={savedItemByTrendId.has(trend.id) ? '1' : '2'}
                   >
                     <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
                   </svg>
