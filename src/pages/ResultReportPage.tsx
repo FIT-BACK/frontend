@@ -24,6 +24,7 @@ export const ResultReportPage: React.FC = () => {
   const imageUri = useUploadStore((state) => state.imageUri);
   const tags = useUploadStore((state) => state.aiTags);
   const suggestedTags = useUploadStore((state) => state.suggestedTags);
+  const matchPercentage = useUploadStore((state) => state.matchPercentage);
   const recommendationGroups = useUploadStore((state) => state.recommendationGroups);
   const partial = useUploadStore((state) => state.partial);
   const warnings = useUploadStore((state) => state.warnings);
@@ -197,6 +198,7 @@ export const ResultReportPage: React.FC = () => {
         <span onClick={() => navigate(-1)} className="text-[22px] text-text-secondary cursor-pointer p-1">←</span>
         <div className="flex flex-col items-center">
           <span className="text-[16px] font-bold text-text">분석 결과</span>
+          <span className="text-[11px] text-primary-600 font-semibold mt-[2px]">매칭 정도 {matchPercentage}%</span>
         </div>
         {/* 저장은 하단 버튼으로 옮겨서(룩북 올리기와 나란히) 둘 다 눈에 잘 띄게 함 — 자리 균형용 spacer */}
         <span className="w-[30px]" aria-hidden="true" />
