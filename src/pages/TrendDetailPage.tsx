@@ -1,19 +1,35 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { TREND_ARTICLES } from '../constants/trendArticles';
 import { useLookbooksByTag } from '../hooks/useLookbookDetail';
+import { useClosetItems, useDeleteClosetItem, useSaveTrend } from '../hooks/useMyCloset';
 
 const TrendDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const [isSaved, setIsSaved] = useState(false);
 
   const trend = TREND_ARTICLES.find((t) => t.id === Number(id)) ?? TREND_ARTICLES[0];
   const { data: relatedLookbooks, isLoading: isRelatedLoading } = useLookbooksByTag(
     trend.tag.replace('#', ''),
   );
 
-  const toggleSave = () => setIsSaved((prev) => !prev);
+  // 저장 여부를 로컬 상태로만 흉내내던 것 — 실제로는 마이 클로젯에 전혀 반영이
+  // 안 됐음(새로고침하면 사라짐). 진짜 저장/삭제 API로 교체.
+  const { data: closetItems = [] } = useClosetItems();
+  const savedItem = closetItems.find(
+    (item) => item.category === 'trend' && item.targetId === trend.id,
+  );
+  const isSaved = !!savedItem;
+  const saveTrend = useSaveTrend();
+  const deleteClosetItem = useDeleteClosetItem();
+
+  const toggleSave = () => {
+    if (savedItem) {
+      deleteClosetItem.mutate(savedItem.id);
+    } else {
+      saveTrend.mutate(trend.id);
+    }
+  };
 
   const handleTagClick = (tag: string) => {
     navigate(`/search?q=${encodeURIComponent(tag.replace('#', ''))}`);
@@ -28,8 +44,9 @@ const TrendDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-bg">
-      {/* Header */}
+    <div className="h-screen bg-bg flex justify-center">
+      <div className="w-full max-w-[480px] bg-bg h-screen flex flex-col shadow-lg relative">
+        {/* Header */}
       <header className="flex items-center justify-between p-5 shrink-0 bg-bg">
         <button onClick={() => navigate(-1)} className="text-xl font-bold cursor-pointer">
           ←
@@ -184,6 +201,7 @@ const TrendDetailPage: React.FC = () => {
           이 트렌드로 매칭 시작하기
         </button>
         </div>
+      </div>
       </div>
     </div>
   );

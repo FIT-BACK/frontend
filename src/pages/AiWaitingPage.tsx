@@ -167,13 +167,34 @@ export const AiWaitingPage: React.FC = () => {
           </div>
         </div>
 
-        <button
-          onClick={handleNext}
-          disabled={!canProceed}
-          className="w-full mt-4 text-bg text-[15px] font-bold border-none rounded-[14px] p-[16px] bg-primary-400 disabled:opacity-50 transition-opacity"
-        >
-          {isPending ? '분석 중...' : '태그 확인하기 →'}
-        </button>
+        {isError ? (
+          // AI가 태그를 하나도 못 뽑는 등 409(ANALYSIS_NOT_READY)로 분석이 끝내 실패하면
+          // canProceed가 영영 false로 고정돼 아래 버튼이 비활성 상태로만 남고, 이 화면을
+          // 벗어날 방법이 전혀 없었음(재시도/나가기 버튼 부재로 인한 막다른 화면).
+          // 다른 사진으로 다시 시도하거나 홈으로 나갈 수 있게 두 버튼을 추가.
+          <div className="w-full flex flex-col gap-[10px] mt-4">
+            <button
+              onClick={() => navigate('/image-upload')}
+              className="w-full text-bg text-[15px] font-bold border-none rounded-[14px] p-[16px] bg-primary-400 hover:bg-primary-500 transition-colors"
+            >
+              다른 사진으로 다시 시도
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="w-full text-text-secondary text-[13px] font-bold border-none rounded-[14px] p-[12px] bg-transparent"
+            >
+              나가기
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handleNext}
+            disabled={!canProceed}
+            className="w-full mt-4 text-bg text-[15px] font-bold border-none rounded-[14px] p-[16px] bg-primary-400 disabled:opacity-50 transition-opacity"
+          >
+            {isPending ? '분석 중...' : '태그 확인하기 →'}
+          </button>
+        )}
       </div>
     </div>
   );

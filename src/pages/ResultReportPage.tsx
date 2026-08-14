@@ -52,14 +52,14 @@ export const ResultReportPage: React.FC = () => {
     [recommendationGroups],
   );
 
-  const allSelected =
-    nonEmptyGroups.length > 0 &&
-    nonEmptyGroups.every((group) => selectedByCategory[group.category] !== undefined);
+  // 카테고리마다 하나씩 채우도록 강제하지 않는다 — 한 개만 마음에 들어도 그것만
+  // 선택해서 저장할 수 있어야 한다. 저장은 "선택한 상품이 1개 이상"이면 가능.
+  const hasSelection = Object.keys(selectedByCategory).length > 0;
 
   const handleSave = () => {
     if (!reportId) return;
-    if (!allSelected) {
-      alert('저장하려면 상품이 있는 카테고리마다 하나씩 선택해주세요.');
+    if (!hasSelection) {
+      alert('저장하려면 상품을 1개 이상 선택해주세요.');
       return;
     }
     submitSaveReport({
@@ -78,7 +78,7 @@ export const ResultReportPage: React.FC = () => {
   // 룩북은 "매칭 상품" 하나만 지원(백엔드 LookbookRequest.matchedProductId가 단일 값) —
   // 여러 카테고리를 선택했다면 첫 번째 선택을 대표 상품으로 사용한다.
   const handleUploadAsLookbook = () => {
-    if (!reportId || !imageId || !allSelected) return;
+    if (!reportId || !imageId || !hasSelection) return;
     const firstSelectedProductId = Object.values(selectedByCategory)[0];
     const matchedItem = nonEmptyGroups
       .flatMap((group) => group.items)
@@ -111,10 +111,16 @@ export const ResultReportPage: React.FC = () => {
     item,
     category,
     isSelected,
+    displayRank,
   }: {
     item: RecommendationItem;
     category: string;
     isSelected: boolean;
+    // item.rank는 백엔드가 매긴 "매칭 품질" 순위인데, 화면은 가성비 화면 취지에 맞게
+    // 가격순으로 다시 정렬해서 보여준다 — 그 원본 rank를 그대로 배지에 쓰면 화면에
+    // 보이는 순서(가격순)와 배지 숫자(매칭순)가 어긋나 1위 다음에 3위, 2위 순으로
+    // 뒤죽박죽 보이는 문제가 있었음. 배지는 항상 "지금 보이는 순서" 기준으로 표시.
+    displayRank: number;
   }) => (
     <div
       className={`flex gap-[10px] rounded-[11px] p-[10px] items-center transition-colors border-[1px] ${
@@ -170,7 +176,7 @@ export const ResultReportPage: React.FC = () => {
 
         <div className="flex flex-col items-end">
           <div className="text-[10px] px-[6px] py-[2px] rounded-[6px] font-extrabold bg-[#FAEEDA] text-[#633806] mb-[4px]">
-            {item.rank}위 매칭
+            {displayRank}위 매칭
           </div>
           <div className="text-[14px] font-extrabold text-primary-800">
             {item.price
@@ -226,12 +232,13 @@ export const ResultReportPage: React.FC = () => {
               </span>
             </div>
             <div className="flex flex-col gap-[8px] mb-[10px]">
-              {group.items.map((item) => (
+              {group.items.map((item, index) => (
                 <ItemCard
                   key={item.productId}
                   item={item}
                   category={group.category}
                   isSelected={selectedByCategory[group.category] === item.productId}
+                  displayRank={index + 1}
                 />
               ))}
             </div>
@@ -243,24 +250,24 @@ export const ResultReportPage: React.FC = () => {
           올려보자"는 제안 톤의 보조 버튼으로 분리 (기존엔 룩북 올리기만 있었고 저장은
           헤더의 작은 텍스트 링크라 눈에 잘 안 띄었음) */}
       <div className="absolute bottom-[20px] left-[20px] right-[20px] z-20 flex flex-col items-center gap-[8px]">
-        {!allSelected && nonEmptyGroups.length > 0 && (
+        {!hasSelection && nonEmptyGroups.length > 0 && (
           <p className="text-[11px] text-text-secondary bg-bg/90 px-[10px] py-[4px] rounded-full">
-            상품이 있는 카테고리마다 하나씩 선택해주세요
+            상품을 1개 이상 선택해주세요
           </p>
         )}
         <button
           onClick={handleSave}
-          disabled={!allSelected || isPending}
+          disabled={!hasSelection || isPending}
           className="w-full text-bg text-[15px] font-bold border-none rounded-[14px] p-[16px] bg-primary-400 hover:bg-primary-500 transition-colors shadow-[0_5px_12px_rgba(127,119,221,0.3)] disabled:bg-border disabled:text-text-secondary disabled:shadow-none"
         >
           {isPending ? '저장 중...' : isSaved ? '저장 완료 ✓' : '저장하기'}
         </button>
         <button
           onClick={handleUploadAsLookbook}
-          disabled={!allSelected}
+          disabled={!hasSelection}
           className="w-full text-primary-600 text-[13px] font-semibold rounded-[14px] p-[12px] bg-white border border-primary-200 hover:bg-primary-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {isSaved ? '이 조합, 내 룩북으로도 올려볼까요? →' : '저장 후 이 조합을 룩북으로 올릴 수도 있어요 →'}
+          룩북으로 올리기
         </button>
       </div>
     </div>

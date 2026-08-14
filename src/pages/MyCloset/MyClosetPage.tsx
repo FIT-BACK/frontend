@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import type { ClosetItem } from '../../api/closet'
 import { useClosetItems, useDeleteClosetItem } from '../../hooks/useMyCloset'
 import CategoryTabs, { type ClosetTab } from './components/CategoryTabs'
@@ -8,6 +8,7 @@ import ClosetGrid from './components/ClosetGrid'
 const VALID_TABS: ClosetTab[] = ['all', 'trend', 'lookbook', 'report']
 
 export default function MyClosetPage() {
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const initialTab = searchParams.get('tab')
   const [activeTab, setActiveTab] = useState<ClosetTab>(
@@ -22,7 +23,17 @@ export default function MyClosetPage() {
   )
 
   const handleSelect = (item: ClosetItem) => {
-    console.log('선택한 클로젯 아이템', item)
+    if (item.category === 'trend') {
+      navigate(`/trend/${item.targetId}`)
+      return
+    }
+    if (item.category === 'lookbook') {
+      navigate(`/lookbooks/${item.targetId}`)
+      return
+    }
+    if (item.category === 'report') {
+      navigate(`/reports/${item.targetId}`)
+    }
   }
 
   const handleDelete = (item: ClosetItem) => {

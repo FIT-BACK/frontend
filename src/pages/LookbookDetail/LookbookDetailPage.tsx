@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getProductDetail } from '../../api/products';
+import { TREND_ARTICLES } from '../../constants/trendArticles';
 import {
   useLookbookDetail,
   useToggleLike,
   useSaveLookbook,
+  useUnsaveLookbook,
   useDeleteLookbook,
 } from '../../hooks/useLookbookDetail';
 import ReportBottomSheet from './components/ReportBottomSheet';
@@ -18,6 +20,7 @@ export default function LookbookDetailPage() {
   const { data: lookbook, isLoading, isError } = useLookbookDetail(id);
   const toggleLike = useToggleLike(id);
   const saveLookbook = useSaveLookbook(id);
+  const unsaveLookbook = useUnsaveLookbook(id);
   const deleteLookbookMutation = useDeleteLookbook(id);
 
   // 매칭 상품이 실제 카탈로그 상품일 때만 상세(이름/가격/판매처)를 조회한다.
@@ -36,6 +39,16 @@ export default function LookbookDetailPage() {
     navigate('/');
   };
 
+  const isSaved = lookbook?.saveId != null;
+  const handleToggleSave = () => {
+    if (!lookbook) return;
+    if (lookbook.saveId != null) {
+      unsaveLookbook.mutate(lookbook.saveId);
+    } else {
+      saveLookbook.mutate();
+    }
+  };
+
   if (isLoading) return <div className='p-4 text-center'>불러오는 중...</div>;
   if (isError || !lookbook)
     return <div className='p-4 text-center'>삭제된 콘텐츠입니다</div>;
@@ -43,6 +56,12 @@ export default function LookbookDetailPage() {
   const purchaseUrl = product
     ? (product.affiliateUrl ?? product.purchaseUrl)
     : lookbook.purchaseUrl;
+
+  // 룩북 태그와 겹치는 트렌드가 있으면 뱃지로 연결 (화면설계서 C-04B-06)
+  const lookbookTagNames = lookbook.tags.map((tag) => `#${tag.tagName}`);
+  const relatedTrend = TREND_ARTICLES.find((trend) =>
+    trend.relatedTags.some((relatedTag) => lookbookTagNames.includes(relatedTag)),
+  );
 
   return (
     <div className='flex flex-col h-full'>
@@ -106,6 +125,19 @@ export default function LookbookDetailPage() {
         <p className='px-4 pt-2 text-xs leading-relaxed'>{lookbook.comment}</p>
       )}
 
+      {relatedTrend && (
+        <div className='flex items-center gap-1.5 px-4 pt-2 text-[11px] text-text-tertiary'>
+          <span>관련 트렌드</span>
+          <button
+            type='button'
+            onClick={() => navigate(`/trend/${relatedTrend.id}`)}
+            className='rounded-full bg-teal-50 text-teal-700 px-2 py-0.5 font-semibold'
+          >
+            {relatedTrend.title} →
+          </button>
+        </div>
+      )}
+
       {purchaseUrl && (
         <div className='mx-4 mt-2 bg-gray-50 rounded-xl p-3'>
           <div className='text-xs font-bold mb-2'>🛍️ 구매한 상품</div>
@@ -145,10 +177,12 @@ export default function LookbookDetailPage() {
           <span className='text-xs font-bold'>{lookbook.likeCount}</span>
         </button>
         <button
-          onClick={() => saveLookbook.mutate()}
-          aria-label='마이 클로젯에 저장'
+          onClick={handleToggleSave}
+          disabled={saveLookbook.isPending || unsaveLookbook.isPending}
+          aria-label={isSaved ? '마이 클로젯 저장 취소' : '마이 클로젯에 저장'}
+          className='disabled:opacity-40'
         >
-          📑
+          {isSaved ? '📑' : '🔖'}
         </button>
       </div>
 
