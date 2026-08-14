@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ReactCrop, { type Crop, type PixelCrop } from 'react-image-crop';
+import ReactCrop, { centerCrop, type Crop, type PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { useUploadStore } from '../store/useUploadStore';
 import { useImageUpload } from '../hooks/useImageUpload';
@@ -46,6 +46,23 @@ export default function ImageUploadPage() {
       setIsCropping(true);
     }
     e.target.value = ''; // 같은 파일 재선택 가능하도록 초기화
+  };
+
+  // 크롭 화면에 진입했을 때 선택 영역이 아예 없는 상태로 시작해서, 사용자가 직접
+  // 드래그하지 않으면 completedCrop이 계속 null로 남아 "크롭 완료" 버튼이 비활성인
+  // 채로 있었음(눌러도 반응 없는 것처럼 보이는 원인) — 이미지가 뜨자마자 가운데
+  // 85% 영역을 기본 크롭으로 잡아줘서, 드래그 안 해도 바로 진행할 수 있게 한다.
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { width, height } = e.currentTarget;
+    const initialCrop = centerCrop({ unit: '%', width: 85, height: 85 }, width, height);
+    setCrop(initialCrop);
+    setCompletedCrop({
+      unit: 'px',
+      x: (initialCrop.x / 100) * width,
+      y: (initialCrop.y / 100) * height,
+      width: (initialCrop.width / 100) * width,
+      height: (initialCrop.height / 100) * height,
+    });
   };
 
   const handleCropCancel = () => {
@@ -120,6 +137,7 @@ export default function ImageUploadPage() {
                 ref={imgRef}
                 src={tempImageUri}
                 alt='Crop preview'
+                onLoad={handleImageLoad}
                 className='max-h-[60vh] max-w-full w-auto h-auto block'
               />
             </ReactCrop>
