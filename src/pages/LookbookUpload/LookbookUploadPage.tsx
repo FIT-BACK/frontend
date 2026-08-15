@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Button, TagSelectBottomSheet, TextInput } from '../../components/common'
 import { useTags } from '../../hooks/useTags'
 import type { StyleTag } from '../../api/tags'
@@ -29,6 +29,7 @@ export interface LookbookUploadNavState {
 
 export default function LookbookUploadPage() {
   const location = useLocation()
+  const navigate = useNavigate()
   const fromAnalysis = (location.state as LookbookUploadNavState | null) ?? null
 
   const [selectedTags, setSelectedTags] = useState<StyleTag[]>(fromAnalysis?.tags ?? [])
@@ -44,7 +45,7 @@ export default function LookbookUploadPage() {
   // (분석 결과에서 넘어온 경우에는 이 훅들을 아예 쓰지 않는다 — 사진을 다시 안 올리기 때문)
   const originalLookUpload = useImageUpload('LOOKBOOK')
   const valueMatchUpload = useImageUpload('LOOKBOOK')
-  const { mutate, isPending, isError, isSuccess, error } = useLookbookUpload()
+  const { mutate, isPending, isError, error } = useLookbookUpload()
 
   // 백엔드가 매칭 이미지/매칭 상품 중 정확히 하나만 요구함(둘 다 없거나 둘 다 있으면 에러).
   // 분석 결과에서 넘어온 경우: matchedProductId(+sourceReportId)를 그대로 쓰고 재업로드 불필요.
@@ -70,26 +71,39 @@ export default function LookbookUploadPage() {
       return
     }
 
+    // 업로드 성공 시 목록으로 돌아가지 않고, 방금 올린 룩북 상세 화면으로 바로 이동해서
+    // 실제로 어떻게 올라갔는지 확인할 수 있게 한다 (기존엔 같은 화면에 "업로드되었습니다"
+    // 텍스트만 떴고, 정작 결과물은 홈 피드에 직접 가서 찾아야 했음).
+    const goToUploadedLookbook = (data: { lookbookId: number }) => {
+      navigate(`/lookbooks/${data.lookbookId}`, { replace: true })
+    }
+
     if (fromAnalysis) {
-      mutate({
-        originalImageId: fromAnalysis.originalImageId,
-        matchedProductId: fromAnalysis.matchedProduct.productId,
-        sourceReportId: fromAnalysis.sourceReportId,
-        tagIds: selectedTags.map((tag) => tag.tagId),
-        purchaseUrl: purchaseLink || undefined,
-        comment: comment || undefined,
-      })
+      mutate(
+        {
+          originalImageId: fromAnalysis.originalImageId,
+          matchedProductId: fromAnalysis.matchedProduct.productId,
+          sourceReportId: fromAnalysis.sourceReportId,
+          tagIds: selectedTags.map((tag) => tag.tagId),
+          purchaseUrl: purchaseLink || undefined,
+          comment: comment || undefined,
+        },
+        { onSuccess: goToUploadedLookbook },
+      )
       return
     }
 
     if (!originalLookUpload.imageId || !valueMatchUpload.imageId) return
-    mutate({
-      originalImageId: originalLookUpload.imageId,
-      matchedImageId: valueMatchUpload.imageId,
-      tagIds: selectedTags.map((tag) => tag.tagId),
-      purchaseUrl: purchaseLink || undefined,
-      comment: comment || undefined,
-    })
+    mutate(
+      {
+        originalImageId: originalLookUpload.imageId,
+        matchedImageId: valueMatchUpload.imageId,
+        tagIds: selectedTags.map((tag) => tag.tagId),
+        purchaseUrl: purchaseLink || undefined,
+        comment: comment || undefined,
+      },
+      { onSuccess: goToUploadedLookbook },
+    )
   }
 
   return (
@@ -186,11 +200,6 @@ export default function LookbookUploadPage() {
       {isError && (
         <p className="text-center text-sm text-error-400">
           {error instanceof Error && error.message ? error.message : '업로드에 실패했습니다. 다시 시도해주세요'}
-        </p>
-      )}
-      {isSuccess && (
-        <p className="text-center text-sm text-primary-600">
-          룩북이 업로드되었습니다
         </p>
       )}
 
