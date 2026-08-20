@@ -26,7 +26,7 @@ export default function HomePage({
   const items = feed?.items ?? [];
 
   return (
-    <div className='max-w-[375px] mx-auto text-text'>
+    <div className='text-text'>
       <SearchBar
         onOpenSearch={onOpenSearch}
         onOpenImageSearch={onOpenImageSearch}

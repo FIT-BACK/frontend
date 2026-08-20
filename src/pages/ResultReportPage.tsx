@@ -188,7 +188,7 @@ export const ResultReportPage: React.FC = () => {
   // min-h-screen(100vh)만 쓰면 모바일 브라우저의 주소창/툴바 높이가 빠진 채로 계산돼서
   // 하단 고정 버튼이 실제 보이는 화면 아래로 밀려날 수 있음 — dvh(동적 뷰포트 높이)로 보정
   return (
-    <div className="max-w-[375px] min-h-screen min-h-[100dvh] mx-auto bg-bg flex flex-col text-text relative">
+    <div className="w-full max-w-[480px] min-h-screen min-h-[100dvh] mx-auto bg-bg flex flex-col text-text relative">
       {/* Header */}
       <div className="flex items-center justify-between p-[12px_20px_8px] shrink-0 bg-bg z-10 sticky top-0">
         <span onClick={() => navigate(-1)} className="text-text-secondary cursor-pointer p-1" role="button" aria-label="뒤로가기">

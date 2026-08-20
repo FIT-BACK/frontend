@@ -147,7 +147,7 @@ export const TagEditPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-[375px] min-h-screen mx-auto bg-bg flex flex-col text-text relative overflow-hidden pb-5">
+    <div className="w-full max-w-[480px] min-h-screen mx-auto bg-bg flex flex-col text-text relative overflow-hidden pb-5">
       <div className="flex items-center justify-between p-[20px_20px_8px] shrink-0">
         {/* 분석/태그 추출까지 끝난 뒤에도 나가는 버튼이 아예 없어서 흐름 중간에
             빠져나갈 방법이 없었음 — 홈으로 나가기 버튼 추가 */}

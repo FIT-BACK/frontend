@@ -103,7 +103,7 @@ export default function ProfileEditPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-4 bg-bg p-4">
+    <div className="flex flex-col gap-4 p-4">
       <div className="flex items-center justify-between">
         <button type="button" onClick={handleBack} className="text-text-secondary" aria-label="뒤로가기">
           <ArrowLeft size={20} strokeWidth={2} />

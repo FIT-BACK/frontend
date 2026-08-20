@@ -108,7 +108,7 @@ export default function LookbookUploadPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-6 bg-bg p-4">
+    <div className="flex flex-col gap-6 p-4">
       <h1 className="text-lg font-semibold text-text">내 룩북 올리기</h1>
 
       {fromAnalysis ? (

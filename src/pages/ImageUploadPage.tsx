@@ -88,7 +88,7 @@ export default function ImageUploadPage() {
 
   if (isCropping && tempImageUri) {
     return (
-      <div className='max-w-[375px] min-h-screen mx-auto bg-bg flex flex-col text-text px-5 pb-8 pt-6'>
+      <div className='flex flex-col text-text px-5 pb-8 pt-6'>
         <header className='flex items-center gap-3'>
           <button
             type='button'
@@ -142,7 +142,7 @@ export default function ImageUploadPage() {
   }
 
   return (
-    <div className='max-w-[375px] min-h-screen mx-auto bg-bg flex flex-col text-text px-5 pb-8 pt-6'>
+    <div className='flex flex-col text-text px-5 pb-8 pt-6'>
       {/* 헤더 */}
       <header className='flex items-center gap-3'>
         <button
