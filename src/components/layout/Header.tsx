@@ -3,11 +3,10 @@ import { Bell } from 'lucide-react';
 import { useUnreadNotificationCount } from '../../hooks/useNotification';
 import hangerIcon from '../../assets/hanger-icon.png';
 
-// 원래 브랜드 로고(public/logo.png)는 보라색 그라디언트 사각형 배경 위에
-// 흰색 옷걸이+글자를 얹은 형태였음 — 배경 사각형을 없애는 대신, 그 배경이
-// 쓰던 그라디언트를 옷걸이 아이콘과 글자에 그대로 옮겨왔다.
-// (원본 로고에서 좌/우 끝 색을 직접 샘플링: 왼쪽 #8f86dd → 오른쪽 #d0caf6)
-const LOGO_GRADIENT = 'linear-gradient(90deg, #8f86dd 0%, #d0caf6 100%)';
+// 옅은 그라디언트(왼쪽 #8f86dd → 오른쪽 #d0caf6)를 썼더니 로고가 흐리멍텅해
+// 보인다는 피드백 — 그라디언트를 없애고 디자인 시스템에서 가장 진한 보라
+// 토큰(primary-900)의 단색으로 통일한다.
+const LOGO_COLOR = '#26215c';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -17,17 +16,17 @@ const Header = () => {
     <header className="h-16 w-full flex items-center justify-between px-4 bg-white">
       {/* 1. 로고 영역 */}
       <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
-        {/* 옷걸이 아이콘(알파 채널만 있는 PNG)을 CSS mask로 써서 그라디언트를
+        {/* 옷걸이 아이콘(알파 채널만 있는 PNG)을 CSS mask로 써서 단색을
             아이콘 실루엣에만 채운다 — 배경은 완전히 투명.
             (이전 추출본은 배경의 min(r,g,b) 값이 완전히 0으로 안 떨어져서
-            옅은 사각형 그라디언트가 배경에 비쳐 보였음 — chroma(=max-min
-            채널 차) 기준으로 다시 뽑아서 배경은 완전히 alpha 0으로 처리) */}
+            옅은 사각형이 배경에 비쳐 보였음 — chroma(=max-min 채널 차)
+            기준으로 다시 뽑아서 배경은 완전히 alpha 0으로 처리) */}
         <span
           aria-hidden="true"
           className="h-8 shrink-0"
           style={{
             aspectRatio: '178 / 134',
-            backgroundImage: LOGO_GRADIENT,
+            backgroundColor: LOGO_COLOR,
             WebkitMaskImage: `url(${hangerIcon})`,
             maskImage: `url(${hangerIcon})`,
             WebkitMaskSize: 'contain',
@@ -38,11 +37,10 @@ const Header = () => {
             maskPosition: 'center',
           }}
         />
-        {/* 글자도 같은 그라디언트로 채운다 (배경 그라디언트를 text-fill로 잘라냄) */}
         <span
           aria-hidden="true"
-          className="font-extrabold text-xl bg-clip-text text-transparent"
-          style={{ backgroundImage: LOGO_GRADIENT }}
+          className="font-extrabold text-xl"
+          style={{ color: LOGO_COLOR }}
         >
           FIT BACK
         </span>
