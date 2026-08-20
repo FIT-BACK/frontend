@@ -109,8 +109,19 @@ export const TREND_ARTICLES: TrendArticle[] = [
     bgGradient: 'linear-gradient(160deg, #FDECF1, #F6C9DA)',
     description: '부드러운 실루엣과 파스텔 컬러로 완성하는 러블리 스타일링.',
     relatedTags: ['#러블리', '#페미닌'],
-    contentType: 'photo',
-    imageUrl: 'https://i.pinimg.com/1200x/9a/7d/47/9a7d473fb2b6d3e7ba3b82f7fe2e50a2.jpg',
+    // 유일하게 photo 타입이라 다른 트렌드(전부 magazine)보다 읽을거리가 적었음
+    // — 코디 팁 + 컬러 팔레트를 갖춘 magazine 타입으로 맞춤
+    contentType: 'magazine',
+    intro:
+      '러블리 룩은 파스텔톤과 부드러운 소재를 매치하면 사랑스러운 무드를 완성할 수 있어요. 리본이나 프릴 같은 디테일 아이템으로 포인트를 더해보세요.',
+    colorPalette: [
+      { name: '소프트 핑크', hex: '#F7C8D9' },
+      { name: '라벤더 미스트', hex: '#DCD3F0' },
+      { name: '크림 아이보리', hex: '#F8F1E4' },
+    ],
+    photos: [
+      'https://i.pinimg.com/1200x/9a/7d/47/9a7d473fb2b6d3e7ba3b82f7fe2e50a2.jpg',
+    ],
   },
   {
     id: 4,

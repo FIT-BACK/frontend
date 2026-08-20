@@ -10,6 +10,14 @@ const TrendDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
 
   const trend = TREND_ARTICLES.find((t) => t.id === Number(id)) ?? TREND_ARTICLES[0];
+  // 사진/매거진 히어로 이미지 — bg-cover로 고정 높이 박스를 채우면 사진이
+  // 잘려 보였음. 실제 <img>로 자연스러운 비율 그대로 보여준다.
+  const heroImageUrl =
+    trend.contentType === 'photo'
+      ? trend.imageUrl
+      : trend.contentType === 'magazine'
+        ? trend.photos[0]
+        : null;
   const { data: relatedLookbooks, isLoading: isRelatedLoading } = useLookbooksByTag(
     trend.tag.replace('#', ''),
   );
@@ -80,18 +88,23 @@ const TrendDetailPage: React.FC = () => {
               {trend.tag}
             </div>
           </div>
+        ) : heroImageUrl ? (
+          <div className="relative bg-bg-secondary">
+            <img
+              src={heroImageUrl}
+              alt={trend.title}
+              className="block w-full h-auto"
+            />
+            <div className="absolute top-3 left-3 text-[11px] bg-primary-400 text-white px-2.5 py-1 rounded-full font-bold">
+              {trend.tag}
+            </div>
+          </div>
         ) : (
+          // article 타입은 실제 사진이 없고 그라디언트 배경만 있어서 기존처럼
+          // 고정 높이 박스에 중앙 정렬
           <div
-            className={`flex items-center justify-center relative bg-cover bg-center ${
-              trend.contentType === 'magazine' ? 'h-[320px]' : 'h-[150px]'
-            }`}
-            style={
-              trend.contentType === 'photo'
-                ? { backgroundImage: `url(${trend.imageUrl})` }
-                : trend.contentType === 'magazine'
-                  ? { backgroundImage: `url(${trend.photos[0]})` }
-                  : { background: trend.bgGradient }
-            }
+            className="flex h-[150px] items-center justify-center relative"
+            style={{ background: trend.bgGradient }}
           >
             <div className="absolute top-3 left-3 text-[11px] bg-primary-400 text-white px-2.5 py-1 rounded-full font-bold">
               {trend.tag}
