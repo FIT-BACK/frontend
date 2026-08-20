@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Sparkles, Camera, Heart, ShoppingBag } from 'lucide-react';
 
 const SEEN_KEY = 'fitback:onboarding-seen';
@@ -33,14 +34,21 @@ const STEPS: Step[] = [
 ];
 
 export default function OnboardingTutorial() {
+  const location = useLocation();
   const [visible, setVisible] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
 
   useEffect(() => {
-    // 로그인 여부와 무관하게 이 브라우저에서 처음 앱을 켰을 때 한 번만 보여준다.
+    // Layout이 모든 하위 라우트(이미지 업로드, 클로젯 등)를 감싸고 있어서, 홈 화면
+    // 체크 없이 그냥 "처음이면 보여준다"만 하면 로그인 직후 홈을 거치지 않고 바로
+    // 다른 화면(예: /image-upload)으로 들어갔을 때도 이 모달이 그 화면 위에 뜬다 —
+    // 실제로 크롭 화면에서 이 모달이 "크롭 완료" 버튼 클릭을 막는 문제가 있었음.
+    // 안내 문구 자체도 "하단 + 버튼으로 시작", "홈 화면에서 트렌드를..." 등 홈 화면을
+    // 전제로 쓰여 있어서, 홈에서만 보여주는 게 맞다.
+    if (location.pathname !== '/') return;
     const seen = localStorage.getItem(SEEN_KEY);
     if (!seen) setVisible(true);
-  }, []);
+  }, [location.pathname]);
 
   const close = () => {
     localStorage.setItem(SEEN_KEY, 'true');
