@@ -1,22 +1,51 @@
+import { useRef } from 'react';
 import { Heart } from 'lucide-react';
 import { useToggleLike } from '../../hooks/useLookbookDetail';
 import { DUMMY_UPLOAD_IMAGE_URL } from '../../constants/dummyData';
 import type { LookbookFeedItem } from '../../api/lookbooks';
 
+const LONG_PRESS_MS = 600;
+
 interface LookbookFeedCardProps {
   item: LookbookFeedItem;
   onOpenDetail: () => void;
+  // 마이클로젯 "내가 올린 룩북" 탭에서만 전달 — 길게 누르면 삭제(ClosetGrid와 동일한 UX)
+  onDelete?: () => void;
 }
 
 export default function LookbookFeedCard({
   item,
   onOpenDetail,
+  onDelete,
 }: LookbookFeedCardProps) {
   const toggleLike = useToggleLike(item.id);
+  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressed = useRef(false);
+
+  const startPress = () => {
+    if (!onDelete) return;
+    longPressed.current = false;
+    pressTimer.current = setTimeout(() => {
+      longPressed.current = true;
+      onDelete();
+    }, LONG_PRESS_MS);
+  };
+
+  const endPress = () => {
+    if (pressTimer.current) clearTimeout(pressTimer.current);
+    if (!longPressed.current) onOpenDetail();
+  };
+
+  const cancelPress = () => {
+    if (pressTimer.current) clearTimeout(pressTimer.current);
+  };
 
   return (
     <div
-      onClick={onOpenDetail}
+      onClick={onDelete ? undefined : onOpenDetail}
+      onPointerDown={onDelete ? startPress : undefined}
+      onPointerUp={onDelete ? endPress : undefined}
+      onPointerLeave={onDelete ? cancelPress : undefined}
       className='rounded-2xl border border-border bg-white overflow-hidden cursor-pointer'
     >
       <div className='relative flex gap-2 p-2'>

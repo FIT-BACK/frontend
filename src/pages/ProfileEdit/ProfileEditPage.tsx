@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, X } from 'lucide-react'
 import { Button, TagSelectBottomSheet, TextInput } from '../../components/common'
 import type { StyleTag } from '../../api/tags'
 import { checkNicknameAvailable } from '../../api/profile'
@@ -145,9 +145,10 @@ export default function ProfileEditPage() {
               key={tag.tagId}
               type="button"
               onClick={() => removeTag(tag.tagId)}
-              className="rounded-full bg-primary-50 px-3 py-1 text-sm text-primary-800"
+              className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-3 py-1 text-sm text-primary-800"
             >
-              #{tag.tagName} ✕
+              #{tag.tagName}
+              <X size={12} strokeWidth={2} />
             </button>
           ))}
           <button

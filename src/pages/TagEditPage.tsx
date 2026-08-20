@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { X } from 'lucide-react';
 import { useItemMatching } from '../hooks/useItemMatching';
 import { useUploadStore } from '../store/useUploadStore';
 import { TagChip } from '../components/common/TagChip';
@@ -154,9 +155,9 @@ export const TagEditPage: React.FC = () => {
           type="button"
           onClick={() => navigate('/')}
           aria-label="나가기"
-          className="text-[22px] text-text-secondary cursor-pointer p-1 -ml-1"
+          className="text-text-secondary cursor-pointer p-1 -ml-1"
         >
-          ×
+          <X size={20} strokeWidth={2} />
         </button>
         <span className="text-[16px] font-bold text-text"></span>
         <span className="w-[30px]" aria-hidden="true" />

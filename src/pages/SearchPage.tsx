@@ -75,8 +75,8 @@ export default function SearchPage() {
           <ArrowLeft size={16} strokeWidth={2} />
         </button>
 
-        <div className='flex-1 flex items-center gap-2 rounded-full border border-border bg-white px-4 py-2.5'>
-          <Search size={16} strokeWidth={2} />
+        <div className='flex-1 flex items-center gap-2 rounded-2xl bg-primary-50/50 px-3.5 py-2.5'>
+          <Search size={16} strokeWidth={2} className='text-text-tertiary shrink-0' />
           <input
             autoFocus
             value={input}

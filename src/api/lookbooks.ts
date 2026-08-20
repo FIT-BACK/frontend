@@ -254,3 +254,22 @@ export const getLookbookFeed = async (
     nextCursor: response.data.data.nextCursor,
   };
 };
+
+/** GET /api/v1/lookbooks/mine - 마이 클로젯 "내가 올린 룩북" 목록 (로그인 필요) */
+export const getMyLookbooks = async (
+  cursor?: number,
+): Promise<{
+  items: LookbookFeedItem[];
+  hasNext: boolean;
+  nextCursor: number | null;
+}> => {
+  const response = await api.get<ApiEnvelope<LookbookFeedApiResponse>>(
+    '/api/v1/lookbooks/mine',
+    { params: cursor ? { cursor } : {} },
+  );
+  return {
+    items: response.data.data.items.map(toFeedItem),
+    hasNext: response.data.data.hasNext,
+    nextCursor: response.data.data.nextCursor,
+  };
+};

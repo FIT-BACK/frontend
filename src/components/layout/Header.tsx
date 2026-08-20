@@ -30,7 +30,7 @@ const Header = () => {
 
         {/* 빨간색 알림 점 */}
         {unreadCount > 0 && (
-          <span className="absolute top-2 right-2.5 h-2.5 w-2.5 rounded-full bg-pink-500 border-2 border-white" />
+          <span className="absolute top-2 right-2.5 h-2.5 w-2.5 rounded-full bg-error-400 border-2 border-white" />
         )}
       </button>
     </header>
