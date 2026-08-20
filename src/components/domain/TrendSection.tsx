@@ -51,10 +51,20 @@ export default function TrendSection({
         </button>
       </div>
 
-      <button
-        type='button'
+      {/* 안에 저장 버튼(<button>)이 또 있어서 카드 전체를 <button>으로 감싸면
+          button-in-button이 되어 하이드레이션 경고가 나고 클릭 시맨틱도
+          깨진다 — div+role="button"으로 바꾸고 키보드 접근성만 직접 챙긴다 */}
+      <div
+        role='button'
+        tabIndex={0}
         onClick={() => onOpenTrendDetail?.(String(featured.id))}
-        className='block w-full text-left'
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onOpenTrendDetail?.(String(featured.id));
+          }
+        }}
+        className='block w-full cursor-pointer text-left'
       >
         {/* 태그·제목을 전부 사진 위에 얹기 때문에, 그라디언트가 충분히 깔릴 수
             있도록 카드를 이전보다 더 길게 잡는다 */}
@@ -95,7 +105,7 @@ export default function TrendSection({
             </p>
           </div>
         </div>
-      </button>
+      </div>
     </section>
   );
 }
