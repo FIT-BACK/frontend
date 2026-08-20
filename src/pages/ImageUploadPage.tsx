@@ -94,9 +94,9 @@ export default function ImageUploadPage() {
             type='button'
             onClick={handleCropCancel}
             aria-label='취소'
-            className='grid h-9 w-9 place-items-center rounded-full border border-border bg-white'
+            className='grid h-9 w-9 place-items-center text-text'
           >
-            <ArrowLeft size={18} strokeWidth={2} />
+            <ArrowLeft size={20} strokeWidth={2} />
           </button>
           <h2 className='text-lg font-extrabold text-text'>사진 자르기</h2>
         </header>

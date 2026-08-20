@@ -64,15 +64,15 @@ export default function SearchPage() {
   };
 
   return (
-    <div className='max-w-[375px] min-h-screen mx-auto bg-bg flex flex-col text-text'>
+    <div className='max-w-[375px] mx-auto flex flex-col text-text'>
       <header className='flex items-center gap-2 px-4 pt-5 pb-3 shrink-0'>
         <button
           type='button'
           onClick={() => navigate(-1)}
           aria-label='뒤로가기'
-          className='grid h-9 w-9 place-items-center rounded-full border border-border bg-white shrink-0'
+          className='grid h-9 w-9 place-items-center text-text shrink-0'
         >
-          <ArrowLeft size={16} strokeWidth={2} />
+          <ArrowLeft size={20} strokeWidth={2} />
         </button>
 
         <div className='flex-1 flex items-center gap-2 rounded-2xl bg-primary-50/50 px-3.5 py-2.5'>
