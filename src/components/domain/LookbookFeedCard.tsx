@@ -1,6 +1,6 @@
 import { useRef } from 'react';
-import { Heart } from 'lucide-react';
-import { useToggleLike } from '../../hooks/useLookbookDetail';
+import { Heart, Bookmark } from 'lucide-react';
+import { useToggleLike, useToggleLookbookSave } from '../../hooks/useLookbookDetail';
 import { DUMMY_UPLOAD_IMAGE_URL } from '../../constants/dummyData';
 import type { LookbookFeedItem } from '../../api/lookbooks';
 
@@ -19,6 +19,7 @@ export default function LookbookFeedCard({
   onDelete,
 }: LookbookFeedCardProps) {
   const toggleLike = useToggleLike(item.id);
+  const toggleSave = useToggleLookbookSave(item.id);
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressed = useRef(false);
 
@@ -110,23 +111,43 @@ export default function LookbookFeedCard({
           </span>
         </div>
 
-        <button
-          type='button'
-          aria-label='좋아요'
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleLike.mutate(item.isLiked);
-          }}
-          className='flex items-center gap-1 text-xs text-text-secondary'
-        >
-          <Heart
-            size={14}
-            strokeWidth={2}
-            fill={item.isLiked ? 'currentColor' : 'none'}
-            className={item.isLiked ? 'text-error-400' : ''}
-          />
-          {item.likeCount}
-        </button>
+        <div className='flex items-center gap-3'>
+          <button
+            type='button'
+            aria-label='좋아요'
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleLike.mutate(item.isLiked);
+            }}
+            className='flex items-center gap-1 text-xs text-text-secondary'
+          >
+            <Heart
+              size={14}
+              strokeWidth={2}
+              fill={item.isLiked ? 'currentColor' : 'none'}
+              className={item.isLiked ? 'text-error-400' : ''}
+            />
+            {item.likeCount}
+          </button>
+
+          {/* 상세로 안 들어가도 썸네일에서 바로 저장/저장취소 */}
+          <button
+            type='button'
+            aria-label={item.saveId != null ? '저장 취소' : '저장'}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleSave.mutate(item.saveId);
+            }}
+            className='text-text-secondary'
+          >
+            <Bookmark
+              size={14}
+              strokeWidth={2}
+              fill={item.saveId != null ? 'currentColor' : 'none'}
+              className={item.saveId != null ? 'text-primary-600' : ''}
+            />
+          </button>
+        </div>
       </div>
     </div>
   );
