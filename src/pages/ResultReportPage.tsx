@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Check } from 'lucide-react';
 import { useSaveReport } from '../hooks/useSaveReport';
 import { useUploadStore } from '../store/useUploadStore';
 import type { RecommendationItem } from '../api/analysis';
@@ -138,11 +139,7 @@ export const ResultReportPage: React.FC = () => {
           isSelected ? 'border-primary-400 bg-primary-400' : 'border-border bg-bg-secondary'
         }`}
       >
-        {isSelected && (
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        )}
+        {isSelected && <Check size={10} color="#fff" strokeWidth={3} />}
       </button>
 
       {/* 이미지/이름 — 상품 상세로 이동. availability가 TEMPORARILY_UNRESOLVED면 상세 정보가
@@ -194,7 +191,9 @@ export const ResultReportPage: React.FC = () => {
     <div className="max-w-[375px] min-h-screen min-h-[100dvh] mx-auto bg-bg flex flex-col text-text relative">
       {/* Header */}
       <div className="flex items-center justify-between p-[12px_20px_8px] shrink-0 bg-bg z-10 sticky top-0">
-        <span onClick={() => navigate(-1)} className="text-[22px] text-text-secondary cursor-pointer p-1">←</span>
+        <span onClick={() => navigate(-1)} className="text-text-secondary cursor-pointer p-1" role="button" aria-label="뒤로가기">
+          <ArrowLeft size={22} strokeWidth={2} />
+        </span>
         <div className="flex flex-col items-center">
           <span className="text-[16px] font-bold text-text">분석 결과</span>
         </div>

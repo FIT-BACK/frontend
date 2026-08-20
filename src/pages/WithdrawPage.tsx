@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { withdraw } from '../api/profile';
 
 const WARNING_ITEMS = [
@@ -35,7 +36,9 @@ export default function WithdrawPage() {
     <div className="min-h-screen bg-bg flex justify-center">
       <div className="w-full max-w-[480px] bg-white min-h-screen flex flex-col px-6 py-8 font-sans shadow-lg relative overflow-y-auto">
         <div className="flex items-center gap-2 mb-6">
-          <button onClick={() => navigate(-1)} className="text-text-tertiary text-xl">←</button>
+          <button onClick={() => navigate(-1)} className="text-text-tertiary" aria-label="뒤로가기">
+            <ArrowLeft size={22} strokeWidth={2} />
+          </button>
           <h1 className="text-lg font-bold text-primary-900">회원 탈퇴</h1>
         </div>
 

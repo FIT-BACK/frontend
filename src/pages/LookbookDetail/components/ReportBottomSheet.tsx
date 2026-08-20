@@ -85,7 +85,7 @@ export default function ReportBottomSheet({
                 />
                 <span
                   className={`grid h-4 w-4 shrink-0 place-items-center rounded-full border-[1.5px] ${
-                    isChecked ? 'border-pink-500 bg-pink-500' : 'border-border'
+                    isChecked ? 'border-error-400 bg-error-400' : 'border-border'
                   }`}
                 >
                   {isChecked && (
@@ -105,7 +105,7 @@ export default function ReportBottomSheet({
         {/* 제출 버튼 — destructive 핑크 */}
         <button
           type='button'
-          className='w-full rounded-xl bg-pink-500 py-3 text-xs font-bold text-white transition disabled:bg-gray-200 disabled:text-gray-400'
+          className='w-full rounded-xl bg-error-400 py-3 text-xs font-bold text-white transition disabled:bg-gray-200 disabled:text-gray-400'
           disabled={!selected || submitting}
           onClick={handleSubmit}
         >

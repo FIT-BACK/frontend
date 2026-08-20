@@ -1,3 +1,5 @@
+import { Camera } from 'lucide-react';
+
 export type UploadPurpose = 'analysis' | 'lookbook';
 
 interface UploadSelectSheetProps {
@@ -41,7 +43,7 @@ export default function UploadSelectSheet({
             step={1}
             label='AI 가성비 매칭 분석'
             description='워너비 사진으로 가성비 아이템 찾기'
-            icon={<CameraIcon />}
+            icon={<Camera size={20} strokeWidth={2} />}
             onClick={() => handleSelect('analysis')}
           />
           <SheetOption
@@ -90,22 +92,6 @@ function SheetOption({ step, label, description, icon, onClick }: SheetOptionPro
         <p className='text-xs text-text-secondary mt-0.5'>{description}</p>
       </div>
     </button>
-  );
-}
-
-function CameraIcon() {
-  return (
-    <svg
-      width='20'
-      height='20'
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='2'
-    >
-      <path d='M4 8h3l2-2h6l2 2h3v11H4z' />
-      <circle cx='12' cy='13' r='3.5' />
-    </svg>
   );
 }
 

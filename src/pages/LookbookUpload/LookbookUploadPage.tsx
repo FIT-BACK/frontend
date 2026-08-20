@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { X } from 'lucide-react'
 import { Button, TagSelectBottomSheet, TextInput } from '../../components/common'
 import { useTags } from '../../hooks/useTags'
 import type { StyleTag } from '../../api/tags'
@@ -162,9 +163,10 @@ export default function LookbookUploadPage() {
               key={tag.tagId}
               type="button"
               onClick={() => setSelectedTags((prev) => prev.filter((t) => t.tagId !== tag.tagId))}
-              className="rounded-full bg-primary-50 px-3 py-1 text-sm text-primary-800"
+              className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-3 py-1 text-sm text-primary-800"
             >
-              #{tag.tagName} ✕
+              #{tag.tagName}
+              <X size={12} strokeWidth={2} />
             </button>
           ))}
           <button

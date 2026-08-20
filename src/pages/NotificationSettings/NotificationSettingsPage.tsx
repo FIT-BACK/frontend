@@ -1,3 +1,4 @@
+import { ArrowLeft } from 'lucide-react'
 import { Toggle } from '../../components/common'
 import type { NotificationSettings } from '../../api/notifications'
 import {
@@ -32,9 +33,10 @@ export default function NotificationSettingsPage() {
         <button
           type="button"
           onClick={() => navigate('/mypage')}
-          className="text-sm text-text-secondary"
+          className="text-text-secondary"
+          aria-label="뒤로가기"
         >
-          ←
+          <ArrowLeft size={20} strokeWidth={2} />
         </button>
         <h1 className="text-base font-semibold text-text">알림 설정</h1>
       </div>

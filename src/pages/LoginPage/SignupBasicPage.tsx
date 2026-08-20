@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../../api/axiosInstance'; 
+import { ArrowLeft } from 'lucide-react';
+import { api } from '../../api/axiosInstance';
 
 export default function SignupBasicPage() {
   const navigate = useNavigate();
@@ -64,7 +65,9 @@ export default function SignupBasicPage() {
       <div className="w-full max-w-[480px] bg-white min-h-screen flex flex-col px-8 py-10 font-sans shadow-lg relative overflow-y-auto">
         
         <div className="flex items-center mb-8 relative">
-          <button onClick={() => navigate(-1)} className="text-text-tertiary text-xl">←</button>
+          <button onClick={() => navigate(-1)} className="text-text-tertiary" aria-label="뒤로가기">
+            <ArrowLeft size={22} strokeWidth={2} />
+          </button>
           <h1 className="flex-1 text-center text-lg font-bold text-primary-900">회원가입</h1>
         </div>
 

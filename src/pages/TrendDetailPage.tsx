@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Bookmark } from 'lucide-react';
 import { TREND_ARTICLES } from '../constants/trendArticles';
 import { useLookbooksByTag } from '../hooks/useLookbookDetail';
 import { useClosetItems, useDeleteClosetItem, useSaveTrend } from '../hooks/useMyCloset';
@@ -48,21 +49,17 @@ const TrendDetailPage: React.FC = () => {
       <div className="w-full max-w-[480px] bg-bg h-screen flex flex-col shadow-lg relative">
         {/* Header */}
       <header className="flex items-center justify-between p-5 shrink-0 bg-bg">
-        <button onClick={() => navigate(-1)} className="text-xl font-bold cursor-pointer">
-          ←
+        <button onClick={() => navigate(-1)} className="cursor-pointer" aria-label="뒤로가기">
+          <ArrowLeft size={22} strokeWidth={2} />
         </button>
         <h1 className="text-base font-bold text-text">트렌드</h1>
-        <button onClick={toggleSave} className="cursor-pointer">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
+        <button onClick={toggleSave} className="cursor-pointer" aria-label="저장">
+          <Bookmark
+            size={20}
+            strokeWidth={2}
             fill={isSaved ? '#3c3489' : 'none'}
             stroke={isSaved ? '#3c3489' : 'var(--color-text-secondary)'}
-            strokeWidth="2"
-          >
-            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-          </svg>
+          />
         </button>
       </header>
 

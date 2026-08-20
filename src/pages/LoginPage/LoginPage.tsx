@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { loginUser } from '../../api/auth';
 import BottomSheet from '../../components/common/BottomSheet';
 
@@ -78,9 +79,10 @@ export default function LoginPage() {
         {view === 'email' && (
           <button 
             onClick={() => setView('main')}
-            className="absolute top-8 left-8 text-text-tertiary text-xl"
+            className="absolute top-8 left-8 text-text-tertiary"
+            aria-label="뒤로가기"
           >
-            ←
+            <ArrowLeft size={22} strokeWidth={2} />
           </button>
         )}
 
