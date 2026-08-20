@@ -66,7 +66,7 @@ export default function LookbookDetailPage() {
   return (
     <div className='flex flex-col h-full'>
       <div className='flex items-center justify-between px-4 py-2'>
-        <button onClick={() => navigate(-1)}>←</button>
+        <button onClick={() => navigate('/')}>←</button>
         <span className='font-bold text-sm'>룩북</span>
         <button onClick={() => setShowMoreSheet(true)}>⋮</button>
       </div>
