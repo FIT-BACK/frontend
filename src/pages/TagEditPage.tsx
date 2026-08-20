@@ -133,6 +133,7 @@ export const TagEditPage: React.FC = () => {
         partial: data.partial,
         warnings: data.warnings,
       });
+      useUploadStore.getState().setMatchPercentage(matchLevel);
       navigate('/result');
     } catch (err) {
       // axios 에러의 기본 message("Request failed with status code 400")는 사용자한테

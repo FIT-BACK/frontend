@@ -10,7 +10,7 @@ export const api = axios.create({
   },
 });
 
-// 요청 인터셉터
+// 요청 인터셉터: 요청 시마다 Access Token 첨부
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
   if (token && config.headers) {
@@ -88,6 +88,7 @@ api.interceptors.response.use(
     if (typeof serverMessage === 'string' && serverMessage.length > 0) {
       error.message = serverMessage;
     }
+
     return Promise.reject(error);
   }
 );
