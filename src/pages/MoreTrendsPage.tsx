@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Bookmark } from 'lucide-react';
 import { TREND_ARTICLES } from '../constants/trendArticles';
 import { useMyProfile } from '../hooks/useMyPage';
 import { useClosetItems, useDeleteClosetItem, useSaveTrend } from '../hooks/useMyCloset';
@@ -14,16 +15,11 @@ const FILTER_TABS = [
   { id: 'formal', label: '#포멀', tag: '#포멀' },
 ];
 
-const CONTENT_TYPE_ICON: Record<string, string> = {
-  photo: '📷',
-  article: '📰',
-  youtube: '▶',
-  magazine: '✨',
-};
-
 const MoreTrendsPage: React.FC = () => {
   const navigate = useNavigate();
-  const [activeFilter, setActiveFilter] = useState('all');
+  // 홈 화면 "나를 위한 트렌드"의 더보기를 눌러 들어오는 화면이라 기본 탭도
+  // 전체가 아니라 내 스타일에 맞춘 결과로 시작한다.
+  const [activeFilter, setActiveFilter] = useState('my-style');
   const { data: profile } = useMyProfile();
 
   // 저장 여부를 로컬 Set으로만 흉내내던 것 — 실제로는 마이 클로젯에 반영이 안 됐음
@@ -71,8 +67,8 @@ const MoreTrendsPage: React.FC = () => {
       <div className="w-full max-w-[480px] bg-bg h-screen flex flex-col shadow-lg relative">
         {/* Header */}
       <header className="flex items-center justify-between p-5 shrink-0">
-        <button onClick={() => navigate(-1)} className="text-xl font-bold cursor-pointer">
-          ←
+        <button onClick={() => navigate(-1)} className="cursor-pointer" aria-label="뒤로가기">
+          <ArrowLeft size={22} strokeWidth={2} />
         </button>
         <h1 className="text-base font-bold text-text">요즘 트렌드</h1>
         <div className="w-8"></div> {/* Spacer for centering */}
@@ -103,66 +99,69 @@ const MoreTrendsPage: React.FC = () => {
         {trends.length === 0 ? (
           <p className="pt-16 text-center text-xs text-text-secondary">해당하는 트렌드가 없어요</p>
         ) : (
-          <div className="grid grid-cols-2 gap-3 content-start">
-            {trends.map((trend) => (
-              <div
-                key={trend.id}
-                onClick={() => handleTrendClick(trend.id)}
-                className="rounded-[18px] aspect-[0.85] flex flex-col justify-end p-3 relative cursor-pointer overflow-hidden"
-                style={
-                  trend.contentType === 'photo'
-                    ? { backgroundImage: `url(${trend.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-                    : trend.contentType === 'magazine' && trend.photos[0]
-                      ? { backgroundImage: `url(${trend.photos[0]})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-                      : { background: trend.bgGradient }
-                }
-              >
-                {/* Content type badge */}
-                <span className="absolute top-2.5 left-2.5 grid h-6 w-6 place-items-center rounded-full bg-white/90 text-[11px]">
-                  {CONTENT_TYPE_ICON[trend.contentType]}
-                </span>
+          // 한 줄에 두 개씩이던 카드 그리드를 홈 화면 "나를 위한 트렌드" 카드와
+          // 같은 형태(한 줄에 하나, 사진 위에 태그+제목을 흰 글씨로 얹는 방식)로 통일
+          <div className="flex flex-col gap-3">
+            {trends.map((trend) => {
+              const thumbnail =
+                trend.contentType === 'photo'
+                  ? trend.imageUrl
+                  : trend.contentType === 'magazine'
+                    ? (trend.photos[0] ?? null)
+                    : null;
 
-                {/* Bookmark Icon */}
-                <button
-                  className="absolute top-2.5 right-2.5 cursor-pointer z-10"
-                  onClick={(e) => toggleSave(e, trend.id)}
+              return (
+                <div
+                  key={trend.id}
+                  onClick={() => handleTrendClick(trend.id)}
+                  className="relative h-[210px] w-full overflow-hidden rounded-2xl cursor-pointer"
                 >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill={savedItemByTrendId.has(trend.id) ? '#3c3489' : 'none'}
-                    stroke={savedItemByTrendId.has(trend.id) ? '#3c3489' : '#3c3489'}
-                    strokeWidth={savedItemByTrendId.has(trend.id) ? '1' : '2'}
+                  {/* 배경 */}
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={
+                      thumbnail
+                        ? { backgroundImage: `url(${thumbnail})` }
+                        : { background: trend.bgGradient }
+                    }
+                  />
+
+                  {/* 태그·제목 가독성용 그라디언트 — 사진이 있을 때만 필요 */}
+                  {thumbnail && (
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-primary-900/40 via-40% to-transparent" />
+                  )}
+
+                  {/* Bookmark Icon */}
+                  <button
+                    className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center text-white drop-shadow"
+                    onClick={(e) => toggleSave(e, trend.id)}
                   >
-                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-                  </svg>
-                </button>
+                    <Bookmark
+                      size={18}
+                      strokeWidth={2}
+                      fill={savedItemByTrendId.has(trend.id) ? '#fff' : 'none'}
+                      stroke="#fff"
+                    />
+                  </button>
 
-                {/* Tag Badge */}
-                <span
-                  className="text-[10px] bg-white/90 px-2 py-0.5 rounded-full font-semibold self-start mb-1.5"
-                  style={{ color: trend.tagColor }}
-                >
-                  {trend.tag}
-                </span>
-                {/* Title */}
-                <span
-                  className={`text-[13px] font-bold ${
-                    trend.contentType === 'photo' || (trend.contentType === 'magazine' && trend.photos[0])
-                      ? 'text-white drop-shadow'
-                      : ''
-                  }`}
-                  style={
-                    trend.contentType === 'photo' || (trend.contentType === 'magazine' && trend.photos[0])
-                      ? undefined
-                      : { color: trend.tagColor }
-                  }
-                >
-                  {trend.title}
-                </span>
-              </div>
-            ))}
+                  {/* Tag + Title */}
+                  <div className="absolute inset-x-0 bottom-0 p-4">
+                    <span
+                      className={`inline-block rounded-full bg-white px-2.5 py-1 text-[11px] font-bold shadow-sm ${thumbnail ? 'text-primary-600' : ''}`}
+                      style={thumbnail ? undefined : { color: trend.tagColor }}
+                    >
+                      {trend.tag}
+                    </span>
+                    <p
+                      className={`mt-2 text-[15px] font-bold leading-tight ${thumbnail ? 'text-white drop-shadow' : ''}`}
+                      style={thumbnail ? undefined : { color: trend.tagColor }}
+                    >
+                      {trend.title}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

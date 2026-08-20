@@ -177,6 +177,9 @@ export interface LookbookFeedItem {
   tags: string[];
   likeCount: number;
   isLiked: boolean;
+  // 상세로 안 들어가고 썸네일에서 바로 저장/저장취소하기 위함 — null이면 저장
+  // 안 한 상태, 값이 있으면 저장취소(unsaveLookbook) 호출에 쓰는 closet-save id
+  saveId: number | null;
 }
 
 // 서버 응답 원본 형태 (lookbookId 등 Swagger 그대로)
@@ -190,6 +193,7 @@ interface LookbookFeedApiItem {
   tags: string[];
   likeCount: number;
   isLiked: boolean;
+  saveId: number | null;
 }
 
 interface LookbookFeedApiResponse {
@@ -209,6 +213,7 @@ const toFeedItem = (raw: LookbookFeedApiItem): LookbookFeedItem => ({
   tags: raw.tags,
   likeCount: raw.likeCount,
   isLiked: raw.isLiked,
+  saveId: raw.saveId ?? null,
 });
 
 const USE_MOCK_FEED = false;
@@ -224,6 +229,7 @@ const mockFeedRaw: LookbookFeedApiItem[] = [
     tags: ['미니멀', '와이드핏'],
     likeCount: 128,
     isLiked: false,
+    saveId: null,
   },
 ];
 
@@ -247,6 +253,25 @@ export const getLookbookFeed = async (
   const response = await api.get<ApiEnvelope<LookbookFeedApiResponse>>(
     '/api/v1/lookbooks',
     { params: { ...(cursor ? { cursor } : {}), ...(tag ? { tag } : {}) } },
+  );
+  return {
+    items: response.data.data.items.map(toFeedItem),
+    hasNext: response.data.data.hasNext,
+    nextCursor: response.data.data.nextCursor,
+  };
+};
+
+/** GET /api/v1/lookbooks/mine - 마이 클로젯 "내가 올린 룩북" 목록 (로그인 필요) */
+export const getMyLookbooks = async (
+  cursor?: number,
+): Promise<{
+  items: LookbookFeedItem[];
+  hasNext: boolean;
+  nextCursor: number | null;
+}> => {
+  const response = await api.get<ApiEnvelope<LookbookFeedApiResponse>>(
+    '/api/v1/lookbooks/mine',
+    { params: cursor ? { cursor } : {} },
   );
   return {
     items: response.data.data.items.map(toFeedItem),

@@ -1,10 +1,11 @@
-export type ClosetTab = 'all' | 'trend' | 'lookbook' | 'report'
+export type ClosetTab = 'all' | 'trend' | 'lookbook' | 'report' | 'my-lookbook'
 
 const TABS: { key: ClosetTab; label: string }[] = [
   { key: 'all', label: '전체' },
   { key: 'trend', label: '저장한 트렌드' },
   { key: 'lookbook', label: '저장한 룩북' },
   { key: 'report', label: '분석 리포트' },
+  { key: 'my-lookbook', label: '내가 올린 룩북' },
 ]
 
 interface CategoryTabsProps {

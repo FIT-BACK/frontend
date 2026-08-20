@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { requestPasswordReset } from '../../api/auth';
 
 export default function FindPasswordPage() {
@@ -59,9 +60,10 @@ export default function FindPasswordPage() {
         <div className="flex items-center gap-2 h-[48px] mb-6">
           <button
             onClick={() => navigate(-1)}
-            className="text-text-secondary text-2xl font-light hover:text-primary-900 transition"
+            className="text-text-secondary hover:text-primary-900 transition"
+            aria-label="뒤로가기"
           >
-            ←
+            <ArrowLeft size={22} strokeWidth={2} />
           </button>
           <h1 className="text-[18px] font-bold text-primary-900">
             비밀번호 찾기

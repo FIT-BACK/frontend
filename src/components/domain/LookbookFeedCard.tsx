@@ -1,49 +1,76 @@
-import { useToggleLike } from '../../hooks/useLookbookDetail';
+import { useRef } from 'react';
+import { Heart, Bookmark } from 'lucide-react';
+import { useToggleLike, useToggleLookbookSave } from '../../hooks/useLookbookDetail';
 import { DUMMY_UPLOAD_IMAGE_URL } from '../../constants/dummyData';
 import type { LookbookFeedItem } from '../../api/lookbooks';
+
+const LONG_PRESS_MS = 600;
 
 interface LookbookFeedCardProps {
   item: LookbookFeedItem;
   onOpenDetail: () => void;
+  // 마이클로젯 "내가 올린 룩북" 탭에서만 전달 — 길게 누르면 삭제(ClosetGrid와 동일한 UX)
+  onDelete?: () => void;
 }
 
 export default function LookbookFeedCard({
   item,
   onOpenDetail,
+  onDelete,
 }: LookbookFeedCardProps) {
   const toggleLike = useToggleLike(item.id);
+  const toggleSave = useToggleLookbookSave(item.id);
+  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressed = useRef(false);
+
+  const startPress = () => {
+    if (!onDelete) return;
+    longPressed.current = false;
+    pressTimer.current = setTimeout(() => {
+      longPressed.current = true;
+      onDelete();
+    }, LONG_PRESS_MS);
+  };
+
+  const endPress = () => {
+    if (pressTimer.current) clearTimeout(pressTimer.current);
+    if (!longPressed.current) onOpenDetail();
+  };
+
+  const cancelPress = () => {
+    if (pressTimer.current) clearTimeout(pressTimer.current);
+  };
 
   return (
     <div
-      onClick={onOpenDetail}
+      onClick={onDelete ? undefined : onOpenDetail}
+      onPointerDown={onDelete ? startPress : undefined}
+      onPointerUp={onDelete ? endPress : undefined}
+      onPointerLeave={onDelete ? cancelPress : undefined}
       className='rounded-2xl border border-border bg-white overflow-hidden cursor-pointer'
     >
-      <div className='relative flex'>
-        <div className='flex-1 aspect-square bg-bg-secondary overflow-hidden'>
+      <div className='relative flex gap-2 p-2'>
+        <div className='relative flex-1 aspect-square overflow-hidden rounded-xl bg-bg-secondary'>
           <img
             src={item.originalImageUrl ?? DUMMY_UPLOAD_IMAGE_URL}
             alt='원본 사진'
             className='h-full w-full object-cover'
           />
-          <span className='absolute top-2 left-2 rounded bg-white/85 px-1.5 py-0.5 text-[9px] font-semibold text-text'>
+          <span className='absolute top-2 left-2 rounded-md bg-white/90 px-1.5 py-0.5 text-[9px] font-bold text-text'>
             원본
           </span>
         </div>
 
-        <div className='flex-1 aspect-square bg-bg-secondary overflow-hidden border-l border-border relative'>
+        <div className='relative flex-1 aspect-square overflow-hidden rounded-xl bg-bg-secondary'>
           <img
             src={item.matchedImageUrl ?? DUMMY_UPLOAD_IMAGE_URL}
             alt='매칭 아이템'
             className='h-full w-full object-cover'
           />
-          <span className='absolute top-2 right-2 rounded bg-white/85 px-1.5 py-0.5 text-[9px] font-semibold text-text'>
+          <span className='absolute top-2 right-2 rounded-md bg-primary-50/95 px-1.5 py-0.5 text-[9px] font-bold text-primary-800'>
             매칭
           </span>
         </div>
-
-        <span className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-[11px] font-bold text-text-secondary'>
-          VS
-        </span>
       </div>
 
       {item.tags.length > 0 && (
@@ -51,13 +78,13 @@ export default function LookbookFeedCard({
           {item.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className='rounded-full bg-primary-50 px-2 py-0.5 text-[10px] font-semibold text-primary-600'
+              className='rounded-full border border-primary-200 bg-primary-50 px-2 py-0.5 text-[10px] font-bold text-primary-800'
             >
               #{tag}
             </span>
           ))}
           {item.tags.length > 3 && (
-            <span className='rounded-full bg-bg-secondary px-2 py-0.5 text-[10px] font-semibold text-text-tertiary'>
+            <span className='rounded-full bg-bg-secondary px-2 py-0.5 text-[10px] font-bold text-text-tertiary'>
               +{item.tags.length - 3}
             </span>
           )}
@@ -80,36 +107,45 @@ export default function LookbookFeedCard({
           </span>
         </div>
 
-        <button
-          type='button'
-          aria-label='좋아요'
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleLike.mutate(item.isLiked);
-          }}
-          className='flex items-center gap-1 text-xs text-text-secondary'
-        >
-          <HeartIcon filled={item.isLiked} />
-          {item.likeCount}
-        </button>
+        <div className='flex items-center gap-3'>
+          <button
+            type='button'
+            aria-label='좋아요'
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleLike.mutate(item.isLiked);
+            }}
+            className='flex items-center gap-1 text-xs text-text-secondary'
+          >
+            <Heart
+              size={14}
+              strokeWidth={2}
+              fill={item.isLiked ? 'currentColor' : 'none'}
+              className={item.isLiked ? 'text-error-400' : ''}
+            />
+            {item.likeCount}
+          </button>
+
+          {/* 상세로 안 들어가도 썸네일에서 바로 저장/저장취소 */}
+          <button
+            type='button'
+            aria-label={item.saveId != null ? '저장 취소' : '저장'}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleSave.mutate(item.saveId);
+            }}
+            className='text-text-secondary'
+          >
+            <Bookmark
+              size={14}
+              strokeWidth={2}
+              fill={item.saveId != null ? 'currentColor' : 'none'}
+              className={item.saveId != null ? 'text-primary-600' : ''}
+            />
+          </button>
+        </div>
       </div>
     </div>
-  );
-}
-
-function HeartIcon({ filled }: { filled: boolean }) {
-  return (
-    <svg
-      width='14'
-      height='14'
-      viewBox='0 0 24 24'
-      fill={filled ? 'currentColor' : 'none'}
-      stroke='currentColor'
-      strokeWidth='2'
-      className={filled ? 'text-error-400' : ''}
-    >
-      <path d='M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z' />
-    </svg>
   );
 }
 

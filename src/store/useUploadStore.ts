@@ -32,6 +32,7 @@ interface UploadActions {
     warnings: string[];
   }) => void;
   setStatus: (status: UploadState['analysisStatus']) => void;
+  setMatchPercentage: (percentage: number) => void;
   resetUpload: () => void; // 리포트 확인 후 다음 업로드를 위해 초기화
 }
 
@@ -69,5 +70,6 @@ export const useUploadStore = create<UploadStore>((set) => ({
   setRecommendations: ({ recommendationGroups, partial, warnings }) =>
     set({ recommendationGroups, partial, warnings }),
   setStatus: (analysisStatus) => set({ analysisStatus }),
+  setMatchPercentage: (matchPercentage) => set({ matchPercentage }),
   resetUpload: () => set({ ...initialState }),
 }));
