@@ -44,16 +44,18 @@ export default function SignupBasicPage() {
       console.error('가입 실패:', error);
 
       // 서버 응답 데이터 추출
-      const status = error.response?.status;
       const errorCode = error.response?.data?.code;
       const errorMessageFromServer = error.response?.data?.message;
 
-      // 2. 이메일 중복 에러 처리
-      if (status === 409 || errorCode === 'AUTH409_1') {
+      // 2. 에러 코드별 분기 처리
+      if (errorCode === 'COMMON400_2') {
+        setErrorMessage(errorMessageFromServer || '이메일 또는 비밀번호가 누락되었거나 형식 에러입니다.');
+      } else if (errorCode === 'MEMBER403_1') {
+        setErrorMessage(errorMessageFromServer || '탈퇴 후 30일 동안은 재가입할 수 없습니다.');
+      } else if (errorCode === 'AUTH409_1') {
         setErrorMessage(errorMessageFromServer || '이미 사용 중인 이메일입니다.');
-      } 
-      // 3. 그 외의 서버 에러 처리
-      else {
+      } else {
+        // 3. 그 외의 서버 에러 처리
         setErrorMessage('회원가입에 실패했습니다. 다시 시도해주세요.');
       }
     }
