@@ -23,14 +23,17 @@ export default function MyClosetPage() {
   const { data: items = [], isLoading, isError } = useClosetItems()
   const { mutate: deleteItem } = useDeleteClosetItem()
 
-  // "내가 올린 룩북"은 저장(찜)한 항목이 아니라 직접 업로드한 룩북이라 별도 API/탭으로 분리
+  // "내가 올린 룩북"은 저장(찜)한 항목이 아니라 직접 업로드한 룩북이라 별도 API/탭으로
+  // 분리돼 있음. 다만 "전체" 탭은 말 그대로 전부 다 보여줘야 하므로, "전체"·"내가
+  // 올린 룩북" 두 탭에서는 같이 불러온다(그 외 탭에서는 안 씀 — 불필요한 요청 방지).
+  const showMyLookbooks = activeTab === 'all' || activeTab === 'my-lookbook'
   const {
     data: myLookbooksData,
     isLoading: isMyLookbooksLoading,
     isError: isMyLookbooksError,
     refetch: refetchMyLookbooks,
     isRefetching: isMyLookbooksRefetching,
-  } = useMyLookbooks()
+  } = useMyLookbooks({ enabled: showMyLookbooks })
   const { mutate: deleteMyLookbook } = useDeleteMyLookbook()
   const myLookbooks = myLookbooksData?.items ?? []
 
@@ -65,53 +68,59 @@ export default function MyClosetPage() {
     }
   }
 
+  const showClosetGrid = activeTab !== 'my-lookbook'
+
+  const myLookbookSection = (
+    <>
+      {activeTab === 'all' && (
+        <h2 className="text-sm font-semibold text-text-secondary">내가 올린 룩북</h2>
+      )}
+      {isMyLookbooksLoading && (
+        <p className="py-8 text-center text-sm text-text-tertiary">불러오는 중...</p>
+      )}
+      {isMyLookbooksError && (
+        <div className="flex flex-col items-center gap-3 py-8">
+          <p className="text-center text-sm text-error-400">데이터를 불러오지 못했습니다</p>
+          <button
+            type="button"
+            onClick={() => refetchMyLookbooks()}
+            disabled={isMyLookbooksRefetching}
+            className="rounded-full bg-primary-400 px-5 py-2 text-sm font-bold text-white disabled:opacity-50"
+          >
+            {isMyLookbooksRefetching ? '다시 시도 중...' : '다시 시도'}
+          </button>
+        </div>
+      )}
+      {!isMyLookbooksLoading && !isMyLookbooksError && myLookbooks.length === 0 && (
+        <p className="py-8 text-center text-sm text-text-tertiary">아직 올린 룩북이 없어요</p>
+      )}
+      {!isMyLookbooksLoading && !isMyLookbooksError && myLookbooks.length > 0 && (
+        <div className="flex flex-col gap-3">
+          {/* 길게 누르면 삭제 — 마이클로젯 다른 탭(ClosetGrid)과 동일한 조작 방식 */}
+          {myLookbooks.map((item) => (
+            <LookbookFeedCard
+              key={item.id}
+              item={item}
+              onOpenDetail={() => navigate(`/lookbooks/${item.id}`)}
+              onDelete={() => handleDeleteMyLookbook(item.id)}
+            />
+          ))}
+        </div>
+      )}
+    </>
+  )
+
   return (
     <div className="flex flex-col gap-4 p-4">
       <h1 className="text-lg font-semibold text-text">마이 클로젯</h1>
 
       <CategoryTabs activeTab={activeTab} onChange={setActiveTab} />
 
-      {activeTab === 'my-lookbook' ? (
+      {showClosetGrid && (
         <>
-          {isMyLookbooksLoading && (
-            <p className="py-8 text-center text-sm text-text-tertiary">불러오는 중...</p>
+          {activeTab === 'all' && items.length > 0 && (
+            <h2 className="text-sm font-semibold text-text-secondary">저장한 항목</h2>
           )}
-          {isMyLookbooksError && (
-            <div className="flex flex-col items-center gap-3 py-8">
-              <p className="text-center text-sm text-error-400">
-                데이터를 불러오지 못했습니다
-              </p>
-              <button
-                type="button"
-                onClick={() => refetchMyLookbooks()}
-                disabled={isMyLookbooksRefetching}
-                className="rounded-full bg-primary-400 px-5 py-2 text-sm font-bold text-white disabled:opacity-50"
-              >
-                {isMyLookbooksRefetching ? '다시 시도 중...' : '다시 시도'}
-              </button>
-            </div>
-          )}
-          {!isMyLookbooksLoading && !isMyLookbooksError && myLookbooks.length === 0 && (
-            <p className="py-8 text-center text-sm text-text-tertiary">
-              아직 올린 룩북이 없어요
-            </p>
-          )}
-          {!isMyLookbooksLoading && !isMyLookbooksError && myLookbooks.length > 0 && (
-            <div className="flex flex-col gap-3">
-              {/* 길게 누르면 삭제 — 마이클로젯 다른 탭(ClosetGrid)과 동일한 조작 방식 */}
-              {myLookbooks.map((item) => (
-                <LookbookFeedCard
-                  key={item.id}
-                  item={item}
-                  onOpenDetail={() => navigate(`/lookbooks/${item.id}`)}
-                  onDelete={() => handleDeleteMyLookbook(item.id)}
-                />
-              ))}
-            </div>
-          )}
-        </>
-      ) : (
-        <>
           {isLoading && (
             <p className="py-8 text-center text-sm text-text-tertiary">불러오는 중...</p>
           )}
@@ -125,6 +134,8 @@ export default function MyClosetPage() {
           )}
         </>
       )}
+
+      {showMyLookbooks && myLookbookSection}
     </div>
   )
 }

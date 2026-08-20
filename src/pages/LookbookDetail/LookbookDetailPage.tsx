@@ -97,7 +97,10 @@ export default function LookbookDetailPage() {
   return (
     <div className='flex flex-col h-full'>
       <div className='flex items-center justify-between px-4 py-2'>
-        <button onClick={() => navigate('/')} aria-label="뒤로가기">
+        {/* 원래 있던 화면(홈/클로젯/검색 등)으로 정확히 돌아가야 하는데, '/'로
+            고정해뒀더니 클로젯에서 들어왔을 때도 항상 홈으로 튕겼음 — 브라우저
+            히스토리로 되돌아가도록 원복 */}
+        <button onClick={() => navigate(-1)} aria-label="뒤로가기">
           <ArrowLeft size={22} strokeWidth={2} />
         </button>
         <span className='font-bold text-sm'>룩북</span>
