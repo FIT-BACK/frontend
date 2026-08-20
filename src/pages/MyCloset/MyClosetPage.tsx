@@ -64,7 +64,7 @@ export default function MyClosetPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-4 bg-bg p-4">
+    <div className="mx-auto flex max-w-md flex-col gap-4 p-4">
       <h1 className="text-lg font-semibold text-text">마이 클로젯</h1>
 
       <CategoryTabs activeTab={activeTab} onChange={setActiveTab} />
