@@ -64,7 +64,7 @@ export default function SearchPage() {
   };
 
   return (
-    <div className='max-w-[375px] mx-auto flex flex-col text-text'>
+    <div className='flex flex-col text-text'>
       <header className='flex items-center gap-2 px-4 pt-5 pb-3 shrink-0'>
         <button
           type='button'

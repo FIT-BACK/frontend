@@ -22,7 +22,7 @@ export const ProductDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-[375px] min-h-screen mx-auto bg-bg flex flex-col text-text relative">
+    <div className="w-full max-w-[480px] min-h-screen mx-auto bg-bg flex flex-col text-text relative">
       <div className="flex items-center p-[12px_20px_8px] shrink-0 bg-bg sticky top-0 z-10">
         <span onClick={() => navigate(-1)} className="text-text-secondary cursor-pointer p-1" role="button" aria-label="뒤로가기">
           <ArrowLeft size={22} strokeWidth={2} />

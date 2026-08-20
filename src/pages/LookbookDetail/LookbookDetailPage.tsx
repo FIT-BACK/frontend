@@ -18,7 +18,14 @@ export default function LookbookDetailPage() {
   const { lookbookId } = useParams();
   const id = Number(lookbookId);
 
-  const { data: lookbook, isLoading, isError } = useLookbookDetail(id);
+  const {
+    data: lookbook,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isRefetching,
+  } = useLookbookDetail(id);
   const toggleLike = useToggleLike(id);
   const saveLookbook = useSaveLookbook(id);
   const unsaveLookbook = useUnsaveLookbook(id);
@@ -51,8 +58,31 @@ export default function LookbookDetailPage() {
   };
 
   if (isLoading) return <div className='p-4 text-center'>불러오는 중...</div>;
-  if (isError || !lookbook)
-    return <div className='p-4 text-center'>삭제된 콘텐츠입니다</div>;
+  if (isError || !lookbook) {
+    // 404(실제로 삭제·비공개 처리된 룩북)일 때만 "삭제된 콘텐츠"라고 알려준다 —
+    // 그 외(네트워크 오류, 로그인 만료 등 일시적 실패)까지 전부 "삭제됨"으로
+    // 보여줘서 실제로는 멀쩡한 룩북도 삭제된 것처럼 오해하게 만들던 문제 수정.
+    const status = (error as { response?: { status?: number } } | null)?.response
+      ?.status;
+    if (status === 404) {
+      return <div className='p-4 text-center'>삭제된 콘텐츠입니다</div>;
+    }
+    return (
+      <div className='flex flex-col items-center gap-3 p-4 pt-10 text-center'>
+        <p className='text-text-secondary'>
+          룩북을 불러오지 못했어요. 네트워크 상태를 확인하고 다시 시도해주세요.
+        </p>
+        <button
+          type='button'
+          onClick={() => refetch()}
+          disabled={isRefetching}
+          className='rounded-full bg-primary-400 px-5 py-2 text-sm font-bold text-white disabled:opacity-50'
+        >
+          {isRefetching ? '다시 시도 중...' : '다시 시도'}
+        </button>
+      </div>
+    );
+  }
 
   const purchaseUrl = product
     ? (product.affiliateUrl ?? product.purchaseUrl)
@@ -176,7 +206,7 @@ export default function LookbookDetailPage() {
         </div>
       )}
 
-      <div className='mt-auto flex items-center justify-between px-4 py-3 border-t'>
+      <div className='mt-auto flex items-center justify-between px-4 py-3'>
         <button
           onClick={() => toggleLike.mutate(lookbook.isLiked)}
           className='flex items-center gap-1.5'

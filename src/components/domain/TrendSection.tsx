@@ -56,24 +56,22 @@ export default function TrendSection({
         onClick={() => onOpenTrendDetail?.(String(featured.id))}
         className='block w-full text-left'
       >
-        {/* 사진 자체의 rounded+overflow-hidden은 안쪽 래퍼에만 걸어서, 바깥 태그가
-            그 경계에 걸치게 배치해도 잘려나가지 않게 한다 */}
-        <div className='relative h-[150px] w-full'>
-          <div className='absolute inset-0 overflow-hidden rounded-2xl'>
-            {/* 배경 */}
-            <div
-              className='absolute inset-0 bg-cover bg-center'
-              style={
-                thumbnail
-                  ? { backgroundImage: `url(${thumbnail})` }
-                  : { background: featured.bgGradient }
-              }
-            />
+        {/* 태그·제목을 전부 사진 위에 얹기 때문에, 그라디언트가 충분히 깔릴 수
+            있도록 카드를 이전보다 더 길게 잡는다 */}
+        <div className='relative h-[210px] w-full overflow-hidden rounded-2xl'>
+          {/* 배경 */}
+          <div
+            className='absolute inset-0 bg-cover bg-center'
+            style={
+              thumbnail
+                ? { backgroundImage: `url(${thumbnail})` }
+                : { background: featured.bgGradient }
+            }
+          />
 
-            {/* 블랙-보라 그라디언트 — 하단 태그 가독성용, 와이어프레임처럼 이미지
-                아래쪽에 진하게 깔리다가 위로 갈수록 사라진다 */}
-            <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-primary-900/35 via-40% to-transparent' />
-          </div>
+          {/* 블랙-보라 그라디언트 — 태그·제목 가독성용, 이미지 아래쪽에 진하게
+              깔리다가 위로 갈수록 사라진다 */}
+          <div className='absolute inset-0 bg-gradient-to-t from-black/85 via-primary-900/40 via-40% to-transparent' />
 
           {/* 저장 버튼 */}
           <button
@@ -87,16 +85,16 @@ export default function TrendSection({
             <Bookmark size={18} strokeWidth={2} />
           </button>
 
-          {/* 태그 — 이미지 하단 경계에 걸치게 */}
-          <span className='absolute -bottom-2.5 left-3 inline-block rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-primary-600 shadow-sm'>
-            {featured.tag}
-          </span>
+          {/* 태그 + 제목 — 둘 다 그라디언트 위, 글자는 화이트 */}
+          <div className='absolute inset-x-0 bottom-0 p-4'>
+            <span className='inline-block rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-primary-600 shadow-sm'>
+              {featured.tag}
+            </span>
+            <p className='mt-2 text-[15px] font-bold leading-tight text-white drop-shadow'>
+              {featured.title}
+            </p>
+          </div>
         </div>
-
-        {/* 제목 — 이미지 밖, 태그 아래 */}
-        <p className='mt-4 px-1 text-[15px] font-bold leading-tight text-text'>
-          {featured.title}
-        </p>
       </button>
     </section>
   );

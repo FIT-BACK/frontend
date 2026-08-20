@@ -28,6 +28,8 @@ export default function MyClosetPage() {
     data: myLookbooksData,
     isLoading: isMyLookbooksLoading,
     isError: isMyLookbooksError,
+    refetch: refetchMyLookbooks,
+    isRefetching: isMyLookbooksRefetching,
   } = useMyLookbooks()
   const { mutate: deleteMyLookbook } = useDeleteMyLookbook()
   const myLookbooks = myLookbooksData?.items ?? []
@@ -64,7 +66,7 @@ export default function MyClosetPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-4 p-4">
+    <div className="flex flex-col gap-4 p-4">
       <h1 className="text-lg font-semibold text-text">마이 클로젯</h1>
 
       <CategoryTabs activeTab={activeTab} onChange={setActiveTab} />
@@ -75,9 +77,19 @@ export default function MyClosetPage() {
             <p className="py-8 text-center text-sm text-text-tertiary">불러오는 중...</p>
           )}
           {isMyLookbooksError && (
-            <p className="py-8 text-center text-sm text-error-400">
-              데이터를 불러오지 못했습니다
-            </p>
+            <div className="flex flex-col items-center gap-3 py-8">
+              <p className="text-center text-sm text-error-400">
+                데이터를 불러오지 못했습니다
+              </p>
+              <button
+                type="button"
+                onClick={() => refetchMyLookbooks()}
+                disabled={isMyLookbooksRefetching}
+                className="rounded-full bg-primary-400 px-5 py-2 text-sm font-bold text-white disabled:opacity-50"
+              >
+                {isMyLookbooksRefetching ? '다시 시도 중...' : '다시 시도'}
+              </button>
+            </div>
           )}
           {!isMyLookbooksLoading && !isMyLookbooksError && myLookbooks.length === 0 && (
             <p className="py-8 text-center text-sm text-text-tertiary">

@@ -74,7 +74,7 @@ export const AiWaitingPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-[375px] min-h-screen mx-auto bg-bg flex flex-col text-text">
+    <div className="w-full max-w-[480px] min-h-screen mx-auto bg-bg flex flex-col text-text">
       <style>{`
         @keyframes scan {
           0% { top: 10%; }
@@ -104,7 +104,11 @@ export const AiWaitingPage: React.FC = () => {
         {/* Text */}
         <div className="text-center">
           <div className="text-[16px] text-primary-800 font-bold leading-snug">
-            스타일과 실루엣을<br />분석하고 있어요
+            {canProceed ? (
+              '분석이 완료됐어요!'
+            ) : (
+              <>스타일과 실루엣을<br />분석하고 있어요</>
+            )}
           </div>
           <div className="text-[12px] text-text-secondary mt-[8px]">
             {isError
