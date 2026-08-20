@@ -55,19 +55,23 @@ export default function TrendSection({
         onClick={() => onOpenTrendDetail?.(String(featured.id))}
         className='block w-full text-left'
       >
-        <div className='relative h-[150px] w-full overflow-hidden rounded-2xl'>
-          {/* 배경 */}
-          <div
-            className='absolute inset-0 bg-cover bg-center'
-            style={
-              thumbnail
-                ? { backgroundImage: `url(${thumbnail})` }
-                : { background: featured.bgGradient }
-            }
-          />
+        {/* 사진 자체의 rounded+overflow-hidden은 안쪽 래퍼에만 걸어서, 바깥 태그가
+            그 경계에 걸치게 배치해도 잘려나가지 않게 한다 */}
+        <div className='relative h-[150px] w-full'>
+          <div className='absolute inset-0 overflow-hidden rounded-2xl'>
+            {/* 배경 */}
+            <div
+              className='absolute inset-0 bg-cover bg-center'
+              style={
+                thumbnail
+                  ? { backgroundImage: `url(${thumbnail})` }
+                  : { background: featured.bgGradient }
+              }
+            />
 
-          {/* 어둡게 */}
-          <div className='absolute inset-0 bg-black/15' />
+            {/* 어둡게 */}
+            <div className='absolute inset-0 bg-black/15' />
+          </div>
 
           {/* 저장 버튼 */}
           <button

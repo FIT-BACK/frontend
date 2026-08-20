@@ -34,7 +34,7 @@ export const TagChip: React.FC<TagChipProps> = ({
   if (variant === 'deletable') {
     return (
       <div
-        className={`${baseClasses} bg-primary-50 text-primary-800 pl-[12px] pr-[8px] py-[6px] gap-[5px]`}
+        className={`${baseClasses} border border-primary-200 bg-primary-50 text-primary-800 pl-[12px] pr-[8px] py-[6px] gap-[5px]`}
         onClick={onClick}
       >
         <span>#{label}</span>
