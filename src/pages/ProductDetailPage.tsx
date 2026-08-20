@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { ArrowLeft } from 'lucide-react';
 import { getProductDetail } from '../api/products';
 
 export const ProductDetailPage: React.FC = () => {
@@ -23,7 +24,9 @@ export const ProductDetailPage: React.FC = () => {
   return (
     <div className="max-w-[375px] min-h-screen mx-auto bg-bg flex flex-col text-text relative">
       <div className="flex items-center p-[12px_20px_8px] shrink-0 bg-bg sticky top-0 z-10">
-        <span onClick={() => navigate(-1)} className="text-[22px] text-text-secondary cursor-pointer p-1">←</span>
+        <span onClick={() => navigate(-1)} className="text-text-secondary cursor-pointer p-1" role="button" aria-label="뒤로가기">
+          <ArrowLeft size={22} strokeWidth={2} />
+        </span>
         <span className="text-[16px] font-bold text-text ml-2">상품 상세</span>
       </div>
 

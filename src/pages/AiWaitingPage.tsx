@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Check } from 'lucide-react';
 import { useCreateAnalysis } from '../hooks/useAiAnalysis';
 import { useUploadStore } from '../store/useUploadStore';
 
@@ -118,9 +119,7 @@ export const AiWaitingPage: React.FC = () => {
           <div className="flex items-center gap-[10px]">
             <div className={`w-[18px] h-[18px] rounded-full flex items-center justify-center shrink-0 ${progress > 0 ? 'bg-primary-400' : 'bg-bg-secondary border-[2px] border-border'}`}>
               {progress > 0 && (
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+                <Check size={10} color="#fff" strokeWidth={3} />
               )}
             </div>
             <span className={`text-[13px] ${progress > 0 ? 'text-text-secondary' : 'text-primary-800 font-bold'}`}>이미지 업로드 완료</span>
@@ -132,9 +131,7 @@ export const AiWaitingPage: React.FC = () => {
               progress > 60 ? 'bg-primary-400' : progress > 0 ? 'bg-primary-50 border-[2px] border-primary-400' : 'bg-bg-secondary border-[2px] border-border'
             }`}>
               {progress > 60 && (
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+                <Check size={10} color="#fff" strokeWidth={3} />
               )}
             </div>
             <span className={`text-[13px] ${progress > 60 ? 'text-text-secondary' : progress > 0 ? 'text-primary-800 font-bold' : 'text-text-secondary'}`}>
@@ -148,9 +145,7 @@ export const AiWaitingPage: React.FC = () => {
               progress >= 100 ? 'bg-primary-400' : progress > 60 ? 'bg-primary-50 border-[2px] border-primary-400' : 'bg-bg-secondary border-[2px] border-border'
             }`}>
               {progress >= 100 && (
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+                <Check size={10} color="#fff" strokeWidth={3} />
               )}
             </div>
             <span className={`text-[13px] ${progress >= 100 ? 'text-text-secondary' : progress > 60 ? 'text-primary-800 font-bold' : 'text-text-secondary'}`}>

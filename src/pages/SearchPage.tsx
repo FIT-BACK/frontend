@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Search, X } from 'lucide-react';
 import { useContentSearch } from '../hooks/useContentSearch';
 import { useTags } from '../hooks/useTags';
 
@@ -71,11 +72,11 @@ export default function SearchPage() {
           aria-label='뒤로가기'
           className='grid h-9 w-9 place-items-center rounded-full border border-border bg-white shrink-0'
         >
-          <BackIcon />
+          <ArrowLeft size={16} strokeWidth={2} />
         </button>
 
         <div className='flex-1 flex items-center gap-2 rounded-full border border-border bg-white px-4 py-2.5'>
-          <SearchIcon />
+          <Search size={16} strokeWidth={2} />
           <input
             autoFocus
             value={input}
@@ -109,7 +110,7 @@ export default function SearchPage() {
                         aria-label={`${term} 삭제`}
                         className='text-text-tertiary'
                       >
-                        ✕
+                        <X size={11} strokeWidth={2} />
                       </button>
                     </span>
                   ))}
@@ -126,7 +127,7 @@ export default function SearchPage() {
                       key={tag.tagId}
                       type='button'
                       onClick={() => runSearch(tag.tagName)}
-                      className='rounded-full bg-primary-50 px-3 py-1.5 text-xs font-semibold text-primary-700'
+                      className='rounded-full bg-primary-50 px-3 py-1.5 text-xs font-bold text-primary-700'
                     >
                       #{tag.tagName}
                     </button>
@@ -166,7 +167,7 @@ export default function SearchPage() {
                   className='relative w-28 h-28 shrink-0 rounded-xl bg-bg-secondary border border-border overflow-hidden text-left'
                 >
                   <img src={trend.imageUrl} alt={trend.title} className='h-full w-full object-cover' />
-                  <span className='absolute bottom-2 left-2 rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold text-text'>
+                  <span className='absolute bottom-2 left-2 rounded-md bg-white/90 px-2 py-1 text-[10px] font-bold text-text'>
                     #{trend.title}
                   </span>
                 </button>
@@ -221,22 +222,5 @@ export default function SearchPage() {
         )}
       </div>
     </div>
-  );
-}
-
-function BackIcon() {
-  return (
-    <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
-      <path d='M15 18l-6-6 6-6' />
-    </svg>
-  );
-}
-
-function SearchIcon() {
-  return (
-    <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
-      <circle cx='11' cy='11' r='7' />
-      <line x1='21' y1='21' x2='16.65' y2='16.65' />
-    </svg>
   );
 }

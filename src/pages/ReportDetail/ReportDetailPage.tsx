@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { getAnalysis, type SavedAnalysisItem } from '../../api/analysis';
 import { getAllTags } from '../../api/tags';
 import type { LookbookUploadNavState } from '../LookbookUpload/LookbookUploadPage';
@@ -78,8 +79,8 @@ export default function ReportDetailPage() {
   return (
     <div className="max-w-[375px] min-h-screen min-h-[100dvh] mx-auto bg-bg flex flex-col text-text">
       <div className="flex items-center justify-between px-[20px] py-[12px] sticky top-0 bg-bg z-10 border-b border-border">
-        <button type="button" onClick={() => navigate(-1)} className="text-[22px] text-text-secondary p-1" aria-label="뒤로가기">
-          ←
+        <button type="button" onClick={() => navigate(-1)} className="text-text-secondary p-1" aria-label="뒤로가기">
+          <ArrowLeft size={22} strokeWidth={2} />
         </button>
         <span className="text-[16px] font-bold text-text">분석 리포트</span>
         <span className="w-[30px]" aria-hidden="true" />

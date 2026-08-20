@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, ClipboardList, Plus, Search, User } from 'lucide-react';
+import { Home, Menu, Plus, Search, User } from 'lucide-react';
 
 interface TabBarProps {
   onUploadClick?: () => void;
@@ -26,7 +26,7 @@ const TabBar = ({ onUploadClick }: TabBarProps) => {
 
       {/* 클로젯 */}
       <Link to="/closet" className={getLinkClass('/closet')}>
-        <ClipboardList size={26} />
+        <Menu size={26} />
         <span className="text-[10px] mt-1 font-medium">클로젯</span>
       </Link>
       

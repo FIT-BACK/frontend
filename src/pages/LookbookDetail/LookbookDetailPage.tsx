@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { ArrowLeft, MoreVertical } from 'lucide-react';
 import { getProductDetail } from '../../api/products';
 import { TREND_ARTICLES } from '../../constants/trendArticles';
 import {
@@ -66,9 +67,13 @@ export default function LookbookDetailPage() {
   return (
     <div className='flex flex-col h-full'>
       <div className='flex items-center justify-between px-4 py-2'>
-        <button onClick={() => navigate('/')}>←</button>
+        <button onClick={() => navigate('/')} aria-label="뒤로가기">
+          <ArrowLeft size={22} strokeWidth={2} />
+        </button>
         <span className='font-bold text-sm'>룩북</span>
-        <button onClick={() => setShowMoreSheet(true)}>⋮</button>
+        <button onClick={() => setShowMoreSheet(true)} aria-label="더보기">
+          <MoreVertical size={22} strokeWidth={2} />
+        </button>
       </div>
 
       <div className='flex gap-1.5 px-4'>

@@ -1,3 +1,4 @@
+import { Heart } from 'lucide-react';
 import { useToggleLike } from '../../hooks/useLookbookDetail';
 import { DUMMY_UPLOAD_IMAGE_URL } from '../../constants/dummyData';
 import type { LookbookFeedItem } from '../../api/lookbooks';
@@ -25,7 +26,7 @@ export default function LookbookFeedCard({
             alt='원본 사진'
             className='h-full w-full object-cover'
           />
-          <span className='absolute top-2 left-2 rounded bg-white/85 px-1.5 py-0.5 text-[9px] font-semibold text-text'>
+          <span className='absolute top-2 left-2 rounded-md bg-white/90 px-1.5 py-0.5 text-[9px] font-bold text-text'>
             원본
           </span>
         </div>
@@ -36,7 +37,7 @@ export default function LookbookFeedCard({
             alt='매칭 아이템'
             className='h-full w-full object-cover'
           />
-          <span className='absolute top-2 right-2 rounded bg-white/85 px-1.5 py-0.5 text-[9px] font-semibold text-text'>
+          <span className='absolute top-2 right-2 rounded-md bg-primary-50/95 px-1.5 py-0.5 text-[9px] font-bold text-primary-800'>
             매칭
           </span>
         </div>
@@ -51,13 +52,13 @@ export default function LookbookFeedCard({
           {item.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className='rounded-full border border-primary-200 bg-primary-50 px-2 py-0.5 text-[10px] font-semibold text-primary-800'
+              className='rounded-full border border-primary-200 bg-primary-50 px-2 py-0.5 text-[10px] font-bold text-primary-800'
             >
               #{tag}
             </span>
           ))}
           {item.tags.length > 3 && (
-            <span className='rounded-full bg-bg-secondary px-2 py-0.5 text-[10px] font-semibold text-text-tertiary'>
+            <span className='rounded-full bg-bg-secondary px-2 py-0.5 text-[10px] font-bold text-text-tertiary'>
               +{item.tags.length - 3}
             </span>
           )}
@@ -89,27 +90,16 @@ export default function LookbookFeedCard({
           }}
           className='flex items-center gap-1 text-xs text-text-secondary'
         >
-          <HeartIcon filled={item.isLiked} />
+          <Heart
+            size={14}
+            strokeWidth={2}
+            fill={item.isLiked ? 'currentColor' : 'none'}
+            className={item.isLiked ? 'text-error-400' : ''}
+          />
           {item.likeCount}
         </button>
       </div>
     </div>
-  );
-}
-
-function HeartIcon({ filled }: { filled: boolean }) {
-  return (
-    <svg
-      width='14'
-      height='14'
-      viewBox='0 0 24 24'
-      fill={filled ? 'currentColor' : 'none'}
-      stroke='currentColor'
-      strokeWidth='2'
-      className={filled ? 'text-error-400' : ''}
-    >
-      <path d='M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z' />
-    </svg>
   );
 }
 
