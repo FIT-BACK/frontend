@@ -1,3 +1,4 @@
+import { Bookmark } from 'lucide-react';
 import {
   TREND_ARTICLES,
   type TrendArticle,
@@ -39,7 +40,7 @@ export default function TrendSection({
   return (
     <section className='mt-5 px-5'>
       <div className='mb-3 flex items-center justify-between'>
-        <h2 className='text-base font-bold text-text'>🔥 요즘 트렌드</h2>
+        <h2 className='text-base font-bold text-text'>나를 위한 트렌드</h2>
 
         <button
           type='button'
@@ -69,8 +70,9 @@ export default function TrendSection({
               }
             />
 
-            {/* 어둡게 */}
-            <div className='absolute inset-0 bg-black/15' />
+            {/* 보라 그라디언트 — 하단 태그/텍스트 가독성용, 와이어프레임처럼 이미지
+                아래쪽에만 깔린다 */}
+            <div className='absolute inset-0 bg-gradient-to-t from-primary-900/70 via-primary-900/10 to-transparent' />
           </div>
 
           {/* 저장 버튼 */}
@@ -82,11 +84,11 @@ export default function TrendSection({
             }}
             className='absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-text-secondary'
           >
-            <BookmarkIcon />
+            <Bookmark size={15} strokeWidth={2} />
           </button>
 
           {/* 태그 — 이미지 하단 경계에 걸치게 */}
-          <span className='absolute -bottom-2.5 left-3 inline-block rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-primary-600 shadow-sm'>
+          <span className='absolute -bottom-2.5 left-3 inline-block rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-primary-600 shadow-sm'>
             {featured.tag}
           </span>
         </div>
@@ -97,20 +99,5 @@ export default function TrendSection({
         </p>
       </button>
     </section>
-  );
-}
-
-function BookmarkIcon() {
-  return (
-    <svg
-      width='15'
-      height='15'
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='2'
-    >
-      <path d='M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z' />
-    </svg>
   );
 }

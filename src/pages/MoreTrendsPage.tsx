@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Bookmark } from 'lucide-react';
 import { TREND_ARTICLES } from '../constants/trendArticles';
 import { useMyProfile } from '../hooks/useMyPage';
 import { useClosetItems, useDeleteClosetItem, useSaveTrend } from '../hooks/useMyCloset';
@@ -64,8 +65,8 @@ const MoreTrendsPage: React.FC = () => {
       <div className="w-full max-w-[480px] bg-bg h-screen flex flex-col shadow-lg relative">
         {/* Header */}
       <header className="flex items-center justify-between p-5 shrink-0">
-        <button onClick={() => navigate(-1)} className="text-xl font-bold cursor-pointer">
-          ←
+        <button onClick={() => navigate(-1)} className="cursor-pointer" aria-label="뒤로가기">
+          <ArrowLeft size={22} strokeWidth={2} />
         </button>
         <h1 className="text-base font-bold text-text">요즘 트렌드</h1>
         <div className="w-8"></div> {/* Spacer for centering */}
@@ -115,21 +116,17 @@ const MoreTrendsPage: React.FC = () => {
                   className="absolute top-2.5 right-2.5 cursor-pointer z-10"
                   onClick={(e) => toggleSave(e, trend.id)}
                 >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
+                  <Bookmark
+                    size={16}
+                    strokeWidth={2}
                     fill={savedItemByTrendId.has(trend.id) ? '#3c3489' : 'none'}
-                    stroke={savedItemByTrendId.has(trend.id) ? '#3c3489' : '#3c3489'}
-                    strokeWidth={savedItemByTrendId.has(trend.id) ? '1' : '2'}
-                  >
-                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-                  </svg>
+                    stroke="#3c3489"
+                  />
                 </button>
 
                 {/* Tag Badge */}
                 <span
-                  className="text-[10px] bg-white/90 px-2 py-0.5 rounded-full font-semibold self-start mb-1.5"
+                  className="text-[10px] bg-white/90 px-2 py-0.5 rounded-full font-bold self-start mb-1.5"
                   style={{ color: trend.tagColor }}
                 >
                   {trend.tag}

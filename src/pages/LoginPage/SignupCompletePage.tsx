@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Check } from 'lucide-react';
 
 export default function SignupCompletePage() {
   const navigate = useNavigate();
@@ -28,10 +29,8 @@ export default function SignupCompletePage() {
             isVisible ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          {/* 보라색 체크마크 SVG */}
-          <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#7C6CE0" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
+          {/* 보라색 체크마크 — 디자인 시스템 primary-400 토큰 색상 */}
+          <Check size={50} strokeWidth={3} className="text-primary-400" />
         </div>
 
         {/* 환영 메시지 (C-03A-02) */}

@@ -1,3 +1,4 @@
+import { Heart, Info } from 'lucide-react';
 import {
   useNotifications,
   useMarkNotificationAsRead,
@@ -25,35 +26,11 @@ const NotificationIcon = ({ type }: { type: NotificationItem['type'] }) => {
   const config = {
     LOOKBOOK_LIKED: {
       bg: 'bg-purple-400',
-      icon: (
-        <svg
-          width='14'
-          height='14'
-          viewBox='0 0 24 24'
-          fill='#fff'
-          stroke='#fff'
-          strokeWidth='1'
-        >
-          <path d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78z' />
-        </svg>
-      ),
+      icon: <Heart size={14} strokeWidth={2} fill='#fff' stroke='#fff' />,
     },
     ANALYSIS_COMPLETE: {
       bg: 'bg-[#1D9E75]',
-      icon: (
-        <svg
-          width='14'
-          height='14'
-          viewBox='0 0 24 24'
-          fill='none'
-          stroke='#fff'
-          strokeWidth='2'
-        >
-          <circle cx='12' cy='12' r='10' />
-          <line x1='12' y1='8' x2='12' y2='12' />
-          <line x1='12' y1='16' x2='12.01' y2='16' />
-        </svg>
-      ),
+      icon: <Info size={14} strokeWidth={2} stroke='#fff' />,
     },
     TREND_UPDATE: {
       bg: 'bg-gray-100',

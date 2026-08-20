@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { api } from '../api/axiosInstance';
 import { useMyProfile } from '../hooks/useMyPage';
 
@@ -139,7 +140,9 @@ export default function ChangePasswordPage() {
         
         {/* 헤더 - 좌측 정렬 및 간격 조정 */}
         <div className="flex items-center mb-6">
-          <button onClick={() => navigate(-1)} className="text-gray-400 text-2xl mr-3 mb-1">←</button>
+          <button onClick={() => navigate(-1)} className="text-gray-400 mr-3 mb-1" aria-label="뒤로가기">
+            <ArrowLeft size={22} strokeWidth={2} />
+          </button>
           <h1 className="text-lg font-bold text-[#1C1C1E]">비밀번호 변경</h1>
         </div>
 

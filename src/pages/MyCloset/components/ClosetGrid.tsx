@@ -70,7 +70,7 @@ export default function ClosetGrid({ items, onSelect, onDelete }: ClosetGridProp
             {item.tags.map((tag) => (
               <span
                 key={tag}
-                className="rounded-full border border-primary-200 bg-primary-50 px-2 py-0.5 text-[10px] font-semibold text-primary-800"
+                className="rounded-full border border-primary-200 bg-primary-50 px-2 py-0.5 text-[10px] font-bold text-primary-800"
               >
                 #{tag}
               </span>

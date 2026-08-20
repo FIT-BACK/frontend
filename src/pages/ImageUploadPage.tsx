@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, ArrowUp } from 'lucide-react';
 import ReactCrop, { type Crop, type PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { useUploadStore } from '../store/useUploadStore';
@@ -95,7 +96,7 @@ export default function ImageUploadPage() {
             aria-label='취소'
             className='grid h-9 w-9 place-items-center rounded-full border border-border bg-white'
           >
-            <BackIcon />
+            <ArrowLeft size={18} strokeWidth={2} />
           </button>
           <h2 className='text-lg font-extrabold text-text'>사진 자르기</h2>
         </header>
@@ -150,7 +151,7 @@ export default function ImageUploadPage() {
           aria-label='뒤로가기'
           className='grid h-9 w-9 place-items-center rounded-full border border-border bg-white'
         >
-          <BackIcon />
+          <ArrowLeft size={18} strokeWidth={2} />
         </button>
       </header>
 
@@ -208,7 +209,7 @@ export default function ImageUploadPage() {
           >
             <div className='flex flex-col items-center gap-3'>
               <span className='grid h-11 w-11 place-items-center rounded-full bg-primary-50 text-primary-400'>
-                <UploadArrowIcon />
+                <ArrowUp size={20} strokeWidth={2} />
               </span>
               <div>
                 <p className='text-xs text-text'>탭하여 사진 선택</p>
@@ -237,36 +238,5 @@ export default function ImageUploadPage() {
         </button>
       </div>
     </div>
-  );
-}
-
-function BackIcon() {
-  return (
-    <svg
-      width='16'
-      height='16'
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='2'
-    >
-      <path d='M15 18l-6-6 6-6' />
-    </svg>
-  );
-}
-
-function UploadArrowIcon() {
-  return (
-    <svg
-      width='20'
-      height='20'
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='2'
-    >
-      <line x1='12' y1='19' x2='12' y2='5' />
-      <path d='M5 12l7-7 7 7' />
-    </svg>
   );
 }
