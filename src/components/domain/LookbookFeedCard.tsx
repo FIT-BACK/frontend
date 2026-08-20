@@ -51,7 +51,7 @@ export default function LookbookFeedCard({
           {item.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className='rounded-full bg-primary-50 px-2 py-0.5 text-[10px] font-semibold text-primary-600'
+              className='rounded-full border border-primary-200 bg-primary-50 px-2 py-0.5 text-[10px] font-semibold text-primary-800'
             >
               #{tag}
             </span>
