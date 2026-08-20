@@ -116,11 +116,14 @@ const MoreTrendsPage: React.FC = () => {
                   className="absolute top-2.5 right-2.5 cursor-pointer z-10"
                   onClick={(e) => toggleSave(e, trend.id)}
                 >
+                  {/* 홈 화면 트렌드 카드와 같은 흰색으로 통일 — 사진 위에 얹히는
+                      아이콘이라 보라색보다 흰색이 배경과 상관없이 더 잘 보임 */}
                   <Bookmark
                     size={16}
                     strokeWidth={2}
-                    fill={savedItemByTrendId.has(trend.id) ? '#3c3489' : 'none'}
-                    stroke="#3c3489"
+                    fill={savedItemByTrendId.has(trend.id) ? '#fff' : 'none'}
+                    stroke="#fff"
+                    className="drop-shadow"
                   />
                 </button>
 

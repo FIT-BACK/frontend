@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { Bookmark } from 'lucide-react'
 import type { ClosetItem } from '../../../api/closet'
 
 const LONG_PRESS_MS = 600
@@ -41,13 +42,19 @@ export default function ClosetGrid({ items, onSelect, onDelete }: ClosetGridProp
   return (
     <div className="grid grid-cols-2 gap-3">
       {items.map((item) => (
-        <button
+        // 저장 취소 버튼이 카드 안에 따로 있어서(버튼 안에 버튼이 되면 안 됨)
+        // 카드 자체는 button이 아니라 div로 두고 키보드 접근성만 role/tabIndex로 보강
+        <div
           key={item.id}
-          type="button"
+          role="button"
+          tabIndex={0}
           onPointerDown={() => startPress(item)}
           onPointerUp={() => endPress(item)}
           onPointerLeave={cancelPress}
-          className="relative flex h-44 w-full flex-col overflow-hidden rounded-lg border border-border bg-white text-left"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') onSelect(item)
+          }}
+          className="relative flex h-44 w-full cursor-pointer flex-col overflow-hidden rounded-lg border border-border bg-white text-left"
         >
           {item.matchedImageUrl ? (
             // 룩북: 원본 vs 매칭 상품 비교 — 두 장을 나란히 보여준다
@@ -82,7 +89,24 @@ export default function ClosetGrid({ items, onSelect, onDelete }: ClosetGridProp
               </span>
             ))}
           </div>
-        </button>
+
+          {/* 저장 아이콘 — 전부 이미 저장된 항목이라 항상 채워진 상태로 보여주고,
+              다시 누르면 저장 취소(삭제) 확인을 묻는다. pointerdown에서
+              stopPropagation해서 카드의 길게 누르기 타이머가 같이 발동하지 않게 함 */}
+          <button
+            type="button"
+            onPointerDown={(e) => e.stopPropagation()}
+            onPointerUp={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation()
+              onDelete(item)
+            }}
+            aria-label="저장 취소"
+            className="absolute right-2 top-2 grid h-8 w-8 place-items-center text-white drop-shadow"
+          >
+            <Bookmark size={18} strokeWidth={2} fill="#fff" />
+          </button>
+        </div>
       ))}
     </div>
   )
