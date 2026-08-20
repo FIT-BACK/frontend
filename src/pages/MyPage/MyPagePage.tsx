@@ -32,7 +32,7 @@ export default function MyPagePage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-6 bg-bg p-4">
+    <div className="mx-auto flex max-w-md flex-col gap-6 p-4">
       <ProfileHeader
         name={profile.name}
         email={profile.email}

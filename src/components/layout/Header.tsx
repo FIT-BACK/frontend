@@ -21,7 +21,7 @@ const Header = () => {
 
       {/* 2. 알림 아이콘 영역 */}
       <button
-        className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
+        className="relative flex items-center justify-center w-10 h-10 text-gray-500"
         onClick={() => navigate('/alerts')}
         aria-label='알림'
       >

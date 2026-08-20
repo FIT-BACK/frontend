@@ -82,9 +82,9 @@ export default function TrendSection({
               e.stopPropagation();
               onSaveTrend?.(String(featured.id));
             }}
-            className='absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-text-secondary'
+            className='absolute right-3 top-3 grid h-8 w-8 place-items-center text-white drop-shadow'
           >
-            <Bookmark size={15} strokeWidth={2} />
+            <Bookmark size={18} strokeWidth={2} />
           </button>
 
           {/* 태그 — 이미지 하단 경계에 걸치게 */}
