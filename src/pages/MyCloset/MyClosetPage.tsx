@@ -57,7 +57,9 @@ export default function MyClosetPage() {
   }
 
   const handleDelete = (item: ClosetItem) => {
-    if (window.confirm(`'${item.title}'을(를) 삭제할까요?`)) {
+    // 여기 있는 항목은 전부 이미 저장된 것들이라, "삭제"보다는 "저장 취소"가
+    // 실제로 하는 일에 더 가까운 표현이라 문구를 그렇게 바꿈
+    if (window.confirm('저장을 취소할까요?')) {
       deleteItem(item.id)
     }
   }
