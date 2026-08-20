@@ -71,10 +71,6 @@ export default function LookbookFeedCard({
             매칭
           </span>
         </div>
-
-        <span className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-[11px] font-bold text-text-secondary shadow-sm'>
-          VS
-        </span>
       </div>
 
       {item.tags.length > 0 && (
