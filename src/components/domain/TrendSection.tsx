@@ -70,9 +70,9 @@ export default function TrendSection({
               }
             />
 
-            {/* 보라 그라디언트 — 하단 태그/텍스트 가독성용, 와이어프레임처럼 이미지
-                아래쪽에만 깔린다 */}
-            <div className='absolute inset-0 bg-gradient-to-t from-primary-900/70 via-primary-900/10 to-transparent' />
+            {/* 블랙-보라 그라디언트 — 하단 태그 가독성용, 와이어프레임처럼 이미지
+                아래쪽에 진하게 깔리다가 위로 갈수록 사라진다 */}
+            <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-primary-900/35 via-40% to-transparent' />
           </div>
 
           {/* 저장 버튼 */}
