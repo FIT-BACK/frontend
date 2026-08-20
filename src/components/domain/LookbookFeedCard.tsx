@@ -18,8 +18,8 @@ export default function LookbookFeedCard({
       onClick={onOpenDetail}
       className='rounded-2xl border border-border bg-white overflow-hidden cursor-pointer'
     >
-      <div className='relative flex'>
-        <div className='flex-1 aspect-square bg-bg-secondary overflow-hidden'>
+      <div className='relative flex gap-2 p-2'>
+        <div className='relative flex-1 aspect-square overflow-hidden rounded-xl bg-bg-secondary'>
           <img
             src={item.originalImageUrl ?? DUMMY_UPLOAD_IMAGE_URL}
             alt='원본 사진'
@@ -30,7 +30,7 @@ export default function LookbookFeedCard({
           </span>
         </div>
 
-        <div className='flex-1 aspect-square bg-bg-secondary overflow-hidden border-l border-border relative'>
+        <div className='relative flex-1 aspect-square overflow-hidden rounded-xl bg-bg-secondary'>
           <img
             src={item.matchedImageUrl ?? DUMMY_UPLOAD_IMAGE_URL}
             alt='매칭 아이템'
@@ -41,7 +41,7 @@ export default function LookbookFeedCard({
           </span>
         </div>
 
-        <span className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-[11px] font-bold text-text-secondary'>
+        <span className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-[11px] font-bold text-text-secondary shadow-sm'>
           VS
         </span>
       </div>

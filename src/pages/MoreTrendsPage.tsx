@@ -14,13 +14,6 @@ const FILTER_TABS = [
   { id: 'formal', label: '#포멀', tag: '#포멀' },
 ];
 
-const CONTENT_TYPE_ICON: Record<string, string> = {
-  photo: '📷',
-  article: '📰',
-  youtube: '▶',
-  magazine: '✨',
-};
-
 const MoreTrendsPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState('all');
@@ -117,11 +110,6 @@ const MoreTrendsPage: React.FC = () => {
                       : { background: trend.bgGradient }
                 }
               >
-                {/* Content type badge */}
-                <span className="absolute top-2.5 left-2.5 grid h-6 w-6 place-items-center rounded-full bg-white/90 text-[11px]">
-                  {CONTENT_TYPE_ICON[trend.contentType]}
-                </span>
-
                 {/* Bookmark Icon */}
                 <button
                   className="absolute top-2.5 right-2.5 cursor-pointer z-10"

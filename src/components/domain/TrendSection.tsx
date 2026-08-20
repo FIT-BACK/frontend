@@ -31,6 +31,10 @@ export default function TrendSection({
     : [];
 
   const visibleItems = matchedItems.length > 0 ? matchedItems : TREND_ARTICLES;
+  const featured = visibleItems[0];
+  const thumbnail = featured ? getTrendThumbnail(featured) : null;
+
+  if (!featured) return null;
 
   return (
     <section className='mt-5 px-5'>
@@ -46,60 +50,48 @@ export default function TrendSection({
         </button>
       </div>
 
-      <div className='scrollbar-hide flex gap-4 overflow-x-auto pb-2'>
-        {visibleItems.map((item) => {
-          const thumbnail = getTrendThumbnail(item);
+      <button
+        type='button'
+        onClick={() => onOpenTrendDetail?.(String(featured.id))}
+        className='block w-full text-left'
+      >
+        <div className='relative h-[150px] w-full overflow-hidden rounded-2xl'>
+          {/* 배경 */}
+          <div
+            className='absolute inset-0 bg-cover bg-center'
+            style={
+              thumbnail
+                ? { backgroundImage: `url(${thumbnail})` }
+                : { background: featured.bgGradient }
+            }
+          />
 
-          return (
-            <button
-              key={item.id}
-              type='button'
-              onClick={() => onOpenTrendDetail?.(String(item.id))}
-              className='relative h-[170px] w-[150px] shrink-0 overflow-hidden rounded-3xl text-left'
-            >
-              {/* 배경 */}
-              <div
-                className='absolute inset-0 bg-cover bg-center'
-                style={
-                  thumbnail
-                    ? {
-                        backgroundImage: `url(${thumbnail})`,
-                      }
-                    : {
-                        background: item.bgGradient,
-                      }
-                }
-              />
+          {/* 어둡게 */}
+          <div className='absolute inset-0 bg-black/15' />
 
-              {/* 어둡게 */}
-              <div className='absolute inset-0 bg-black/15' />
+          {/* 저장 버튼 */}
+          <button
+            type='button'
+            onClick={(e) => {
+              e.stopPropagation();
+              onSaveTrend?.(String(featured.id));
+            }}
+            className='absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-text-secondary'
+          >
+            <BookmarkIcon />
+          </button>
 
-              {/* 저장 버튼 */}
-              <button
-                type='button'
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSaveTrend?.(String(item.id));
-                }}
-                className='absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-text-secondary'
-              >
-                <BookmarkIcon />
-              </button>
+          {/* 태그 — 이미지 하단 경계에 걸치게 */}
+          <span className='absolute -bottom-2.5 left-3 inline-block rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-primary-600 shadow-sm'>
+            {featured.tag}
+          </span>
+        </div>
 
-              {/* 태그 + 제목 */}
-              <div className='absolute bottom-3 left-3 right-3'>
-                <span className='inline-block rounded-full bg-white px-2 py-1 text-[10px] font-semibold text-primary-600'>
-                  {item.tag}
-                </span>
-
-                <p className='mt-2 text-[17px] font-bold leading-tight text-white drop-shadow'>
-                  {item.title}
-                </p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
+        {/* 제목 — 이미지 밖, 태그 아래 */}
+        <p className='mt-4 px-1 text-[15px] font-bold leading-tight text-text'>
+          {featured.title}
+        </p>
+      </button>
     </section>
   );
 }
