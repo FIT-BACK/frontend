@@ -77,7 +77,7 @@ export default function ReportDetailPage() {
   );
 
   return (
-    <div className="max-w-[375px] min-h-screen min-h-[100dvh] mx-auto bg-bg flex flex-col text-text">
+    <div className="flex flex-col text-text">
       <div className="flex items-center justify-between px-[20px] py-[12px] sticky top-0 bg-bg z-10 border-b border-border">
         <button type="button" onClick={() => navigate(-1)} className="text-text-secondary p-1" aria-label="뒤로가기">
           <ArrowLeft size={22} strokeWidth={2} />

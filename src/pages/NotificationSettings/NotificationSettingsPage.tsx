@@ -28,7 +28,7 @@ export default function NotificationSettingsPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-md flex-col bg-bg p-4">
+    <div className="flex flex-col p-4">
       <div className="mb-2 flex items-center gap-3">
         <button
           type="button"
