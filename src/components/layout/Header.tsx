@@ -3,6 +3,12 @@ import { Bell } from 'lucide-react';
 import { useUnreadNotificationCount } from '../../hooks/useNotification';
 import hangerIcon from '../../assets/hanger-icon.png';
 
+// 원래 브랜드 로고(public/logo.png)는 보라색 그라디언트 사각형 배경 위에
+// 흰색 옷걸이+글자를 얹은 형태였음 — 배경 사각형을 없애는 대신, 그 배경이
+// 쓰던 그라디언트를 옷걸이 아이콘과 글자에 그대로 옮겨왔다.
+// (원본 로고에서 좌/우 끝 색을 직접 샘플링: 왼쪽 #8f86dd → 오른쪽 #d0caf6)
+const LOGO_GRADIENT = 'linear-gradient(90deg, #8f86dd 0%, #d0caf6 100%)';
+
 const Header = () => {
   const navigate = useNavigate();
   const { data: unreadCount = 0 } = useUnreadNotificationCount();
@@ -11,14 +17,33 @@ const Header = () => {
     <header className="h-16 w-full flex items-center justify-between px-4 bg-white">
       {/* 1. 로고 영역 */}
       <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
-        {/* 배경 있는 사각형 로고 대신, 배경 없이 옷걸이 아이콘만 글자 색과
-            통일해서 나란히 배치 */}
-        <img
-          src={hangerIcon}
-          alt="FIT BACK 로고"
-          className="h-8 w-auto object-contain"
+        {/* 옷걸이 아이콘(알파 채널만 있는 PNG)을 CSS mask로 써서 그라디언트를
+            아이콘 실루엣에만 채운다 — 배경은 완전히 투명. */}
+        <span
+          aria-hidden="true"
+          className="h-8 shrink-0"
+          style={{
+            aspectRatio: '180 / 137',
+            backgroundImage: LOGO_GRADIENT,
+            WebkitMaskImage: `url(${hangerIcon})`,
+            maskImage: `url(${hangerIcon})`,
+            WebkitMaskSize: 'contain',
+            maskSize: 'contain',
+            WebkitMaskRepeat: 'no-repeat',
+            maskRepeat: 'no-repeat',
+            WebkitMaskPosition: 'center',
+            maskPosition: 'center',
+          }}
         />
-        <div className="font-extrabold text-xl text-primary-900">FIT BACK</div>
+        {/* 글자도 같은 그라디언트로 채운다 (배경 그라디언트를 text-fill로 잘라냄) */}
+        <span
+          aria-hidden="true"
+          className="font-extrabold text-xl bg-clip-text text-transparent"
+          style={{ backgroundImage: LOGO_GRADIENT }}
+        >
+          FIT BACK
+        </span>
+        <span className="sr-only">FIT BACK 홈으로 이동</span>
       </div>
 
       {/* 2. 알림 아이콘 영역 */}
