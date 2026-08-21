@@ -1,4 +1,5 @@
 import { api } from './axiosInstance'
+import { createAnalysisWithTelemetry } from './analysisTelemetry.ts'
 
 /**
  * ==========================================
@@ -111,8 +112,7 @@ interface ApiEnvelope<T> {
 }
 
 export const createAnalysis = async (imageId: string): Promise<AnalysisResult> => {
-  const response = await api.post<ApiEnvelope<AnalysisResult>>('/api/v1/analyses', { imageId })
-  return response.data.data
+  return createAnalysisWithTelemetry<AnalysisResult>(imageId, api)
 }
 
 export const getAnalysis = async (reportId: number): Promise<AnalysisReportDetail> => {
