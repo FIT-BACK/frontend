@@ -22,8 +22,13 @@ const Layout = () => {
   };
 
   return (
-    <div className='h-screen bg-bg flex justify-center'>
-      <div className='w-full max-w-[480px] bg-white h-screen flex flex-col shadow-lg relative'>
+    // h-screen(100vh)만 쓰면 모바일 브라우저 주소창/툴바가 접혔다 펴졌다 하는
+    // 만큼의 높이가 빠진 채로 계산돼서, 하단에 고정된 TabBar가 실제 화면보다
+    // 아래로 밀려나 "하단 바가 너무 낮다"(스크롤해야 보이거나 잘려 보임)는
+    // 문제가 있었다 — 100dvh(동적 뷰포트 높이)로 덮어써서 실제 보이는 화면
+    // 높이에 맞춘다. (ResultReportPage에 이미 있던 동일 패턴과 통일)
+    <div className='h-screen h-[100dvh] bg-bg flex justify-center'>
+      <div className='w-full max-w-[480px] bg-white h-screen h-[100dvh] flex flex-col shadow-lg relative'>
         <Header />
 
         {/* 콘텐츠가 들어갈 영역 */}
