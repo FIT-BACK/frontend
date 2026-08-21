@@ -1,9 +1,10 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
+import { uploadImageToReady, type UploadPurpose } from '../api/imageUpload.ts';
 import { api } from '../api/axiosInstance';
 
 // 업로드 용도(목적)를 명확한 타입으로 정의
-export type UploadPurpose = 'ANALYSIS' | 'LOOKBOOK' | 'PROFILE';
+export type { UploadPurpose } from '../api/imageUpload.ts';
 
 export const useImageUpload = (purpose: UploadPurpose) => {
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -42,30 +43,11 @@ export const useImageUpload = (purpose: UploadPurpose) => {
     setImageId(null);
 
     try {
-      // 1단계: Presigned URL 발급 요청 (FIT-BACK API — JWT 자동 첨부)
-      const requestRes = await api.post('/api/v1/images/upload-requests', {
+      const newImageId = await uploadImageToReady({
+        file,
         purpose,
-        contentType: file.type,
-        fileSize: file.size,
-      });
-
-      const { imageId: newImageId, uploadUrl, uploadFields } = requestRes.data.data;
-
-      // 2단계: S3 직접 업로드 (Presigned POST)
-      const formData = new FormData();
-
-      // 백엔드에서 받은 uploadFields의 모든 키-값 쌍을 먼저 추가
-      Object.entries(uploadFields).forEach(([key, value]) => {
-        formData.append(key, value as string);
-      });
-      // 반드시 마지막에 파일 추가
-      formData.append('file', file);
-
-      // S3 업로드 시 FIT-BACK JWT가 들어가지 않도록 깨끗한 새 axios 인스턴스 사용
-      const s3Axios = axios.create();
-
-      // 브라우저가 boundary를 자동 설정하도록 Content-Type 임의 지정 안 함 (FormData가 알아서 처리)
-      const s3Response = await s3Axios.post(uploadUrl, formData, {
+        apiClient: api,
+        uploadClient: axios.create(),
         onUploadProgress: (progressEvent) => {
           if (progressEvent.total) {
             const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
@@ -73,17 +55,6 @@ export const useImageUpload = (purpose: UploadPurpose) => {
           }
         },
       });
-
-      if (s3Response.status !== 204) {
-        throw new Error('이미지 업로드 중 오류가 발생했습니다.');
-      }
-
-      // 3단계: 업로드 완료 API 호출 (매우 중요)
-      // 이 완료 API까지 에러 없이 통과해야만 최종적으로 훅의 상태 업데이트
-      const completeRes = await api.post(`/api/v1/images/${newImageId}/complete`);
-      if (completeRes.data.data.status !== 'READY') {
-        throw new Error('이미지 업로드 완료 확인에 실패했습니다.');
-      }
 
       // 모든 단계 성공 시 상태 업데이트
       setImageId(newImageId);
