@@ -7,11 +7,16 @@ const AUTO_DISMISS_MS = 6000;
 interface UploadHintArrowProps {
   // 업로드 버튼을 눌러 바텀시트가 열리면(라우트 이동 없이도) 더 이상 보여줄 필요가 없음
   dismissOn?: boolean;
+  // 온보딩 모달이 화면을 덮고 있는 동안(true)은 화살표를 렌더링하지도, 자동
+  // 사라짐 타이머를 돌리지도 않는다 — 첫 로그인 시 온보딩 4단계를 다 읽는
+  // 동안 화살표가 뒤에서 이미 사라져버려서, 온보딩을 닫아도 화살표가 안
+  // 보인다는 신고가 있었다. 온보딩이 닫히는 순간부터 6초를 새로 센다.
+  waitFor?: boolean;
 }
 
 // 홈 화면에 처음 들어왔을 때, 뭘 해야 할지 몰라서 계속 스크롤만 내리게 된다는
 // 피드백으로 추가 — 하단 업로드 버튼을 가리키는 1회성 안내 화살표.
-export default function UploadHintArrow({ dismissOn }: UploadHintArrowProps) {
+export default function UploadHintArrow({ dismissOn, waitFor }: UploadHintArrowProps) {
   const location = useLocation();
   const [visible, setVisible] = useState(false);
 
@@ -35,13 +40,13 @@ export default function UploadHintArrow({ dismissOn }: UploadHintArrowProps) {
   }, [dismissOn]);
 
   useEffect(() => {
-    if (!visible) return;
+    if (!visible || waitFor) return;
     const timer = setTimeout(dismiss, AUTO_DISMISS_MS);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible]);
+  }, [visible, waitFor]);
 
-  if (!visible || location.pathname !== '/') return null;
+  if (!visible || waitFor || location.pathname !== '/') return null;
 
   return (
     <button
