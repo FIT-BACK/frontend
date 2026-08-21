@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { X } from 'lucide-react'
 import { Button, TagSelectBottomSheet, TextInput } from '../../components/common'
 import { useTags } from '../../hooks/useTags'
 import type { StyleTag } from '../../api/tags'
 import type { SuggestedTag } from '../../api/analysis'
 import { useImageUpload } from '../../hooks/useImageUpload'
 import { useLookbookUpload } from '../../hooks/useLookbookUpload'
+import type { LookbookUploadResult } from '../../api/lookbook'
 import ImageUploadField from './components/ImageUploadField'
 
 const URL_PATTERN = /^https?:\/\/[^\s]+$/
@@ -29,6 +31,7 @@ export interface LookbookUploadNavState {
 
 export default function LookbookUploadPage() {
   const location = useLocation()
+  const navigate = useNavigate()
   const fromAnalysis = (location.state as LookbookUploadNavState | null) ?? null
 
   const [selectedTags, setSelectedTags] = useState<StyleTag[]>(fromAnalysis?.tags ?? [])
@@ -44,7 +47,13 @@ export default function LookbookUploadPage() {
   // (분석 결과에서 넘어온 경우에는 이 훅들을 아예 쓰지 않는다 — 사진을 다시 안 올리기 때문)
   const originalLookUpload = useImageUpload('LOOKBOOK')
   const valueMatchUpload = useImageUpload('LOOKBOOK')
-  const { mutate, isPending, isError, isSuccess, error } = useLookbookUpload()
+  const { mutate, isPending, isError, error } = useLookbookUpload()
+
+  // 업로드 완료 후 "됐는지 안 됐는지 모르겠는" 상태로 이 화면에 그대로 남지 않도록,
+  // 방금 만들어진 룩북 상세 화면으로 바로 이동시켜 결과를 눈으로 보여준다.
+  const goToUploadedLookbook = (data: LookbookUploadResult) => {
+    navigate(`/lookbooks/${data.lookbookId}`, { replace: true })
+  }
 
   // 백엔드가 매칭 이미지/매칭 상품 중 정확히 하나만 요구함(둘 다 없거나 둘 다 있으면 에러).
   // 분석 결과에서 넘어온 경우: matchedProductId(+sourceReportId)를 그대로 쓰고 재업로드 불필요.
@@ -71,29 +80,35 @@ export default function LookbookUploadPage() {
     }
 
     if (fromAnalysis) {
-      mutate({
-        originalImageId: fromAnalysis.originalImageId,
-        matchedProductId: fromAnalysis.matchedProduct.productId,
-        sourceReportId: fromAnalysis.sourceReportId,
-        tagIds: selectedTags.map((tag) => tag.tagId),
-        purchaseUrl: purchaseLink || undefined,
-        comment: comment || undefined,
-      })
+      mutate(
+        {
+          originalImageId: fromAnalysis.originalImageId,
+          matchedProductId: fromAnalysis.matchedProduct.productId,
+          sourceReportId: fromAnalysis.sourceReportId,
+          tagIds: selectedTags.map((tag) => tag.tagId),
+          purchaseUrl: purchaseLink || undefined,
+          comment: comment || undefined,
+        },
+        { onSuccess: goToUploadedLookbook },
+      )
       return
     }
 
     if (!originalLookUpload.imageId || !valueMatchUpload.imageId) return
-    mutate({
-      originalImageId: originalLookUpload.imageId,
-      matchedImageId: valueMatchUpload.imageId,
-      tagIds: selectedTags.map((tag) => tag.tagId),
-      purchaseUrl: purchaseLink || undefined,
-      comment: comment || undefined,
-    })
+    mutate(
+      {
+        originalImageId: originalLookUpload.imageId,
+        matchedImageId: valueMatchUpload.imageId,
+        tagIds: selectedTags.map((tag) => tag.tagId),
+        purchaseUrl: purchaseLink || undefined,
+        comment: comment || undefined,
+      },
+      { onSuccess: goToUploadedLookbook },
+    )
   }
 
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-6 bg-bg p-4">
+    <div className="flex flex-col gap-6 p-4">
       <h1 className="text-lg font-semibold text-text">내 룩북 올리기</h1>
 
       {fromAnalysis ? (
@@ -148,9 +163,10 @@ export default function LookbookUploadPage() {
               key={tag.tagId}
               type="button"
               onClick={() => setSelectedTags((prev) => prev.filter((t) => t.tagId !== tag.tagId))}
-              className="rounded-full bg-primary-50 px-3 py-1 text-sm text-primary-800"
+              className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-3 py-1 text-sm text-primary-800"
             >
-              #{tag.tagName} ✕
+              #{tag.tagName}
+              <X size={12} strokeWidth={2} />
             </button>
           ))}
           <button
@@ -186,11 +202,6 @@ export default function LookbookUploadPage() {
       {isError && (
         <p className="text-center text-sm text-error-400">
           {error instanceof Error && error.message ? error.message : '업로드에 실패했습니다. 다시 시도해주세요'}
-        </p>
-      )}
-      {isSuccess && (
-        <p className="text-center text-sm text-primary-600">
-          룩북이 업로드되었습니다
         </p>
       )}
 

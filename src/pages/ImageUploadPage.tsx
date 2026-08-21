@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ReactCrop, { type Crop, type PixelCrop } from 'react-image-crop';
+import { ArrowLeft, ArrowUp } from 'lucide-react';
+import ReactCrop, { centerCrop, type Crop, type PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { useUploadStore } from '../store/useUploadStore';
 import { useImageUpload } from '../hooks/useImageUpload';
@@ -48,6 +49,23 @@ export default function ImageUploadPage() {
     e.target.value = ''; // 같은 파일 재선택 가능하도록 초기화
   };
 
+  // 크롭 화면에 진입했을 때 선택 영역이 아예 없는 상태로 시작해서, 사용자가 직접
+  // 드래그하지 않으면 completedCrop이 계속 null로 남아 "크롭 완료" 버튼이 비활성인
+  // 채로 있었음(눌러도 반응 없는 것처럼 보이는 원인) — 이미지가 뜨자마자 가운데
+  // 85% 영역을 기본 크롭으로 잡아줘서, 드래그 안 해도 바로 진행할 수 있게 한다.
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { width, height } = e.currentTarget;
+    const initialCrop = centerCrop({ unit: '%', width: 85, height: 85 }, width, height);
+    setCrop(initialCrop);
+    setCompletedCrop({
+      unit: 'px',
+      x: (initialCrop.x / 100) * width,
+      y: (initialCrop.y / 100) * height,
+      width: (initialCrop.width / 100) * width,
+      height: (initialCrop.height / 100) * height,
+    });
+  };
+
   const handleCropCancel = () => {
     setIsCropping(false);
     setTempImageUri(null);
@@ -87,15 +105,15 @@ export default function ImageUploadPage() {
 
   if (isCropping && tempImageUri) {
     return (
-      <div className='max-w-[375px] min-h-screen mx-auto bg-bg flex flex-col text-text px-5 pb-8 pt-6'>
+      <div className='flex flex-col text-text px-5 pb-8 pt-6'>
         <header className='flex items-center gap-3'>
           <button
             type='button'
             onClick={handleCropCancel}
             aria-label='취소'
-            className='grid h-9 w-9 place-items-center rounded-full border border-border bg-white'
+            className='grid h-9 w-9 place-items-center text-text'
           >
-            <BackIcon />
+            <ArrowLeft size={20} strokeWidth={2} />
           </button>
           <h2 className='text-lg font-extrabold text-text'>사진 자르기</h2>
         </header>
@@ -120,6 +138,7 @@ export default function ImageUploadPage() {
                 ref={imgRef}
                 src={tempImageUri}
                 alt='Crop preview'
+                onLoad={handleImageLoad}
                 className='max-h-[60vh] max-w-full w-auto h-auto block'
               />
             </ReactCrop>
@@ -141,7 +160,7 @@ export default function ImageUploadPage() {
   }
 
   return (
-    <div className='max-w-[375px] min-h-screen mx-auto bg-bg flex flex-col text-text px-5 pb-8 pt-6'>
+    <div className='flex flex-col text-text px-5 pb-8 pt-6'>
       {/* 헤더 */}
       <header className='flex items-center gap-3'>
         <button
@@ -150,7 +169,7 @@ export default function ImageUploadPage() {
           aria-label='뒤로가기'
           className='grid h-9 w-9 place-items-center rounded-full border border-border bg-white'
         >
-          <BackIcon />
+          <ArrowLeft size={18} strokeWidth={2} />
         </button>
       </header>
 
@@ -208,7 +227,7 @@ export default function ImageUploadPage() {
           >
             <div className='flex flex-col items-center gap-3'>
               <span className='grid h-11 w-11 place-items-center rounded-full bg-primary-50 text-primary-400'>
-                <UploadArrowIcon />
+                <ArrowUp size={20} strokeWidth={2} />
               </span>
               <div>
                 <p className='text-xs text-text'>탭하여 사진 선택</p>
@@ -237,36 +256,5 @@ export default function ImageUploadPage() {
         </button>
       </div>
     </div>
-  );
-}
-
-function BackIcon() {
-  return (
-    <svg
-      width='16'
-      height='16'
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='2'
-    >
-      <path d='M15 18l-6-6 6-6' />
-    </svg>
-  );
-}
-
-function UploadArrowIcon() {
-  return (
-    <svg
-      width='20'
-      height='20'
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='2'
-    >
-      <line x1='12' y1='19' x2='12' y2='5' />
-      <path d='M5 12l7-7 7 7' />
-    </svg>
   );
 }

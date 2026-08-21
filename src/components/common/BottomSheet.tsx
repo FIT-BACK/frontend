@@ -1,3 +1,4 @@
+import { X } from 'lucide-react';
 import type { BottomSheetProps } from '../../types/component';
 import '../../styles/BottomSheet.css';
 
@@ -14,8 +15,8 @@ const BottomSheet = ({ isOpen, onClose, title, content }: BottomSheetProps) => {
         {/* 헤더: 제목과 닫기(X) 버튼 */}
         <div className="bottom-sheet-header">
           <h2 className="bottom-sheet-title">{title}</h2>
-          <button className="bottom-sheet-close" onClick={onClose}>
-            ✕
+          <button className="bottom-sheet-close" onClick={onClose} aria-label="닫기">
+            <X size={18} strokeWidth={2} />
           </button>
         </div>
 

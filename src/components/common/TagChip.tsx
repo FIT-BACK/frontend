@@ -1,4 +1,5 @@
 import React from 'react';
+import { X } from 'lucide-react';
 
 export interface TagChipProps {
   label: string;
@@ -16,7 +17,7 @@ export const TagChip: React.FC<TagChipProps> = ({
   onClick,
 }) => {
   const baseClasses =
-    'inline-flex items-center justify-center text-[12px] font-semibold rounded-full transition-colors cursor-pointer';
+    'inline-flex items-center justify-center text-[12px] font-bold rounded-full transition-colors cursor-pointer';
 
   if (variant === 'add') {
     return (
@@ -34,7 +35,7 @@ export const TagChip: React.FC<TagChipProps> = ({
   if (variant === 'deletable') {
     return (
       <div
-        className={`${baseClasses} bg-primary-50 text-primary-800 pl-[12px] pr-[8px] py-[6px] gap-[5px]`}
+        className={`${baseClasses} border border-primary-200 bg-primary-50 text-primary-800 pl-[12px] pr-[8px] py-[6px] gap-[5px]`}
         onClick={onClick}
       >
         <span>#{label}</span>
@@ -47,19 +48,7 @@ export const TagChip: React.FC<TagChipProps> = ({
           className="w-[14px] h-[14px] rounded-full flex items-center justify-center text-[8px] bg-primary-900/15 text-primary-800 ml-1"
           aria-label="Delete tag"
         >
-          <svg
-            width="6"
-            height="6"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
+          <X size={6} strokeWidth={3} />
         </button>
       </div>
     );

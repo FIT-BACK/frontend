@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Check } from 'lucide-react';
 import { useCreateAnalysis } from '../hooks/useAiAnalysis';
 import { useUploadStore } from '../store/useUploadStore';
 
@@ -73,7 +74,7 @@ export const AiWaitingPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-[375px] min-h-screen mx-auto bg-bg flex flex-col text-text">
+    <div className="w-full max-w-[480px] min-h-screen mx-auto bg-bg flex flex-col text-text">
       <style>{`
         @keyframes scan {
           0% { top: 10%; }
@@ -103,7 +104,11 @@ export const AiWaitingPage: React.FC = () => {
         {/* Text */}
         <div className="text-center">
           <div className="text-[16px] text-primary-800 font-bold leading-snug">
-            스타일과 실루엣을<br />분석하고 있어요
+            {canProceed ? (
+              '분석이 완료됐어요!'
+            ) : (
+              <>스타일과 실루엣을<br />분석하고 있어요</>
+            )}
           </div>
           <div className="text-[12px] text-text-secondary mt-[8px]">
             {isError
@@ -118,9 +123,7 @@ export const AiWaitingPage: React.FC = () => {
           <div className="flex items-center gap-[10px]">
             <div className={`w-[18px] h-[18px] rounded-full flex items-center justify-center shrink-0 ${progress > 0 ? 'bg-primary-400' : 'bg-bg-secondary border-[2px] border-border'}`}>
               {progress > 0 && (
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+                <Check size={10} color="#fff" strokeWidth={3} />
               )}
             </div>
             <span className={`text-[13px] ${progress > 0 ? 'text-text-secondary' : 'text-primary-800 font-bold'}`}>이미지 업로드 완료</span>
@@ -132,9 +135,7 @@ export const AiWaitingPage: React.FC = () => {
               progress > 60 ? 'bg-primary-400' : progress > 0 ? 'bg-primary-50 border-[2px] border-primary-400' : 'bg-bg-secondary border-[2px] border-border'
             }`}>
               {progress > 60 && (
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+                <Check size={10} color="#fff" strokeWidth={3} />
               )}
             </div>
             <span className={`text-[13px] ${progress > 60 ? 'text-text-secondary' : progress > 0 ? 'text-primary-800 font-bold' : 'text-text-secondary'}`}>
@@ -148,9 +149,7 @@ export const AiWaitingPage: React.FC = () => {
               progress >= 100 ? 'bg-primary-400' : progress > 60 ? 'bg-primary-50 border-[2px] border-primary-400' : 'bg-bg-secondary border-[2px] border-border'
             }`}>
               {progress >= 100 && (
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+                <Check size={10} color="#fff" strokeWidth={3} />
               )}
             </div>
             <span className={`text-[13px] ${progress >= 100 ? 'text-text-secondary' : progress > 60 ? 'text-primary-800 font-bold' : 'text-text-secondary'}`}>

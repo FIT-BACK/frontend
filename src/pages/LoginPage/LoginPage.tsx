@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { loginUser } from '../../api/auth';
 import BottomSheet from '../../components/common/BottomSheet';
 
@@ -51,21 +52,33 @@ export default function LoginPage() {
     </>
   );
 
-  // 이메일 로그인 처리 함수
+  // 이메일 로그인 처리 함수 (토큰 저장 및 5회 실패 에러 AUTH429_1 분기 처리)
   const handleLogin = async () => {
     try {
       const response = await loginUser({ email, password });
+      
+      // Access Token과 Refresh Token을 로컬스토리지에 저장
       localStorage.setItem('accessToken', response.data.accessToken);
+      if (response.data.refreshToken) {
+        localStorage.setItem('refreshToken', response.data.refreshToken);
+      }
+
       alert('로그인 성공!');
       navigate('/');
-    } catch (error) {
-      alert('로그인 실패: 이메일과 비밀번호를 확인해주세요.');
+    } catch (error: any) {
+      const errorCode = error.response?.data?.code;
+
+      if (errorCode === 'AUTH401_1') {
+        alert('이메일 또는 비밀번호가 올바르지 않습니다.');
+      } else if (errorCode === 'AUTH429_1') {
+        alert('로그인 시도 횟수를 초과하여 해당 이메일이 일시 잠겼습니다.');
+      } else {
+        alert('로그인에 실패했습니다. 입력한 정보를 다시 확인해주세요.');
+      }
     }
   };
 
-  // 카카오 로그인 처리 함수 (클릭 시 백엔드의 OAuth 시작 엔드포인트로 이동)
-  // 카카오 client-id/secret과 실제 인가 요청은 전부 백엔드(Spring Security OAuth2)가 처리하므로
-  // 프론트는 카카오 관련 키를 전혀 가지고 있을 필요가 없다.
+  // 카카오 로그인 처리 함수
   const handleKakaoLogin = () => {
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
     window.location.href = `${API_BASE_URL}/api/v1/auth/oauth2/kakao`;
@@ -78,9 +91,10 @@ export default function LoginPage() {
         {view === 'email' && (
           <button 
             onClick={() => setView('main')}
-            className="absolute top-8 left-8 text-text-tertiary text-xl"
+            className="absolute top-8 left-8 text-text-tertiary"
+            aria-label="뒤로가기"
           >
-            ←
+            <ArrowLeft size={22} strokeWidth={2} />
           </button>
         )}
 
@@ -204,7 +218,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* 바텀시트 컴포넌트 렌더링 */}
       <BottomSheet 
         isOpen={activeSheet === 'terms'} 
         onClose={() => setActiveSheet(null)} 

@@ -89,6 +89,9 @@ export interface SaveReportResult {
 // 추천/저장 상태까지 포함된 리포트 상세. 마이 클로젯에서 저장된 리포트를 다시 볼 때 씀.
 export interface AnalysisReportDetail {
   reportId: number
+  // 룩북 올리기(POST /api/v1/lookbooks)에 필요한 원본 이미지 식별자 — 백엔드는 이미
+  // 내려주고 있었는데 프론트 타입에 안 받고 있었음.
+  originalImageId: string
   imageUrl: string
   matchPercentage: number
   tags: string[]

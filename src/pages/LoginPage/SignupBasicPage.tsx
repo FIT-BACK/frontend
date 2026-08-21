@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../../api/axiosInstance'; 
+import { ArrowLeft } from 'lucide-react';
+import { api } from '../../api/axiosInstance';
 
 export default function SignupBasicPage() {
   const navigate = useNavigate();
@@ -43,16 +44,18 @@ export default function SignupBasicPage() {
       console.error('가입 실패:', error);
 
       // 서버 응답 데이터 추출
-      const status = error.response?.status;
       const errorCode = error.response?.data?.code;
       const errorMessageFromServer = error.response?.data?.message;
 
-      // 2. 이메일 중복 에러 처리
-      if (status === 409 || errorCode === 'AUTH409_1') {
+      // 2. 에러 코드별 분기 처리
+      if (errorCode === 'COMMON400_2') {
+        setErrorMessage(errorMessageFromServer || '이메일 또는 비밀번호가 누락되었거나 형식 에러입니다.');
+      } else if (errorCode === 'MEMBER403_1') {
+        setErrorMessage(errorMessageFromServer || '탈퇴 후 30일 동안은 재가입할 수 없습니다.');
+      } else if (errorCode === 'AUTH409_1') {
         setErrorMessage(errorMessageFromServer || '이미 사용 중인 이메일입니다.');
-      } 
-      // 3. 그 외의 서버 에러 처리
-      else {
+      } else {
+        // 3. 그 외의 서버 에러 처리
         setErrorMessage('회원가입에 실패했습니다. 다시 시도해주세요.');
       }
     }
@@ -64,7 +67,9 @@ export default function SignupBasicPage() {
       <div className="w-full max-w-[480px] bg-white min-h-screen flex flex-col px-8 py-10 font-sans shadow-lg relative overflow-y-auto">
         
         <div className="flex items-center mb-8 relative">
-          <button onClick={() => navigate(-1)} className="text-text-tertiary text-xl">←</button>
+          <button onClick={() => navigate(-1)} className="text-text-tertiary" aria-label="뒤로가기">
+            <ArrowLeft size={22} strokeWidth={2} />
+          </button>
           <h1 className="flex-1 text-center text-lg font-bold text-primary-900">회원가입</h1>
         </div>
 

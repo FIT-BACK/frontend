@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { ArrowLeft, X } from 'lucide-react'
 import { Button, TagSelectBottomSheet, TextInput } from '../../components/common'
 import type { StyleTag } from '../../api/tags'
 import { checkNicknameAvailable } from '../../api/profile'
@@ -102,10 +103,10 @@ export default function ProfileEditPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-4 bg-bg p-4">
+    <div className="flex flex-col gap-4 p-4">
       <div className="flex items-center justify-between">
-        <button type="button" onClick={handleBack} className="text-sm text-text-secondary">
-          ←
+        <button type="button" onClick={handleBack} className="text-text-secondary" aria-label="뒤로가기">
+          <ArrowLeft size={20} strokeWidth={2} />
         </button>
         <h1 className="text-base font-semibold text-text">회원정보 수정</h1>
         <button
@@ -144,9 +145,10 @@ export default function ProfileEditPage() {
               key={tag.tagId}
               type="button"
               onClick={() => removeTag(tag.tagId)}
-              className="rounded-full bg-primary-50 px-3 py-1 text-sm text-primary-800"
+              className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-3 py-1 text-sm text-primary-800"
             >
-              #{tag.tagName} ✕
+              #{tag.tagName}
+              <X size={12} strokeWidth={2} />
             </button>
           ))}
           <button

@@ -96,11 +96,81 @@ function overwriteLikeAcrossListCaches(
   );
 }
 
+// 저장 여부도 좋아요와 마찬가지로 여러 목록 캐시에 각자 흩어져 있어 같이 패치한다.
+type SaveLike = { saveId: number | null };
+
+function patchSaveInListItem<T extends SaveLike>(
+  item: T,
+  targetId: number,
+  saveId: number | null,
+): T {
+  const itemId = (item as unknown as { id?: number; lookbookId?: number }).id
+    ?? (item as unknown as { lookbookId?: number }).lookbookId;
+  if (itemId !== targetId) return item;
+  return { ...item, saveId };
+}
+
+function overwriteSaveAcrossListCaches(
+  queryClient: ReturnType<typeof useQueryClient>,
+  lookbookId: number,
+  saveId: number | null,
+) {
+  // 홈/트렌드 피드
+  queryClient.setQueriesData<{ items: SaveLike[] } | undefined>(
+    { queryKey: ['lookbookFeed'] },
+    (old) =>
+      old
+        ? { ...old, items: old.items.map((item) => patchSaveInListItem(item, lookbookId, saveId)) }
+        : old,
+  );
+  // 마이클로젯 "내가 올린 룩북"
+  queryClient.setQueriesData<{ items: SaveLike[] } | undefined>(
+    { queryKey: ['myLookbooks'] },
+    (old) =>
+      old
+        ? { ...old, items: old.items.map((item) => patchSaveInListItem(item, lookbookId, saveId)) }
+        : old,
+  );
+  // 통합 검색
+  queryClient.setQueriesData<{ lookbooks: SaveLike[] } | undefined>(
+    { queryKey: ['contentSearch'] },
+    (old) =>
+      old
+        ? { ...old, lookbooks: old.lookbooks.map((item) => patchSaveInListItem(item, lookbookId, saveId)) }
+        : old,
+  );
+}
+
 export const useLookbookDetail = (lookbookId: number) =>
   useQuery({
     queryKey: detailKey(lookbookId),
     queryFn: () => getLookbookDetail(lookbookId),
   });
+
+// 상세로 안 들어가고 목록 썸네일(LookbookFeedCard)에서 바로 저장/저장취소하기 위한
+// 훅 — 상세 화면의 useSaveLookbook/useUnsaveLookbook과 달리 currentSaveId를
+// 호출 시점에 받아서 저장/취소 중 어느 쪽을 부를지 결정한다(좋아요의 useToggleLike와
+// 동일한 방식).
+export const useToggleLookbookSave = (lookbookId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (currentSaveId: number | null): Promise<number | null> => {
+      if (currentSaveId != null) {
+        await unsaveLookbook(currentSaveId);
+        return null;
+      }
+      const { saveId } = await saveLookbook(lookbookId);
+      return saveId;
+    },
+    onSuccess: (newSaveId) => {
+      queryClient.setQueryData<LookbookDetail>(detailKey(lookbookId), (old) =>
+        old ? { ...old, saveId: newSaveId } : old,
+      );
+      overwriteSaveAcrossListCaches(queryClient, lookbookId, newSaveId);
+      queryClient.invalidateQueries({ queryKey: ['closetItems'] });
+    },
+  });
+};
 
 export const useToggleLike = (lookbookId: number) => {
   const queryClient = useQueryClient();

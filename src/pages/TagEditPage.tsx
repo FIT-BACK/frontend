@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { X } from 'lucide-react';
 import { useItemMatching } from '../hooks/useItemMatching';
 import { useUploadStore } from '../store/useUploadStore';
 import { TagChip } from '../components/common/TagChip';
@@ -132,6 +133,7 @@ export const TagEditPage: React.FC = () => {
         partial: data.partial,
         warnings: data.warnings,
       });
+      useUploadStore.getState().setMatchPercentage(matchLevel);
       navigate('/result');
     } catch (err) {
       // axios 에러의 기본 message("Request failed with status code 400")는 사용자한테
@@ -146,7 +148,7 @@ export const TagEditPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-[375px] min-h-screen mx-auto bg-bg flex flex-col text-text relative overflow-hidden pb-5">
+    <div className="w-full max-w-[480px] min-h-screen mx-auto bg-bg flex flex-col text-text relative overflow-hidden pb-5">
       <div className="flex items-center justify-between p-[20px_20px_8px] shrink-0">
         {/* 분석/태그 추출까지 끝난 뒤에도 나가는 버튼이 아예 없어서 흐름 중간에
             빠져나갈 방법이 없었음 — 홈으로 나가기 버튼 추가 */}
@@ -154,9 +156,9 @@ export const TagEditPage: React.FC = () => {
           type="button"
           onClick={() => navigate('/')}
           aria-label="나가기"
-          className="text-[22px] text-text-secondary cursor-pointer p-1 -ml-1"
+          className="text-text-secondary cursor-pointer p-1 -ml-1"
         >
-          ×
+          <X size={20} strokeWidth={2} />
         </button>
         <span className="text-[16px] font-bold text-text"></span>
         <span className="w-[30px]" aria-hidden="true" />
