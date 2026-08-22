@@ -7,7 +7,13 @@ import { useUploadStore } from '../store/useUploadStore';
 import { useImageUpload } from '../hooks/useImageUpload';
 import { getCroppedImg } from '../utils/cropImage';
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+// 실제 업로드되는 건 크롭 단계에서 만들어지는 파일이고, 그 단계가 이제
+// 알아서 5MB 밑으로 줄여서 내보낸다(cropImage.ts) — 그래서 여기 선택 단계
+// 제한은 "크롭 전 원본이 브라우저에서 다루기 버거울 만큼 비정상적으로
+// 크지는 않은지" 정도만 걸러주면 된다. 예전처럼 5MB로 걸어두면 요즘 폰
+// 카메라 사진(고해상도라 5MB를 쉽게 넘김)은 크롭 화면에 들어가보지도
+// 못하고 막혔었다.
+const MAX_ORIGINAL_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 
 export default function ImageUploadPage() {
   const navigate = useNavigate();
@@ -38,8 +44,8 @@ export default function ImageUploadPage() {
         setError('이미지 파일만 업로드 가능합니다');
         return;
       }
-      if (file.size > MAX_FILE_SIZE) {
-        setError('5MB 이하 이미지만 업로드 가능합니다');
+      if (file.size > MAX_ORIGINAL_FILE_SIZE) {
+        setError('20MB 이하 이미지만 업로드 가능합니다');
         return;
       }
       setError(null);
