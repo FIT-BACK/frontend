@@ -31,12 +31,18 @@ const Layout = () => {
       <div className='w-full max-w-[480px] bg-white h-screen h-[100dvh] flex flex-col shadow-lg relative'>
         <Header />
 
-        {/* 콘텐츠가 들어갈 영역 */}
-        <main className='flex-1 overflow-y-auto'>
+        {/* 콘텐츠가 들어갈 영역 — 하단에 TabBar 높이(h-16 + 세이프 에어리어)만큼
+            여백을 미리 확보해둔다. TabBar가 fixed로 바뀌면서 flex 흐름에서
+            빠졌기 때문에, 이게 없으면 스크롤 맨 아래 콘텐츠가 TabBar 뒤에 가려진다. */}
+        <main className='flex-1 overflow-y-auto pb-[calc(4rem+env(safe-area-inset-bottom))]'>
           <Outlet />
         </main>
 
-        {/* 3. TabBar에 onUploadClick 핸들러 전달 */}
+        {/* 3. TabBar — 일부 브라우저(카톡 인앱 브라우저 등 QR 스캔 시 열리는 임베디드
+            브라우저 포함)에서 100dvh 계산이 브라우저 자체 하단 툴바 높이를 다 못 걸러내는
+            경우가 있어서, dvh 기반 고정 높이 flex 흐름 안에 두는 대신 fixed로 뷰포트
+            바닥에 직접 붙인다 — 브라우저가 자기 UI를 표시/숨김에 따라 실시간으로 다시
+            계산되는 position:fixed가 더 안정적이다. */}
         <TabBar onUploadClick={() => setIsSheetOpen(true)} />
 
         {/* 4. 바텀시트 컴포넌트배치 */}
