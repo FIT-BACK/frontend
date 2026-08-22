@@ -16,12 +16,18 @@ const TabBar = ({ onUploadClick }: TabBarProps) => {
     `flex flex-col items-center transition-colors ${isActive(path) ? 'text-primary-600' : 'text-text-secondary'}`;
 
   return (
-    // 이전엔 세이프 에어리어 패딩을 아이콘 행과 같은 flex 컨테이너에 줘서
-    // (min-h-16 + items-center) 패딩만큼 아이콘 행 전체가 위로 쏠려 보이고
-    // 상대적으로 아이콘 행 자체는 짧게 눌린 것처럼 보였음 — 아이콘 행(h-16,
-    // 항상 고정 높이로 정중앙 정렬)과 세이프 에어리어 여백(그 아래 별도
-    // 공간)을 분리해서, 아이콘 위치는 그대로 두고 여백만 아래에 추가한다.
-    <nav className="w-full border-t border-primary-200 bg-white z-40 pb-[env(safe-area-inset-bottom)]">
+    // fixed + inset-x-0 bottom-0으로 뷰포트 바닥에 직접 붙인다 — 부모의
+    // dvh 계산에 기대는 대신, 브라우저가 매 순간 알려주는 실제 보이는
+    // 화면 하단을 기준으로 위치를 잡기 때문에 카톡 인앱 브라우저처럼
+    // 자체 하단 툴바가 있는 임베디드 브라우저에서도 가려지지 않는다.
+    // Layout이 max-w-[480px]로 가운데 정렬돼 있으므로 TabBar도 같은
+    // 너비로 맞춰야 데스크톱에서 폭이 어긋나지 않는다.
+    //
+    // 세이프 에어리어 패딩을 아이콘 행과 같은 flex 컨테이너에 주면(예:
+    // min-h-16 + items-center) 그만큼 아이콘 행 전체가 위로 쏠리고 짧게
+    // 눌려 보이므로, 아이콘 행(h-16, 항상 고정 높이로 정중앙 정렬)과
+    // 세이프 에어리어 여백(그 아래 별도 공간)을 분리해둔다.
+    <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[480px] border-t border-primary-200 bg-white pb-[env(safe-area-inset-bottom)]">
       <div className="h-16 w-full flex items-center justify-around">
         {/* 홈 */}
         <Link to="/" className={getLinkClass('/')}>
