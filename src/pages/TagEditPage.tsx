@@ -24,6 +24,14 @@ export const TagEditPage: React.FC = () => {
   const [matchError, setMatchError] = useState<string | null>(null);
 
   const [tagWarning, setTagWarning] = useState(false);
+  // 태그가 8개 넘게 선택된 상태(주로 AI가 분석 직후 8개보다 많은 태그를 제안해서
+  // 화면에 들어온 순간부터 이미 넘어있는 경우) — 백엔드가 확정 태그 합계를 최대
+  // 8개로 제한해서(RecommendationGenerateRequest.hasValidCombinedTagCount), 이
+  // 상태로 그냥 제출하면 "요청 값이 올바르지 않습니다" 같은 알아보기 힘든 에러만
+  // 뜨고 사용자는 원인을 알 수 없었다 — 몇 개를 넘었는지 계속 보여주고 제출도 막는다.
+  const MAX_TAGS = 8;
+  const tooManyTagsBy = tags.length - MAX_TAGS;
+  const hasTooManyTags = tooManyTagsBy > 0;
 
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [newTagInput, setNewTagInput] = useState('');
@@ -88,8 +96,8 @@ export const TagEditPage: React.FC = () => {
       setNewTagInput('');
       return;
     }
-    if (tags.length >= 8) {
-      alert('태그는 최대 8개까지만 추가할 수 있습니다.');
+    if (tags.length >= MAX_TAGS) {
+      alert(`태그는 최대 ${MAX_TAGS}개까지만 추가할 수 있습니다.`);
       return;
     }
     setTags([...tags, trimmed]);
@@ -113,6 +121,11 @@ export const TagEditPage: React.FC = () => {
     if (tags.length === 0) {
       setTagWarning(true);
       setTimeout(() => setTagWarning(false), 2000);
+      return;
+    }
+    if (hasTooManyTags) {
+      // 이 경고는 tags.length가 바뀔 때까지 계속 유지돼야 하므로(사용자가 실제로
+      // 태그를 지울 때까지) 다른 경고처럼 타이머로 자동으로 안 숨긴다.
       return;
     }
 
@@ -186,6 +199,11 @@ export const TagEditPage: React.FC = () => {
                 태그를 1개 이상 남겨주세요
               </span>
             )}
+            {hasTooManyTags && (
+              <span className="text-error-400 text-[9px] font-semibold">
+                태그는 최대 {MAX_TAGS}개까지 선택할 수 있어요 · {tooManyTagsBy}개 지워주세요
+              </span>
+            )}
           </div>
           <div className="flex gap-[5px] flex-wrap items-center">
             {tags.map((tag) => (
@@ -197,7 +215,7 @@ export const TagEditPage: React.FC = () => {
               />
             ))}
 
-            {tags.length < 8 && (
+            {tags.length < MAX_TAGS && (
               <TagChip
                 label="추가"
                 variant="add"
@@ -292,10 +310,10 @@ export const TagEditPage: React.FC = () => {
         {/* Confirm Button */}
         <button
           onClick={handleConfirm}
-          disabled={isMatching || !reportId}
+          disabled={isMatching || !reportId || hasTooManyTags}
           className="w-full text-bg text-[15px] font-bold border-none rounded-[14px] p-[16px] bg-primary-400 hover:bg-primary-500 transition-colors disabled:opacity-50 shrink-0 mt-2"
         >
-          {isMatching ? '매칭 중...' : '이대로 매칭하기'}
+          {isMatching ? '매칭 중...' : hasTooManyTags ? `태그를 ${tooManyTagsBy}개 지워주세요` : '이대로 매칭하기'}
         </button>
       </div>
 
